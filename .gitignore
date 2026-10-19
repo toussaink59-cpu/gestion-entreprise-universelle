@@ -1,0 +1,22 @@
+# Secrets et variables locales
+.env
+.env.*
+!.env.example
+
+# Dépendances et builds (si application Node.js ajoutée plus tard)
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# Journaux et fichiers système
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Fichiers temporaires
+*.tmp
+*.bak
