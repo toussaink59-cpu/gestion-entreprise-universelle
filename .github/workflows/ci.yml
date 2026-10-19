@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web — lint, types, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # Le build génère next-env.d.ts (ignoré par Git) : il précède la vérification des types.
+      - name: Build
+        run: npm run build
+
+      - name: Vérification TypeScript
+        run: npm run typecheck
+
+      - name: Tests (si présents)
+        run: npm test --if-present
+
+      - name: Audit des dépendances de production
+        run: npm audit --omit=dev --audit-level=high
