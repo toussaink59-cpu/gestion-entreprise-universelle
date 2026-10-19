@@ -170,7 +170,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-xs text-slate-500">Espace de gestion</p>
-                <p className="text-sm font-semibold">Vue d'ensemble</p>
+                <p className="text-sm font-semibold">Vue d&apos;ensemble</p>
               </div>
             </div>
 
@@ -192,7 +192,7 @@ export default function Home() {
                   Bonjour, bienvenue 👋
                 </h2>
                 <p className="mt-2 text-sm text-slate-500">
-                  Voici un aperçu de l'activité de votre entreprise.
+                  Voici un aperçu de l&apos;activité de votre entreprise.
                 </p>
               </div>
 
@@ -349,7 +349,7 @@ export default function Home() {
             </div>
 
             <footer className="pb-3 text-center text-xs text-slate-400">
-              GestionPro · Prototype d'interface · Les données affichées sont fictives.
+              GestionPro · Prototype d&apos;interface · Les données affichées sont fictives.
             </footer>
           </div>
         </section>
