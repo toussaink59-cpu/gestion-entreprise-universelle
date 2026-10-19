@@ -1,0 +1,20 @@
+# Revue obligatoire pour les zones sensibles (CONTRIBUTING.md et cahier des charges).
+# Un seul responsable pour l'instant : ajouter les référents (technique, comptable,
+# paie/fiscalité) dès qu'ils rejoignent le projet.
+
+# Par défaut
+*                           @toussaink59-cpu
+
+# Gouvernance, sécurité et exploitation
+/.github/                   @toussaink59-cpu
+/SECURITY.md                @toussaink59-cpu
+/CONTRIBUTING.md            @toussaink59-cpu
+
+# Spécification et modèle de données
+/docs/                      @toussaink59-cpu
+
+# Chemins anticipés (à ajuster quand la structure sera créée)
+/supabase/migrations/       @toussaink59-cpu
+/apps/web/src/**/payroll/   @toussaink59-cpu
+/apps/web/src/**/paie/      @toussaink59-cpu
+/apps/web/src/**/auth/      @toussaink59-cpu
