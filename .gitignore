@@ -20,3 +20,12 @@ Thumbs.db
 # Fichiers temporaires
 *.tmp
 *.bak
+
+# Sauvegardes locales de base de données (Phase 1)
+backups/
+
+# Dépendances et données locales
+node_modules/
+.env
+.env.local
+backups/
