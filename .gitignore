@@ -3,7 +3,7 @@
 .env.*
 !.env.example
 
-# D√©pendances et builds (si application Node.js ajout√©e plus tard)
+# D√©pendances et builds
 node_modules/
 .next/
 out/
@@ -21,11 +21,6 @@ Thumbs.db
 *.tmp
 *.bak
 
-# Sauvegardes locales de base de donnÈes (Phase 1)
+# Sauvegardes locales de base de donn√©es (Phase 1) : peuvent contenir des donn√©es sensibles
 backups/
-
-# DÈpendances et donnÈes locales
-node_modules/
-.env
-.env.local
-backups/
+*.sql
