@@ -15,6 +15,10 @@ updates:
       # @types/node doit rester aligné sur la version de Node utilisée (22 en CI)
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # typescript-eslint (via eslint-config-next) ne supporte pas TypeScript 7 : le lint plante.
+      # À réexaminer quand typescript-eslint le supportera (suivi : typescript-eslint#10940).
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
