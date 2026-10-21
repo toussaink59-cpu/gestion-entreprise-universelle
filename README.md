@@ -6,14 +6,29 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 
 **Marché de départ :** Burkina Faso. **Ambition :** concevoir une base commune extensible à d’autres pays et secteurs d’activité.
 
-## Statut du projet
+## Statut réel du projet
 
-**Phase actuelle : cadrage et spécification.** Le cahier des charges est en cours de préparation. Le dépôt constitue le point de départ documentaire du projet ; les fonctionnalités décrites ci-dessous ne sont pas présentées comme déjà développées.
+**Phase actuelle : consolidation de la fondation technique (Phase 1).** Le dépôt ne doit pas encore être considéré comme un logiciel prêt pour la production.
+
+Éléments déjà présents dans le dépôt :
+
+- une application Next.js / React / TypeScript avec une première interface de tableau de bord de démonstration ;
+- une première migration PostgreSQL pour les entreprises, profils, appartenances, rôles, permissions, RLS et journal d’audit ;
+- des tests automatisés d’isolation et de permissions, exécutés sur les migrations ;
+- des scripts de sauvegarde, de restauration et un test de restauration de bout en bout avec données fictives ;
+- une CI GitHub Actions qui exécute lint, build, vérification TypeScript, tests, audit des dépendances de production et ShellCheck.
+
+**Limites actuelles :** le tableau de bord contient des données fictives écrites dans le code. Le parcours complet d’authentification dans l’interface n’est pas encore livré ; les modules clients, facturation, paiements, dépenses, trésorerie, stocks et paie ne sont pas encore des fonctionnalités métier complètes. Les scripts de sauvegarde ne remplacent pas la configuration d’un dispositif de sauvegarde opérationnel pour la production.
+
+La liste des critères d’acceptation et des points restant à traiter se trouve dans [la checklist de consolidation de la Phase 1](docs/PHASE1_CHECKLIST.md).
+
+## Documents du projet
 
 - [Cahier des charges PDF](docs/CAHIER_DES_CHARGES.pdf)
 - [Feuille de route](docs/ROADMAP.md)
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
+- [Checklist Phase 1](docs/PHASE1_CHECKLIST.md)
 - [Sécurité et confidentialité](SECURITY.md)
 - [Contribution au projet](CONTRIBUTING.md)
 
@@ -79,41 +94,39 @@ La proposition initiale est une application web fondée sur :
 
 - **Next.js + TypeScript** pour l’application ;
 - **PostgreSQL** pour les données relationnelles ;
-- **Supabase** comme option de départ pour PostgreSQL, l’authentification et le stockage privé ;
+- **Supabase** comme option pour PostgreSQL, l’authentification et le stockage privé ;
 - une interface responsive ;
 - des tests automatisés pour les règles métier, la paie, la trésorerie et l’isolation des entreprises.
 
-Ces choix sont proposés, mais devront être confirmés après étude des coûts, contraintes d’hébergement, exigences de conformité et besoins d’exploitation. Voir [l’architecture](docs/ARCHITECTURE.md).
+Ces choix devront être confirmés selon les coûts, contraintes d’hébergement, exigences de conformité et besoins d’exploitation. Voir [l’architecture](docs/ARCHITECTURE.md) et [ADR-001](docs/adr/0001-socle-technique.md).
 
 ## Périmètre indicatif du MVP
 
 Le premier incrément vise à permettre à une entreprise de :
 
 - créer son espace et inviter des utilisateurs avec des rôles ;
-- enregistrer clients et fournisseurs ;
-- saisir des devis et factures ;
+- saisir clients et fournisseurs ;
+- créer des devis et factures ;
 - enregistrer encaissements et dépenses ;
 - suivre quelques comptes de trésorerie et budgets ;
-- consulter un tableau de bord et exporter des rapports de base.
+- consulter un tableau de bord réel et exporter des rapports de base.
 
 Le module de paie réelle, la comptabilité complète, les intégrations de paiement et les fonctions multi-pays devront être validés spécifiquement avant d’être annoncés comme disponibles.
 
-## Conformité et limites
+## Sécurité et conformité
 
-Le système devra être conçu en tenant compte du cadre applicable au Burkina Faso, notamment des obligations comptables, fiscales, sociales et de protection des données. Les règles exactes, taux, plafonds, formulaires et obligations devront être vérifiés auprès de sources officielles et de professionnels habilités avant la mise en production. Ce projet ne remplace pas les conseils d’un comptable, d’un fiscaliste ou d’un spécialiste de la paie.
+Aucune donnée réelle d’entreprise, de client ou de paie ne doit être utilisée tant que l’authentification, les contrôles d’accès, l’isolation multi-entreprises, les sauvegardes et les procédures d’exploitation n’ont pas été validés.
+
+Le système devra respecter le cadre applicable au Burkina Faso, notamment les obligations comptables, fiscales, sociales et de protection des données. Les règles exactes, taux, plafonds, formulaires et obligations devront être vérifiés auprès de sources officielles et de professionnels habilités avant la mise en production. Ce projet ne remplace pas les conseils d’un comptable, d’un fiscaliste ou d’un spécialiste de la paie.
 
 ## Démarrage du développement
 
-1. Valider le cahier des charges et le périmètre MVP.
-2. Décider du nom définitif, du modèle économique et de la licence du dépôt.
-3. Confirmer l’architecture et les environnements de développement/test/production.
-4. Concevoir le schéma initial et les politiques d’isolation multi-entreprises.
-5. Réaliser les premiers tests de sécurité avant de saisir des données réelles.
-
-## Statut des versions
-
-Le dépôt est actuellement documentaire. Aucun engagement de disponibilité, de conformité certifiée ou de fonctionnalité en production n’est sous-entendu.
+1. Terminer la checklist de consolidation de la Phase 1.
+2. Valider le cahier des charges, le périmètre MVP et la matrice des rôles.
+3. Finaliser l’authentification et l’intégration à la base dans un environnement de test.
+4. Développer un premier flux métier complet, avec permissions et tests.
+5. Valider l’exploitation, la restauration, la conformité et les contrôles de sécurité avant toute mise en production.
 
 ## Licence
 
-La licence n’a pas encore été choisie. Ne pas réutiliser ou redistribuer le code à des fins de production avant clarification de la licence et des droits associés.
+La licence n’a pas encore été choisie. Clarifier la licence et les droits associés avant toute réutilisation ou redistribution du code à des fins de production.
