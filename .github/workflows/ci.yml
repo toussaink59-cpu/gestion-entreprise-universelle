@@ -15,15 +15,16 @@ concurrency:
 jobs:
   web:
     name: Web — lint, types, tests, build
-    runs-on: ubuntu-latest
+    # Version figée : « ubuntu-latest » change de version sans prévenir (Ubuntu 26 dès le 19/10/2026).
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
       run:
         working-directory: apps/web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: npm
@@ -42,8 +43,18 @@ jobs:
       - name: Vérification TypeScript
         run: npm run typecheck
 
-      - name: Tests (si présents)
-        run: npm test --if-present
+      - name: Tests
+        run: npm test
 
       - name: Audit des dépendances de production
         run: npm audit --omit=dev --audit-level=high
+
+  scripts:
+    name: Scripts shell — shellcheck
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: shellcheck
+        run: shellcheck scripts/*.sh
