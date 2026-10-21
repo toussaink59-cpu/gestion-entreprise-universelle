@@ -24,3 +24,5 @@ Thumbs.db
 # Sauvegardes locales de base de données (Phase 1) : peuvent contenir des données sensibles
 backups/
 *.sql
+# Les migrations et fichiers SQL de test du dépôt sont versionnés
+!supabase/**/*.sql
