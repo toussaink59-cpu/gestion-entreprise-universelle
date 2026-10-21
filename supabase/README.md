@@ -33,3 +33,21 @@ npm test
 - L'invitation par e-mail n'existe pas encore : on ne peut ajouter que des utilisateurs déjà inscrits.
 - Pas encore de limitation du nombre d'entreprises créées par utilisateur.
 - L'accès exceptionnel de l'équipe plateforme aux données clients reste à concevoir (§4 du cahier des charges).
+
+## Sauvegarde et restauration (ACC-07)
+
+`scripts/test-restore.sh` prouve de bout en bout qu'une sauvegarde se restaure : il crée une base jetable (migrations + `supabase/tests/seed_restore.sql`, données fictives), la sauvegarde avec `scripts/backup-db.sh`, la restaure dans une base vierge avec `scripts/restore-db.sh`, puis compare les lignes (empreinte par table), la structure (RLS, politiques, déclencheurs, fonctions) et vérifie l'isolation sur la base restaurée.
+
+Il tourne en CI chaque lundi (`.github/workflows/restore-test.yml`), à chaque changement des scripts ou du schéma, et à la demande.
+
+En local, uniquement contre un serveur **jetable** (le script crée et supprime deux bases) :
+
+```bash
+ADMIN_URL=postgresql://postgres:motdepasse@localhost:5432/postgres ./scripts/test-restore.sh
+```
+
+Limites à connaître :
+
+- Une sauvegarde `pg_dump` **ne contient pas les rôles** du serveur (`anon`, `authenticated`, `service_role`). Restaurer sur un nouveau serveur suppose que ces rôles existent (c'est le cas sur Supabase).
+- Ce test valide la procédure sur un serveur PostgreSQL standard avec des données fictives. Il ne remplace ni la configuration des sauvegardes automatiques de l'hébergeur, ni une restauration à blanc sur l'environnement de préproduction.
+- Les objectifs de perte et de durée (RPO/RTO) restent à décider (cahier des charges §10).
