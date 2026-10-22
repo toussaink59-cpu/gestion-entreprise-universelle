@@ -15,6 +15,9 @@ export default async function RegisterPage({
 
   const errorMessages: Record<string, string> = {
     "missing-fields": "Tous les champs sont obligatoires.",
+    "invalid-name": "Le nom complet doit contenir entre 2 et 100 caracteres.",
+    "invalid-email": "Le format de l'adresse e-mail est invalide.",
+    "password-too-long": "Le mot de passe ne doit pas depasser 128 caracteres.",
     "password-too-short": "Le mot de passe doit contenir au moins 8 caractères.",
     "signup-failed":
       "Impossible de créer le compte. Vérifie les informations ou réessaie.",
@@ -38,6 +41,7 @@ export default async function RegisterPage({
             type="text"
             name="full_name"
             autoComplete="name"
+            maxLength={100}
             required
             style={{ display: "block", width: "100%", padding: "0.7rem" }}
           />
@@ -49,6 +53,7 @@ export default async function RegisterPage({
             type="email"
             name="email"
             autoComplete="email"
+            maxLength={254}
             required
             style={{ display: "block", width: "100%", padding: "0.7rem" }}
           />
@@ -61,6 +66,7 @@ export default async function RegisterPage({
             name="password"
             autoComplete="new-password"
             minLength={8}
+            maxLength={128}
             required
             style={{ display: "block", width: "100%", padding: "0.7rem" }}
           />
