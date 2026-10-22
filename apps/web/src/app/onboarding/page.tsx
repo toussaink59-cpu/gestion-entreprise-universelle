@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createCompany } from "@/app/onboarding/actions";
+import { decideOnboardingAccess } from "@/lib/security/onboarding-access";
 
 export const instant = false;
 
@@ -31,7 +32,27 @@ export default async function OnboardingPage({
     .eq("status", "active")
     .limit(1);
 
-  if (!membershipError && memberships && memberships.length > 0) {
+  const accessDecision = decideOnboardingAccess(
+    Boolean(membershipError),
+    memberships,
+  );
+
+  if (accessDecision === "error") {
+    return (
+      <main style={{ maxWidth: 520, margin: "4rem auto", padding: "1.5rem" }}>
+        <h1>Vérification des accès impossible</h1>
+        <p role="alert">
+          Nous ne pouvons pas vérifier les entreprises associées à ce compte.
+          Pour éviter une création en double, aucun formulaire n&apos;est affiché.
+        </p>
+        <p>
+          <a href="/onboarding">Réessayer</a>
+        </p>
+      </main>
+    );
+  }
+
+  if (accessDecision === "dashboard") {
     redirect("/dashboard");
   }
 
