@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { createContact, setContactStatus, updateContact } from "@/app/dashboard/contacts/actions";
 import { createClient } from "@/lib/supabase/server";
@@ -149,6 +150,7 @@ function CompanyChooser({ companies, kind }: { companies: CompanyRow[]; kind: Bu
 }
 
 export async function ContactsPage({ kind, searchParams }: { kind: BusinessContactKind; searchParams: PageSearchParams }) {
+  await connection();
   const params = await searchParams;
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
