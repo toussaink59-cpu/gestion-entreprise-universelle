@@ -14,6 +14,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const errorMessages: Record<string, string> = {
     "missing-fields": "Renseigne ton adresse e-mail et ton mot de passe.",
+    "invalid-email": "Le format de l'adresse e-mail est invalide.",
+    "password-too-long": "Le mot de passe depasse la longueur maximale autorisee.",
     "email-not-confirmed":
       "Ton adresse e-mail n'est pas encore confirmée. Ouvre le message de confirmation Supabase.",
     "invalid-credentials": "Adresse e-mail ou mot de passe incorrect.",
@@ -46,6 +48,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             type="email"
             name="email"
             autoComplete="email"
+            maxLength={254}
             required
             style={{ display: "block", width: "100%", padding: "0.7rem" }}
           />
@@ -57,6 +60,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             type="password"
             name="password"
             autoComplete="current-password"
+            maxLength={128}
             required
             style={{ display: "block", width: "100%", padding: "0.7rem" }}
           />

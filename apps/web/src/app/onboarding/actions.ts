@@ -2,21 +2,41 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import {
+  isValidCompanyName,
+  readStringField,
+} from "@/lib/security/form-validation";
 
 export async function createCompany(formData: FormData) {
-  const legalName = String(formData.get("legal_name") ?? "").trim();
-  const tradeName = String(formData.get("trade_name") ?? "").trim();
+  const legalNameField = readStringField(formData, "legal_name");
+  const tradeNameField = readStringField(formData, "trade_name");
 
-  if (!legalName) {
+  if (legalNameField === null || !legalNameField.trim()) {
     redirect("/onboarding?error=missing-name");
+  }
+
+  if (tradeNameField === null && formData.has("trade_name")) {
+    redirect("/onboarding?error=invalid-trade-name");
+  }
+
+  const legalName = legalNameField.trim();
+  const tradeName = (tradeNameField ?? "").trim();
+
+  if (!isValidCompanyName(legalName)) {
+    redirect("/onboarding?error=invalid-name");
+  }
+
+  if (tradeName && !isValidCompanyName(tradeName)) {
+    redirect("/onboarding?error=invalid-trade-name");
   }
 
   const supabase = await createClient();
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (userError || !user) {
     redirect("/login");
   }
 

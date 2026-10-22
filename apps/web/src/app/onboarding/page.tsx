@@ -47,6 +47,14 @@ export default async function OnboardingPage({
         <p role="alert">La raison sociale est obligatoire.</p>
       )}
 
+      {params.error === "invalid-name" && (
+        <p role="alert">La raison sociale doit contenir entre 2 et 200 caracteres.</p>
+      )}
+
+      {params.error === "invalid-trade-name" && (
+        <p role="alert">Le nom commercial doit contenir entre 2 et 200 caracteres.</p>
+      )}
+
       {params.error === "creation-failed" && (
         <p role="alert">
           La création a échoué. Vérifie les données et les droits en base, puis
