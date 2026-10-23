@@ -7,6 +7,7 @@ Le schéma est la source de vérité du projet ([ADR-001](../docs/adr/0001-socle
 | Migration | Contenu |
 |---|---|
 | `20261021110000_identite_acces.sql` | Entreprises, profils, rôles et permissions, appartenances, journal d'audit, politiques RLS, création d'entreprise atomique |
+| `20261022160000_clients_fournisseurs.sql` | Clients et fournisseurs : colonnes modifiables limitées, RLS liée aux permissions, archivage sans suppression définitive, audit sans valeurs de contact |
 
 ## Règles
 
