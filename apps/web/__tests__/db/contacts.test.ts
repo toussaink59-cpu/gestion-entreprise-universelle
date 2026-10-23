@@ -267,3 +267,95 @@ describe("Clients et fournisseurs — audit et intégrité", () => {
     ).rejects.toThrow(DENIED);
   });
 });
+
+describe("Clients et fournisseurs — accès après changement de statut et protections de colonnes", () => {
+  const countContacts = async (who: "frank" | "carol") => {
+    const customers = await asUser(t.db, who, () =>
+      q(`select id from public.customers where company_id = $1`, [t.companyA]),
+    );
+    const suppliers = await asUser(t.db, who, () =>
+      q(`select id from public.suppliers where company_id = $1`, [t.companyA]),
+    );
+    return customers.rows.length + suppliers.rows.length;
+  };
+
+  it("un membre révoqué perd immédiatement l'accès aux contacts", async () => {
+    expect(await countContacts("frank")).toBeGreaterThan(0);
+
+    await asUser(t.db, "alice", () =>
+      q(
+        `update public.company_memberships
+         set status = 'revoked', revoked_at = now()
+         where user_id = $1 and company_id = $2`,
+        [ids.frank, t.companyA],
+      ),
+    );
+
+    expect(await countContacts("frank")).toBe(0);
+  });
+
+  it("un compte désactivé ne lit plus les contacts", async () => {
+    expect(await countContacts("carol")).toBeGreaterThan(0);
+
+    await q(`update public.users set status = 'disabled' where id = $1`, [
+      ids.carol,
+    ]);
+
+    expect(await countContacts("carol")).toBe(0);
+  });
+
+  it("la modification par identifiant direct dans une autre entreprise ne change rien", async () => {
+    const target = await q<{ id: string }>(
+      `select id from public.customers where name = $1 and company_id = $2`,
+      ["Client initial A", t.companyA],
+    );
+    const id = target.rows[0].id;
+
+    const update = await asUser(t.db, "bob", () =>
+      q(`update public.customers set name = 'Piraté' where id = $1`, [id]),
+    );
+
+    expect(update.affectedRows).toBe(0);
+    const check = await q<{ name: string }>(
+      `select name from public.customers where id = $1`,
+      [id],
+    );
+    expect(check.rows[0].name).toBe("Client initial A");
+  });
+
+  it("refuse de déplacer un contact vers une autre entreprise", async () => {
+    await expect(
+      asUser(t.db, "alice", () =>
+        q(
+          `update public.customers set company_id = $1
+           where name = $2 and company_id = $3`,
+          [t.companyB, "Client initial A", t.companyA],
+        ),
+      ),
+    ).rejects.toThrow(DENIED);
+  });
+
+  it("refuse d'usurper l'auteur d'une création (created_by)", async () => {
+    await expect(
+      asUser(t.db, "alice", () =>
+        q(
+          `insert into public.customers (company_id, name, created_by)
+           values ($1, $2, $3)`,
+          [t.companyA, "Client usurpé", ids.bob],
+        ),
+      ),
+    ).rejects.toThrow(DENIED);
+  });
+
+  it("refuse un statut hors des valeurs autorisées", async () => {
+    await expect(
+      asUser(t.db, "alice", () =>
+        q(
+          `update public.customers set status = 'deleted'
+           where name = $1 and company_id = $2`,
+          ["Client initial A", t.companyA],
+        ),
+      ),
+    ).rejects.toThrow(DENIED);
+  });
+});
