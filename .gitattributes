@@ -1,3 +1,4 @@
 # Keep Bash scripts with Unix line endings on every platform.
 *.sh text eol=lf
 *.md text eol=lf
+*.sql text eol=lf
