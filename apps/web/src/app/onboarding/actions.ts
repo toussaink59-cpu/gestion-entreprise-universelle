@@ -50,6 +50,7 @@ export async function createCompany(formData: FormData) {
 
   if (error) {
     console.error("create_company failed:", error.code);
+    if (error.code === "54000") redirect("/onboarding?error=limit-reached");
     redirect("/onboarding?error=creation-failed");
   }
 

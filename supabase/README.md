@@ -32,7 +32,7 @@ npm test
 
 - La matrice rôles/permissions est un point de départ **à valider** avec le porteur du projet.
 - L'invitation par e-mail n'existe pas encore : on ne peut ajouter que des utilisateurs déjà inscrits.
-- Pas encore de limitation du nombre d'entreprises créées par utilisateur.
+- Création d'entreprises limitée à 5 par propriétaire (migration `20261024090000`, valeur à valider).
 - L'accès exceptionnel de l'équipe plateforme aux données clients reste à concevoir (§4 du cahier des charges).
 
 ## Sauvegarde et restauration (ACC-07)
