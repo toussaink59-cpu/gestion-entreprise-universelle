@@ -74,9 +74,21 @@ begin
 
   -- Une fois créée, l'identité de l'invitant est immuable.
   if new.invited_by is distinct from old.invited_by then
+  -- Autoriser uniquement le NULL automatique lié à la suppression
+  -- du compte référencé par la clé étrangère ON DELETE SET NULL.
+  if not (
+    old.invited_by is not null
+    and new.invited_by is null
+    and not exists (
+      select 1
+      from public.users u
+      where u.id = old.invited_by
+    )
+  ) then
     raise exception 'invited_by ne peut pas être modifié'
       using errcode = '42501';
   end if;
+end if;
 
   -- Toute transition vers active depuis un autre statut nécessite
   -- le rôle propriétaire. Les modifications ordinaires d'une

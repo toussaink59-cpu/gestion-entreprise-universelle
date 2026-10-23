@@ -285,7 +285,6 @@ describe('Sécurité des appartenances — invitant et activation', () => {
       ),
     ).rejects.toThrow(/seul un propriétaire/);
   });
-
   it('un utilisateur ne peut pas falsifier invited_by', async () => {
     await expect(
       asUser(t.db, 'alice', () =>
@@ -358,4 +357,31 @@ describe('Sécurité des appartenances — invitant et activation', () => {
     expect(membership.rows[0].status).toBe('active');
     expect(membership.rows[0].invited_by).toBe(ids.alice);
   });
+  it('la suppression du compte invitant conserve l’invitation', async () => {
+    await asUser(t.db, 'frank', () =>
+      q(`
+        insert into public.company_memberships
+          (company_id, user_id, role_code, status)
+        values ($1, $2, 'employee', 'invited')
+      `, [t.companyA, ids.bob]),
+    )
+
+    await q(
+      'delete from auth.users where id = $1',
+      [ids.frank],
+    )
+
+    const result = await q<{
+      invited_by: string | null
+      status: string
+    }>(`
+      select invited_by, status
+      from public.company_memberships
+      where company_id = $1 and user_id = $2
+    `, [t.companyA, ids.bob])
+
+    expect(result.rows).toHaveLength(1)
+    expect(result.rows[0].status).toBe('invited')
+    expect(result.rows[0].invited_by).toBeNull()
+  })
 });
