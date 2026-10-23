@@ -357,28 +357,126 @@ describe('Sécurité des appartenances — invitant et activation', () => {
     expect(membership.rows[0].status).toBe('active');
     expect(membership.rows[0].invited_by).toBe(ids.alice);
   });
+  describe('Fonctions SQL de gestion des membres', () => {
+    async function createTemporaryUser() {
+      const idResult = await q<{ id: string }>(
+        'select gen_random_uuid()::text as id',
+      )
+      const id = idResult.rows[0].id
+      const email = `member-${id}@example.test`
+
+      await q(
+        `insert into auth.users (id, email, raw_user_meta_data)
+         values ($1, $2, $3)`,
+        [id, email, JSON.stringify({ full_name: 'Temporary member' })],
+      )
+
+      return { id, email }
+    }
+
+    it('le propriétaire peut consulter les membres de son entreprise', async () => {
+      const result = await asUser(t.db, 'alice', () =>
+        q<{ user_id: string; role_code: string; status: string }>(
+          `select user_id, role_code, status
+           from public.list_company_members($1)`,
+          [t.companyA],
+        ),
+      )
+
+      expect(result.rows).toContainEqual(
+        expect.objectContaining({
+          user_id: ids.alice,
+          role_code: 'owner',
+          status: 'active',
+        }),
+      )
+      expect(result.rows.some((row) => row.user_id === ids.bob)).toBe(false)
+    })
+
+    it('un utilisateur sans permission ne peut pas lister les membres', async () => {
+      await expect(
+        asUser(t.db, 'mallory', () =>
+          q('select * from public.list_company_members($1)', [t.companyA]),
+        ),
+      ).rejects.toThrow(/accès refusé/)
+    })
+
+    it('un administrateur peut inviter un compte existant', async () => {
+      const target = await createTemporaryUser()
+
+      try {
+        const result = await asUser(t.db, 'frank', () =>
+          q<{ membership_id: string }>(
+            `select public.invite_existing_company_member($1, $2, $3)
+               as membership_id`,
+            [t.companyA, target.email, 'employee'],
+          ),
+        )
+
+        expect(result.rows).toHaveLength(1)
+        expect(result.rows[0].membership_id).toBeTruthy()
+
+        const membership = await q<{
+          invited_by: string
+          status: string
+          role_code: string
+        }>(
+          `select invited_by, status, role_code
+           from public.company_memberships
+           where company_id = $1 and user_id = $2`,
+          [t.companyA, target.id],
+        )
+
+        expect(membership.rows).toHaveLength(1)
+        expect(membership.rows[0]).toMatchObject({
+          invited_by: ids.frank,
+          status: 'invited',
+          role_code: 'employee',
+        })
+      } finally {
+        await q('delete from auth.users where id = $1', [target.id])
+      }
+    })
+
+    it('un administrateur ne peut pas attribuer le rôle propriétaire', async () => {
+      const target = await createTemporaryUser()
+
+      try {
+        await expect(
+          asUser(t.db, 'frank', () =>
+            q(
+              `select public.invite_existing_company_member($1, $2, $3)`,
+              [t.companyA, target.email, 'owner'],
+            ),
+          ),
+        ).rejects.toThrow(/seul le propriétaire/)
+      } finally {
+        await q('delete from auth.users where id = $1', [target.id])
+      }
+    })
+  })
+
   it('la suppression du compte invitant conserve l’invitation', async () => {
     await asUser(t.db, 'frank', () =>
-      q(`
-        insert into public.company_memberships
+      q(
+        `insert into public.company_memberships
           (company_id, user_id, role_code, status)
-        values ($1, $2, 'employee', 'invited')
-      `, [t.companyA, ids.bob]),
+         values ($1, $2, 'employee', 'invited')`,
+        [t.companyA, ids.bob],
+      ),
     )
 
-    await q(
-      'delete from auth.users where id = $1',
-      [ids.frank],
-    )
+    await q('delete from auth.users where id = $1', [ids.frank])
 
     const result = await q<{
       invited_by: string | null
       status: string
-    }>(`
-      select invited_by, status
-      from public.company_memberships
-      where company_id = $1 and user_id = $2
-    `, [t.companyA, ids.bob])
+    }>(
+      `select invited_by, status
+       from public.company_memberships
+       where company_id = $1 and user_id = $2`,
+      [t.companyA, ids.bob],
+    )
 
     expect(result.rows).toHaveLength(1)
     expect(result.rows[0].status).toBe('invited')
