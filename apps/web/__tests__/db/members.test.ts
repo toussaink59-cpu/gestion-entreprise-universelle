@@ -122,3 +122,38 @@ describe('Invitation : cible et rôle', () => {
     }
   })
 })
+
+describe('Anti-abus : limite du nombre d’entreprises par utilisateur', () => {
+  it('refuse la 6e entreprise, sans en créer', async () => {
+    const user = await createUser()
+    await q(`select set_config('request.jwt.claim.sub', $1, false)`, [user.id])
+    await q('set role authenticated')
+    try {
+      for (let i = 1; i <= 5; i++) {
+        await q('select public.create_company($1)', [`Entreprise limite ${i}`])
+      }
+      await expect(q('select public.create_company($1)', ['Entreprise limite 6'])).rejects.toThrow(
+        /limite du nombre/,
+      )
+    } finally {
+      await q('reset role')
+    }
+    const n = await q<{ n: string }>(
+      `select count(*)::text as n from public.company_memberships where user_id = $1`,
+      [user.id],
+    )
+    expect(n.rows[0].n).toBe('5')
+  })
+
+  it('la limite ne bloque pas un autre utilisateur', async () => {
+    const other = await createUser()
+    await q(`select set_config('request.jwt.claim.sub', $1, false)`, [other.id])
+    await q('set role authenticated')
+    try {
+      const r = await q('select public.create_company($1)', ['Entreprise indépendante'])
+      expect(r.rows).toHaveLength(1)
+    } finally {
+      await q('reset role')
+    }
+  })
+})

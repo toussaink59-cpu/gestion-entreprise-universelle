@@ -76,6 +76,13 @@ export default async function OnboardingPage({
         <p role="alert">Le nom commercial doit contenir entre 2 et 200 caracteres.</p>
       )}
 
+      {params.error === "limit-reached" && (
+        <p role="alert">
+          Tu as atteint le nombre maximal d’entreprises dont tu peux être
+          propriétaire. Contacte le support pour en créer davantage.
+        </p>
+      )}
+
       {params.error === "creation-failed" && (
         <p role="alert">
           La création a échoué. Vérifie les données et les droits en base, puis
