@@ -47,7 +47,7 @@ async function DashboardContent() {
 
   const { data: memberships, error: membershipError } = await supabase
     .from("company_memberships")
-    .select("company_id")
+    .select("company_id, role_code")
     .eq("user_id", user.id)
     .eq("status", "active");
 
@@ -185,6 +185,12 @@ async function DashboardContent() {
       {companies && companies.length > 0 && (
         <div className="grid gap-6">
           {companies.map((company) => {
+            const membership = (memberships ?? []).find(
+              (item) => item.company_id === company.id,
+            );
+            const canManageMembers = ["owner", "company_admin"].includes(
+              String(membership?.role_code ?? ""),
+            );
             const preview = contactPreviews.find(
               (item) => item.companyId === company.id,
             );
@@ -208,9 +214,19 @@ async function DashboardContent() {
                       Devise : {company.default_currency}
                     </p>
                   </div>
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                    Entreprise
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                      Entreprise
+                    </span>
+                    {canManageMembers && (
+                      <a
+                        href={`/dashboard/membres?company=${encodeURIComponent(company.id)}`}
+                        className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                      >
+                        Gérer les membres
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-6 grid gap-5 xl:grid-cols-2">
