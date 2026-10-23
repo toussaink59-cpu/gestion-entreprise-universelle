@@ -1,0 +1,86 @@
+name: Supabase réel
+
+# Les tests habituels tournent sur PGlite avec une doublure du schéma `auth`.
+# Ce workflow rejoue les migrations et les tests de base sur la VRAIE pile Supabase locale
+# (PostgreSQL + GoTrue de Supabase, fournis par la CLI) : même image, même schéma `auth`,
+# mêmes rôles que le service hébergé. Il valide aussi les fonctions SQL (plpgsql_check).
+#
+# Filtré par chemins : il ne tourne que si le schéma, les tests de base ou ce workflow changent.
+
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - "apps/web/__tests__/db/**"
+      - "apps/web/package.json"
+      - "apps/web/package-lock.json"
+      - ".github/workflows/supabase-reel.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - "apps/web/__tests__/db/**"
+      - "apps/web/package.json"
+      - "apps/web/package-lock.json"
+      - ".github/workflows/supabase-reel.yml"
+  schedule:
+    - cron: "43 3 * * 1" # lundi 03:43 UTC : détecte les évolutions de la pile Supabase
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-reel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DO_NOT_TRACK: "1"
+  SUPABASE: ./apps/web/node_modules/.bin/supabase
+
+jobs:
+  supabase:
+    name: Migrations, lint SQL et tests sur Supabase local
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Installer les dépendances
+        working-directory: apps/web
+        run: npm ci
+
+      # Seuls la base et l'authentification sont nécessaires pour tester la RLS.
+      # Les migrations de supabase/migrations/ sont appliquées au démarrage.
+      - name: Démarrer Supabase local (base + authentification)
+        run: >-
+          ${{ env.SUPABASE }} start
+          -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Lint SQL (plpgsql_check)
+        run: ${{ env.SUPABASE }} db lint --local --schema public,app --fail-on error
+
+      - name: Tests de base contre Supabase
+        working-directory: apps/web
+        env:
+          # Mot de passe par défaut de la base LOCALE jetable du job
+          TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: npx vitest run __tests__/db
+
+      - name: Journaux Supabase (en cas d'échec)
+        if: failure()
+        run: |
+          docker ps -a
+          for c in $(docker ps -a --format '{{.Names}}' | grep '^supabase_'); do
+            echo "=== $c"; docker logs --tail 40 "$c" 2>&1
+          done
+
+      - name: Arrêter Supabase
+        if: always()
+        run: ${{ env.SUPABASE }} stop --no-backup
