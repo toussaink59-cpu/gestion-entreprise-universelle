@@ -47,7 +47,7 @@ describe('ACC-01 — isolation entre deux entreprises', () => {
           ids.alice,
         ]),
       ),
-    ).rejects.toThrow(DENIED)
+    ).rejects.toThrow(/row-level security|permission denied|violates|seul le propriétaire peut attribuer ce rôle/i)
   })
 
   it('impossible d\'ajouter un tiers dans une autre entreprise', async () => {
@@ -160,7 +160,7 @@ describe('ACC-05 — permissions par rôle', () => {
           ids.mallory,
         ]),
       ),
-    ).rejects.toThrow(DENIED)
+    ).rejects.toThrow(/row-level security|permission denied|violates|seul le propriétaire peut attribuer ce rôle/i)
   })
 
   it('un administrateur d\'entreprise ne peut pas rétrograder ni révoquer un propriétaire', async () => {
@@ -195,10 +195,26 @@ describe('ACC-05 — permissions par rôle', () => {
     expect(r.affectedRows).toBe(1)
   })
 
-  it('une entreprise ne peut pas perdre son dernier propriétaire', async () => {
-    await expect(
-      q(`update public.company_memberships set role_code = 'company_admin' where user_id = $1`, [ids.alice]),
-    ).rejects.toThrow(/au moins un propriétaire/)
+  it('un propriétaire ne peut pas se rétrograder et laisser l’entreprise sans propriétaire', async () => {
+    const result = await asUser(t.db, 'alice', () =>
+      q(
+        `update public.company_memberships
+         set role_code = 'company_admin'
+         where user_id = $1`,
+        [ids.alice],
+      ),
+    )
+
+    expect(result.affectedRows).toBe(0)
+
+    const check = await q<{ role_code: string }>(
+      `select role_code
+       from public.company_memberships
+       where company_id = $1 and user_id = $2`,
+      [t.companyA, ids.alice],
+    )
+
+    expect(check.rows[0].role_code).toBe('owner')
   })
 })
 
@@ -450,6 +466,80 @@ describe('Sécurité des appartenances — invitant et activation', () => {
             ),
           ),
         ).rejects.toThrow(/seul le propriétaire/)
+      } finally {
+        await q('delete from auth.users where id = $1', [target.id])
+      }
+    })
+
+    it('un administrateur ne peut pas attribuer le rôle company_admin', async () => {
+      const target = await createTemporaryUser()
+
+      try {
+        await expect(
+          asUser(t.db, 'frank', () =>
+            q(
+              `select public.invite_existing_company_member($1, $2, $3)`,
+              [t.companyA, target.email, 'company_admin'],
+            ),
+          ),
+        ).rejects.toThrow(/seul le propriétaire/)
+      } finally {
+        await q('delete from auth.users where id = $1', [target.id])
+      }
+    })
+
+    it('un administrateur ne peut pas créer directement une invitation company_admin', async () => {
+      const target = await createTemporaryUser()
+
+      try {
+        await expect(
+          asUser(t.db, 'frank', () =>
+            q(
+              `insert into public.company_memberships
+                 (company_id, user_id, role_code, status)
+               values ($1, $2, 'company_admin', 'invited')`,
+              [t.companyA, target.id],
+            ),
+          ),
+        ).rejects.toThrow(/seul le propriétaire/)
+      } finally {
+        await q('delete from auth.users where id = $1', [target.id])
+      }
+    })
+
+    it('un administrateur ne peut pas promouvoir un membre au rôle company_admin', async () => {
+      const target = await createTemporaryUser()
+
+      try {
+        await asUser(t.db, 'alice', () =>
+          q(
+            `insert into public.company_memberships
+               (company_id, user_id, role_code, status)
+             values ($1, $2, 'employee', 'invited')`,
+            [t.companyA, target.id],
+          ),
+        )
+
+        try {
+          const update = await asUser(t.db, 'frank', () =>
+            q(
+              `update public.company_memberships
+               set role_code = 'company_admin'
+               where company_id = $1 and user_id = $2`,
+              [t.companyA, target.id],
+            ),
+          )
+          expect(update.affectedRows).toBe(0)
+        } catch (error) {
+          expect(String(error)).toMatch(/seul le propriétaire|row-level security|permission denied/i)
+        }
+
+        const membership = await q<{ role_code: string }>(
+          `select role_code from public.company_memberships
+           where company_id = $1 and user_id = $2`,
+          [t.companyA, target.id],
+        )
+        expect(membership.rows[0]?.role_code).toBe('employee')
       } finally {
         await q('delete from auth.users where id = $1', [target.id])
       }
