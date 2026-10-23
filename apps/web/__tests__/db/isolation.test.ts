@@ -272,3 +272,90 @@ describe('ACC-06 — journal d\'audit', () => {
     ).rejects.toThrow(DENIED)
   })
 })
+
+describe('Sécurité des appartenances — invitant et activation', () => {
+  it('un administrateur ne peut pas créer directement une appartenance active', async () => {
+    await expect(
+      asUser(t.db, 'frank', () =>
+        q(`
+          insert into public.company_memberships
+            (company_id, user_id, role_code, status)
+          values ($1, $2, 'employee', 'active')
+        `, [t.companyA, ids.mallory]),
+      ),
+    ).rejects.toThrow(/seul un propriétaire/);
+  });
+
+  it('un utilisateur ne peut pas falsifier invited_by', async () => {
+    await expect(
+      asUser(t.db, 'alice', () =>
+        q(`
+          insert into public.company_memberships
+            (company_id, user_id, role_code, status, invited_by)
+          values ($1, $2, 'employee', 'invited', $3)
+        `, [t.companyA, ids.mallory, ids.bob]),
+      ),
+    ).rejects.toThrow(/permission denied|invited_by/i);
+  });
+
+  it('l invitant est défini par la session authentifiée', async () => {
+    await asUser(t.db, 'alice', () =>
+      q(`
+        insert into public.company_memberships
+          (company_id, user_id, role_code, status)
+        values ($1, $2, 'employee', 'invited')
+      `, [t.companyA, ids.mallory]),
+    );
+
+    const result = await q<{ invited_by: string; status: string }>(`
+      select invited_by, status
+      from public.company_memberships
+      where company_id = $1 and user_id = $2
+    `, [t.companyA, ids.mallory]);
+
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].invited_by).toBe(ids.alice);
+    expect(result.rows[0].status).toBe('invited');
+  });
+
+  it('un administrateur ne peut pas activer une invitation', async () => {
+    await expect(
+      asUser(t.db, 'frank', () =>
+        q(`
+          update public.company_memberships
+          set status = 'active'
+          where company_id = $1 and user_id = $2
+        `, [t.companyA, ids.mallory]),
+      ),
+    ).rejects.toThrow(/seul un propriétaire/);
+
+    const result = await q<{ status: string }>(`
+      select status
+      from public.company_memberships
+      where company_id = $1 and user_id = $2
+    `, [t.companyA, ids.mallory]);
+
+    expect(result.rows[0].status).toBe('invited');
+  });
+
+  it('le propriétaire peut activer une invitation existante', async () => {
+    const result = await asUser(t.db, 'alice', () =>
+      q(`
+        update public.company_memberships
+        set status = 'active'
+        where company_id = $1 and user_id = $2
+      `, [t.companyA, ids.mallory]),
+    );
+
+    expect(result.affectedRows).toBe(1);
+
+    const membership = await q<{ status: string; invited_by: string }>(`
+      select status, invited_by
+      from public.company_memberships
+      where company_id = $1 and user_id = $2
+    `, [t.companyA, ids.mallory]);
+
+    expect(membership.rows[0].status).toBe('active');
+    expect(membership.rows[0].invited_by).toBe(ids.alice);
+  });
+});
