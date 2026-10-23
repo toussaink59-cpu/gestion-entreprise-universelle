@@ -2,6 +2,13 @@
 
 Cette feuille de route est une proposition de séquencement. Les phases ne sont considérées comme terminées qu’après validation des critères d’acceptation et des tests.
 
+## État d’avancement (23 octobre 2026)
+
+- **Phase 0 :** cahier des charges v0.1 rédigé ; plusieurs décisions restent ouvertes (nom, licence, région d’hébergement, sauvegardes, accès de l’équipe plateforme).
+- **Phase 1 :** **en cours d’audit, non terminée.** Fondation technique, authentification, isolation multi-entreprises et sauvegarde/restauration existent mais ne sont pas encore validées : voir [l’audit de la Phase 1](PHASE1_CHECKLIST.md).
+- **Phase 2 :** démarrée par anticipation (répertoires clients et fournisseurs). Le reste (devis, factures, paiements, dépenses, trésorerie, budgets) n’est pas commencé. Le développement de nouveaux modules métier attend la fin de l’audit de la Phase 1.
+- **Phases 3 à 6 :** non commencées.
+
 ## Phase 0 — Cadrage
 
 - Valider le cahier des charges, les utilisateurs cibles et le périmètre MVP.

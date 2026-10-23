@@ -8,19 +8,21 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 
 ## Statut réel du projet
 
-**Phase actuelle : consolidation de la fondation technique (Phase 1).** Le dépôt ne doit pas encore être considéré comme un logiciel prêt pour la production.
+**Phase actuelle : audit complet de la Phase 1 (fondation technique).** La Phase 1 n’est pas considérée comme terminée : l’ensemble du dépôt est audité avant d’avancer. Le dépôt ne doit pas être considéré comme un logiciel prêt pour la production.
 
-Éléments déjà présents dans le dépôt :
+Éléments présents dans le dépôt :
 
-- une application Next.js / React / TypeScript avec une première interface de tableau de bord de démonstration ;
-- une première migration PostgreSQL pour les entreprises, profils, appartenances, rôles, permissions, RLS et journal d’audit ;
-- des tests automatisés d’isolation et de permissions, exécutés sur les migrations ;
-- des scripts de sauvegarde, de restauration et un test de restauration de bout en bout avec données fictives ;
-- une CI GitHub Actions qui exécute lint, build, vérification TypeScript, tests, audit des dépendances de production et ShellCheck.
+- une application Next.js / React / TypeScript avec inscription, connexion, déconnexion et création d’une première entreprise (authentification Supabase) ;
+- un tableau de bord qui liste les entreprises de l’utilisateur connecté, avec accès aux répertoires clients et fournisseurs ;
+- un premier module métier : répertoires clients et fournisseurs, avec archivage, sans suppression définitive ;
+- des migrations PostgreSQL : entreprises, profils, appartenances, rôles, permissions, journal d’audit en ajout seul, clients et fournisseurs, avec RLS ;
+- des tests automatisés d’isolation entre entreprises, de permissions par rôle, de révocation et d’audit, exécutés sur les migrations ;
+- des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
+- une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit des dépendances de production, ShellCheck.
 
-**Limites actuelles :** le tableau de bord contient des données fictives écrites dans le code. Le parcours complet d’authentification dans l’interface n’est pas encore livré ; les modules clients, facturation, paiements, dépenses, trésorerie, stocks et paie ne sont pas encore des fonctionnalités métier complètes. Les scripts de sauvegarde ne remplacent pas la configuration d’un dispositif de sauvegarde opérationnel pour la production.
+**Limites actuelles :** les modules devis, facturation, paiements, dépenses, trésorerie, budgets, stocks et paie n’existent pas encore. Les migrations n’ont pas encore été validées sur le projet Supabase hébergé, la matrice des rôles n’est pas validée par le porteur du projet, et l’hébergement, la région et la politique de sauvegarde ne sont pas décidés. Les scripts de sauvegarde ne remplacent pas un dispositif de sauvegarde opérationnel pour la production.
 
-La liste des critères d’acceptation et des points restant à traiter se trouve dans [la checklist de consolidation de la Phase 1](docs/PHASE1_CHECKLIST.md).
+Le détail des constats de l’audit, de leur état et des décisions attendues se trouve dans [l’audit de la Phase 1](docs/PHASE1_CHECKLIST.md).
 
 ## Documents du projet
 
@@ -28,7 +30,7 @@ La liste des critères d’acceptation et des points restant à traiter se trouv
 - [Feuille de route](docs/ROADMAP.md)
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
-- [Checklist Phase 1](docs/PHASE1_CHECKLIST.md)
+- [Audit de la Phase 1](docs/PHASE1_CHECKLIST.md)
 - [Sécurité et confidentialité](SECURITY.md)
 - [Contribution au projet](CONTRIBUTING.md)
 
@@ -121,7 +123,7 @@ Le système devra respecter le cadre applicable au Burkina Faso, notamment les o
 
 ## Démarrage du développement
 
-1. Terminer la checklist de consolidation de la Phase 1.
+1. Terminer l’audit de la Phase 1 ([constats et décisions](docs/PHASE1_CHECKLIST.md)).
 2. Valider le cahier des charges, le périmètre MVP et la matrice des rôles.
 3. Finaliser l’authentification et l’intégration à la base dans un environnement de test.
 4. Développer un premier flux métier complet, avec permissions et tests.

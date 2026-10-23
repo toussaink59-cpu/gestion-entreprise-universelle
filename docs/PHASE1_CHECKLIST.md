@@ -1,69 +1,71 @@
-# Checklist de consolidation — Phase 1
+# Audit de la Phase 1
 
-**État de référence :** 21 octobre 2026. Cette checklist distingue ce qui existe dans le dépôt des critères encore à démontrer. Une tâche ne doit être marquée terminée que lorsqu’elle est couverte par une preuve vérifiable.
+**Date de l'audit :** 23 octobre 2026.
 
-## Déjà présent dans le dépôt
+**Statut : la Phase 1 n'est pas consolidée.** L'ensemble du dépôt fait l'objet d'un audit complet avant toute nouvelle fonctionnalité métier. Une tâche n'est marquée « fait » que si elle est couverte par une preuve vérifiable (test, CI, inspection).
 
-- [x] Projet Next.js, React et TypeScript avec commandes lint, build, typecheck et tests.
-- [x] Workflow CI qui exécute lint, build, vérification TypeScript, tests, audit des dépendances de production et ShellCheck.
-- [x] Première migration PostgreSQL pour les entreprises, profils, appartenances, rôles, permissions et journal d’audit.
-- [x] RLS activée sur les tables du schéma `public` de la migration actuelle.
-- [x] Tests de base pour l’isolation entre deux entreprises, les rôles, la révocation et l’audit.
-- [x] Scripts de sauvegarde/restauration et exercice CI sur une base PostgreSQL jetable avec données fictives.
-- [x] `.env.example` et règles `.gitignore` pour éviter d’ajouter les fichiers d’environnement et les sauvegardes locales au dépôt.
+## 1. Ce que l'audit a vérifié
 
-Ces éléments ne suffisent pas à démontrer que toute la Phase 1 est prête pour la production.
+| Domaine | Preuve | Résultat |
+|---|---|---|
+| Qualité | `npm ci`, lint, TypeScript, tests, build en CI sur chaque fusion | OK |
+| Tests | Isolation entre entreprises, permissions par rôle, révocation, compte désactivé, audit, clients/fournisseurs | OK (sur PGlite) |
+| Dépendances | `npm audit` en production | 0 vulnérabilité ; 5 alertes de développement connues (voir §6) |
+| Secrets | Recherche dans le code et dans tout l'historique Git | Aucun secret trouvé ; la clé privilégiée Supabase n'est utilisée nulle part dans le code |
+| Authentification | Lecture du code : redirections sûres, origine fixée par configuration, échec fermé, aucune donnée personnelle dans les journaux | OK |
+| Fonctions SQL | Inspection de `pg_proc` : toutes les fonctions `SECURITY DEFINER` ont `search_path` vide ; exécution limitée à `postgres` et, pour cinq fonctions d'autorisation, à `authenticated` ; rien d'ouvert à `PUBLIC` ni à `anon` | OK |
+| RLS | Garde-fou en test : échec si une table du schéma `public` n'a pas la RLS | OK |
+| Sauvegarde | Test de bout en bout avec comparaison des données, des définitions de sécurité et de l'isolation après restauration | OK sur PostgreSQL standard |
 
-## À terminer avant de déclarer la Phase 1 consolidée
+## 2. Constats et état
 
-### 1. Authentification et cycle de vie des comptes
+| N° | Constat | Exigence | État |
+|---|---|---|---|
+| 1 | Migrations et RLS jamais validées sur la pile Supabase réelle (tests sur PGlite avec une doublure du schéma `auth`) | SEC-02, ACC-01 | CI sur Supabase local réel : PR ouverte (#22). **Reste à votre charge :** appliquer et vérifier sur le projet hébergé |
+| 2 | Réglages d'authentification du projet hébergé inconnus. La configuration locale (`supabase/config.toml`) autorise 6 caractères et désactive la confirmation d'e-mail ; l'API d'authentification étant appelable directement, les règles du formulaire ne suffisent pas | SEC-01 | **À votre charge** (voir §3) |
+| 3 | Protection de `main` non vérifiable depuis la CI ; un commit direct a eu lieu sur `main` le 20/10 | §14 (organisation GitHub) | **À votre charge** (voir §3) |
+| 4 | Matrice des rôles et permissions non validée par le porteur du projet ; le module clients/fournisseurs s'appuie déjà dessus | §4 | **Décision attendue** |
+| 5 | Documentation en retard sur le code (authentification, tableau de bord réel, module clients/fournisseurs) | §14, définition de « terminé » | Corrigé dans ce document, le README et la feuille de route |
+| 6 | Le test de restauration ne contenait aucune donnée clients/fournisseurs | ACC-07 | PR ouverte (#23) |
+| 7 | Aucun en-tête de sécurité HTTP | SEC-03 | PR ouverte (#23). Une CSP stricte avec `script-src` et nonce impose un rendu dynamique de toutes les pages : chantier dédié |
+| 8 | Parcours inscription / connexion / onboarding non testés de bout en bout (tests unitaires de validation seulement) | §13 | **À faire** |
+| 9 | Tests clients/fournisseurs incomplets (membre révoqué, compte désactivé, modification inter-entreprises, déplacement, usurpation de l'auteur) | ACC-01, ACC-05 | PR ouverte (#23) |
+| 10 | Données personnelles des contacts (e-mails, téléphones, identifiants fiscaux) sans durée de conservation ni procédure d'effacement ou d'anonymisation ; l'archivage est la seule opération | §11 | **Décision attendue**, avec un conseil local |
+| 11 | Aucune limite au nombre d'entreprises créées par un compte ; pas de protection anti-abus à l'inscription | SEC-01 | **À faire** |
+| 12 | Quatre PR Dependabot ouvertes depuis le 19/10 | §14 | À examiner une par une |
+| 13 | `.gitignore` de `apps/web` en encodage ISO-8859 (corrompu), récurrent | Maintenabilité | Corrigé : `.editorconfig` et contrôle d'encodage en CI |
 
-- [ ] Connecter l’interface à l’environnement d’authentification retenu et documenter les variables réellement nécessaires.
-- [ ] Tester inscription ou invitation, connexion, déconnexion, expiration/révocation de session et compte désactivé.
-- [ ] Confirmer que la clé privilégiée Supabase, si elle est utilisée, ne peut jamais être envoyée au navigateur.
-- [ ] Définir le flux d’invitation des utilisateurs déjà inscrits et non inscrits.
+## 3. Actions à votre charge
 
-### 2. Rôles, permissions et RLS
+1. **Réglages d'authentification du projet Supabase** (tableau de bord) : longueur minimale du mot de passe alignée sur l'application (au moins 8), confirmation d'e-mail activée, expéditeur d'e-mails personnalisé pour la production, URL du site et URL de redirection autorisées limitées à votre domaine. Vérifier si la protection contre les mots de passe compromis est disponible sur votre offre.
+2. **Protection de `main`** (réglages GitHub) : exiger une pull request, exiger les contrôles « Web — lint, types, tests, build » et « Scripts shell — shellcheck », interdire les poussées directes.
+3. **Valider la matrice des rôles** : en particulier, l'administrateur d'entreprise n'a pas accès à la paie et la finance ne lit pas le journal d'audit.
+4. **Appliquer les migrations sur le projet hébergé** et vérifier que l'isolation tient, après la fusion de la PR #22.
 
-- [ ] Faire valider la matrice des rôles par le porteur du projet avant de figer les permissions.
-- [ ] Couvrir les opérations autorisées et refusées pour propriétaire, administrateur, finance, RH/paie, commercial, employé, auditeur et utilisateur sans entreprise.
-- [ ] Tester lecture, création, modification, suppression, accès direct par identifiant et changement de rôle.
-- [ ] Tester les scénarios multi-entreprises avec les véritables politiques PostgreSQL et une configuration proche de Supabase.
-- [ ] Vérifier les permissions des fonctions `SECURITY DEFINER`, leurs `search_path`, les privilèges d’exécution et les chemins d’accès privilégiés.
-- [ ] Maintenir le garde-fou qui fait échouer les tests si une nouvelle table applicative n’a pas RLS et des politiques adaptées.
+## 4. Décisions attendues du porteur du projet
 
-### 3. Sauvegarde, restauration et exploitation
+Ces décisions bloquent la mise en production (cahier des charges §10, §11, §16) :
 
-- [ ] Protéger les fichiers de sauvegarde par des permissions restrictives et une écriture atomique.
-- [ ] Comparer les données et les définitions des colonnes, contraintes, index, politiques RLS, déclencheurs, fonctions et ACL après restauration.
-- [ ] Vérifier que les rôles requis existent sur le serveur de restauration ; `pg_dump` ne sauvegarde pas les rôles globaux du serveur.
-- [ ] Choisir une fréquence, une rétention, une destination séparée, un chiffrement et des alertes d’échec.
-- [ ] Décider les objectifs RPO/RTO et effectuer un essai de restauration en préproduction.
-- [ ] Documenter les procédures et s’assurer qu’aucun test destructif ne vise la production.
+- région d'hébergement (latence depuis le Burkina contre transfert de données hors du pays, CIL) ;
+- sauvegardes : fréquence, rétention, destination séparée, chiffrement, alertes d'échec, objectifs RPO/RTO, essai de restauration en préproduction ;
+- ce que l'équipe plateforme peut voir des données clients, et dans quelles circonstances ;
+- durée de conservation et procédure d'effacement des données personnelles ;
+- licence du dépôt, nom du produit.
 
-### 4. Qualité du dépôt et du workflow
+## 5. Critères de sortie de la Phase 1
 
-- [ ] Garder README, roadmap et cahier des charges alignés avec l’état réel du code.
-- [ ] Choisir une licence et préciser la propriété/intention de distribution du code.
-- [ ] Exiger les contrôles CI réussis avant fusion dans `main` et limiter les permissions des workflows au strict nécessaire.
-- [ ] Examiner les PR Dependabot individuellement ; ne pas fusionner une mise à jour uniquement parce qu’elle est disponible.
-- [ ] Vérifier qu’aucun secret, jeton, dump ou donnée réelle n’est présent dans l’historique Git.
+La Phase 1 pourra être déclarée consolidée quand :
 
-## Critères de sortie de Phase 1
-
-La Phase 1 pourra être considérée comme consolidée quand :
-
-1. l’authentification et le cycle de vie des comptes sont testés de bout en bout dans un environnement de test ;
-2. les tests d’accès positifs et négatifs passent pour chaque rôle et couvrent les chemins de données pertinents ;
-3. les migrations et tests sont reproductibles depuis un clone vierge ;
+1. l'authentification et le cycle de vie des comptes sont testés de bout en bout dans un environnement de test ;
+2. les tests d'accès positifs et négatifs passent pour chaque rôle et couvrent les chemins de données pertinents ;
+3. les migrations et tests sont reproductibles depuis un clone vierge **et validés sur le projet Supabase hébergé** ;
 4. la sauvegarde/restauration démontre la conservation des données et des définitions de sécurité ;
 5. la CI est verte sur la branche candidate et les contrôles sont exigés avant fusion ;
-6. les décisions d’hébergement, de secrets, de sauvegardes et d’exploitation sont documentées.
+6. les décisions d'hébergement, de secrets, de sauvegardes et d'exploitation sont documentées.
 
-**Interdiction de mise en production :** n’utiliser aucune donnée réelle de client, de salarié ou de paie avant revue de sécurité, validation métier et décision explicite de mise en production.
+**Interdiction de mise en production :** n'utiliser aucune donnée réelle de client, de salarié ou de paie avant revue de sécurité, validation métier et décision explicite de mise en production.
 
-
-## Risque résiduel connu — dépendances de développement
+## 6. Risque résiduel connu — dépendances de développement
 
 Au 21 octobre 2026, `npm audit` signale cinq alertes de sévérité élevée liées à la chaîne de dépendances de développement `eslint-config-next` -> `@next/eslint-plugin-next` -> `fast-glob` -> `micromatch` -> `braces@3.0.3`. Elles sont associées à l'avis GHSA-vfj7-8cjw-p6xm (CVE-2026-93687), relatif à un risque d'épuisement de pile avec des motifs profondément imbriqués.
 
