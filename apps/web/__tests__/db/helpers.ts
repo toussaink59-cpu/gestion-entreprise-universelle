@@ -81,6 +81,17 @@ export async function createMigratedDb(): Promise<SqlClient> {
 }
 
 /** Exécute `fn` en tant qu'utilisateur connecté (rôle `authenticated`, comme l'API Supabase). */
+export async function asUserId<T>(db: SqlClient, userId: string, fn: () => Promise<T>): Promise<T> {
+  await db.query(`select set_config('request.jwt.claim.sub', $1, false)`, [userId]);
+  await db.exec('set role authenticated');
+  try {
+    return await fn();
+  } finally {
+    await db.exec('reset role');
+    await db.query(`select set_config('request.jwt.claim.sub', '', false)`);
+  }
+}
+
 export async function asUser<T>(db: SqlClient, who: Who | null, fn: () => Promise<T>): Promise<T> {
   await db.query(`select set_config('request.jwt.claim.sub', $1, false)`, [who ? ids[who] : ''])
   await db.exec('set role authenticated')

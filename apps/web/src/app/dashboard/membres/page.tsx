@@ -7,7 +7,7 @@ import {
   invitationRolesForActor,
   type MemberInvitationRole,
 } from "@/lib/security/member-invitation-validation";
-import { activateCompanyMember, inviteCompanyMember } from "./actions";
+import { activateCompanyMember, inviteCompanyMember, resendCompanyMemberInvitation } from "./actions";
 
 export const instant = false;
 
@@ -27,6 +27,15 @@ type CompanyMember = {
   status: string;
   invited_by: string | null;
   created_at: string;
+  email_sent_at: string | null;
+  accepted_at: string | null;
+  expires_at: string | null;
+};
+type InvitationMetadata = {
+  membership_id: string;
+  email_sent_at: string | null;
+  accepted_at: string | null;
+  expires_at: string | null;
 };
 
 const INPUT_CLASS = "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100";
@@ -46,8 +55,9 @@ function roleLabel(value: string): string {
   return ROLE_LABELS[value as MemberInvitationRole] ?? value;
 }
 
-function statusLabel(value: string): string {
+function statusLabel(value: string, acceptedAt: string | null): string {
   if (value === "active") return "Actif";
+  if (value === "invited" && acceptedAt) return "Invitation confirmée · activation en attente";
   if (value === "invited") return "Invitation en attente";
   if (value === "revoked") return "Révoqué";
   return value;
@@ -66,16 +76,19 @@ function errorMessage(code: string | undefined): string | null {
     case "permission": return "Ton rôle ne permet pas d’attribuer ce rôle ou de gérer les membres.";
     case "duplicate": return "Ce compte possède déjà une appartenance à cette entreprise.";
     case "no-account": return "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte GestionPro.";
+    case "email-config": return "L’envoi d’e-mails n’est pas configuré. Vérifie RESEND_API_KEY, RESEND_FROM_EMAIL et NEXT_PUBLIC_APP_URL côté serveur.";
+    case "email-failed": return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Vérifie la configuration Resend puis réessaie.";
+    case "email-rate-limit": return "Attends au moins une minute avant de renvoyer cet e-mail.";
     case "save": return "L’opération n’a pas pu être enregistrée. Vérifie les permissions puis réessaie.";
     case "not-found": return "Cette invitation n’est plus en attente ou n’est plus accessible.";
+    case "email-not-confirmed": return "Le destinataire doit confirmer son adresse e-mail avant l’activation.";
     default: return null;
   }
 }
 
 function successMessage(code: string | undefined): string | null {
-  if (code === "invited") {
-    return "L’invitation a été enregistrée. Aucun e-mail n’est envoyé automatiquement pour le moment.";
-  }
+  if (code === "invited") return "L’invitation a été enregistrée et l’e-mail de confirmation a été envoyé.";
+  if (code === "resent") return "L’e-mail d’invitation a été renvoyé.";
   if (code === "activated") return "L’accès du membre a été activé.";
   return null;
 }
@@ -181,7 +194,28 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
   if (membersError) {
     console.error("Company member list failed:", { code: membersError.code });
   }
-  const members = (memberData ?? []) as CompanyMember[];
+  let members = (memberData ?? []) as CompanyMember[];
+  if (!membersError) {
+    const { data: invitationMetadata, error: invitationMetadataError } = await supabase.rpc(
+      "list_company_invitation_metadata",
+      { p_company_id: selectedCompanyId },
+    );
+    if (invitationMetadataError) {
+      console.error("Invitation metadata list failed:", { code: invitationMetadataError.code });
+    } else {
+      const metadataByMembership = new Map<string, InvitationMetadata>(
+        ((invitationMetadata ?? []) as InvitationMetadata[]).map((item) => [item.membership_id, item] as const),
+      );
+      members = members.map((member) => ({
+        ...member,
+        ...(metadataByMembership.get(member.membership_id) ?? {
+          email_sent_at: null,
+          accepted_at: null,
+          expires_at: null,
+        }),
+      }));
+    }
+  }
   const memberListError = membersError
     ? membersError.code === "42501"
       ? "Ton rôle ne permet pas de consulter la liste des membres de cette entreprise."
@@ -211,7 +245,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
 
       {canInvite && (
         <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur GestionPro et choisis son rôle. L’invitation sera créée en attente ; le propriétaire pourra activer l’accès après vérification.</p></div>
+          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur GestionPro et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.</p></div>
           <form action={inviteCompanyMember} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="company_id" value={selectedCompanyId} />
             <label className="text-sm font-medium text-slate-700">Adresse e-mail *<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="nom@entreprise.com" /></label>
@@ -219,7 +253,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
             <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>Créer l’invitation</button></div>
           </form>
           {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">Les rôles Propriétaire et Administrateur donnent des droits étendus. Attribue-les uniquement à des personnes de confiance.</p>}
-          <p className="mt-2 text-xs text-slate-500">Aucun e-mail n’est envoyé automatiquement pour le moment ; cette page enregistre l’invitation dans GestionPro.</p>
+          <p className="mt-2 text-xs text-slate-500">Un e-mail de confirmation valable sept jours sera envoyé. Si l’envoi échoue, tu pourras réessayer depuis la liste.</p>
         </section>
       )}
 
@@ -238,20 +272,29 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
                   <tr key={member.membership_id} className="border-t border-slate-100 align-top hover:bg-slate-50/70">
                     <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || "Utilisateur GestionPro"}</p><p className="mt-1 text-xs text-slate-500">{member.email || `ID utilisateur : ${member.user_id}`}</p></td>
                     <td className="px-5 py-4 text-slate-700">{roleLabel(member.role_code)}</td>
-                    <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status)}</span></td>
+                    <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status, member.accepted_at)}</span></td>
                     <td className="px-5 py-4 text-slate-600">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
                     <td className="px-5 py-4">
-                      {canActivateMember(actorRole) && member.status === "invited" ? (
-                        <form action={activateCompanyMember}>
-                          <input type="hidden" name="company_id" value={selectedCompanyId} />
-                          <input type="hidden" name="membership_id" value={member.membership_id} />
-                          <button type="submit" className="text-sm font-semibold text-blue-700 underline decoration-blue-200 underline-offset-4 hover:text-blue-900">Activer l’accès</button>
-                        </form>
-                      ) : member.status === "invited" ? (
-                        <span className="text-xs text-slate-500">Propriétaire requis</span>
-                      ) : (
-                        <span className="text-xs text-slate-400">—</span>
-                      )}
+                      <div className="flex flex-col items-start gap-2">
+                        {canActivateMember(actorRole) && member.status === "invited" && member.accepted_at && (
+                          <form action={activateCompanyMember}>
+                            <input type="hidden" name="company_id" value={selectedCompanyId} />
+                            <input type="hidden" name="membership_id" value={member.membership_id} />
+                            <button type="submit" className="text-sm font-semibold text-blue-700 underline decoration-blue-200 underline-offset-4 hover:text-blue-900">Activer l’accès</button>
+                          </form>
+                        )}
+                        {member.status === "invited" && !member.accepted_at && (actorRole === "owner" || member.invited_by === user.id) && (
+                          <form action={resendCompanyMemberInvitation}>
+                            <input type="hidden" name="company_id" value={selectedCompanyId} />
+                            <input type="hidden" name="membership_id" value={member.membership_id} />
+                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">Renvoyer l’e-mail</button>
+                          </form>
+                        )}
+                        {member.status === "invited" && member.accepted_at && (
+                          <span className="text-xs text-slate-500">Adresse confirmée · propriétaire requis</span>
+                        )}
+                        {member.status !== "invited" && <span className="text-xs text-slate-400">—</span>}
+                      </div>
                     </td>
                   </tr>
                 ))}

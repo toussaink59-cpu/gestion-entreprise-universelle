@@ -1,5 +1,7 @@
+import { randomBytes } from 'node:crypto'
+import { createHash } from 'node:crypto'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { asAnon, asUser, createMigratedDb, ids, seed, type TestDb } from './helpers'
+import { asAnon, asUser, asUserId, createMigratedDb, ids, seed, type TestDb } from './helpers'
 
 // Tests contre un vrai moteur PostgreSQL : migrations rejouées, politiques RLS réelles.
 // ACC-01 (isolation), ACC-05 (permissions), ACC-06 (audit), SEC-02, SEC-05.
@@ -353,7 +355,45 @@ describe('Sécurité des appartenances — invitant et activation', () => {
     expect(result.rows[0].status).toBe('invited');
   });
 
-  it('le propriétaire peut activer une invitation existante', async () => {
+  it('le propriétaire ne peut pas activer une invitation avant confirmation e-mail', async () => {
+    await expect(
+      asUser(t.db, 'alice', () =>
+        q(`
+          update public.company_memberships
+          set status = 'active'
+          where company_id = $1 and user_id = $2
+        `, [t.companyA, ids.mallory]),
+      ),
+    ).rejects.toThrow(/confirmer l’adresse e-mail avant l’activation/);
+
+    const membership = await q<{ status: string }>(`
+      select status from public.company_memberships
+      where company_id = $1 and user_id = $2
+    `, [t.companyA, ids.mallory]);
+    expect(membership.rows[0].status).toBe('invited');
+  });
+
+  it('le propriétaire peut activer une invitation après confirmation e-mail', async () => {
+    const target = await q<{ membership_id: string; email: string }>(`
+      select m.id::text as membership_id, lower(au.email) as email
+      from public.company_memberships m
+      join auth.users au on au.id = m.user_id
+      where m.company_id = $1 and m.user_id = $2
+    `, [t.companyA, ids.mallory]);
+    expect(target.rows).toHaveLength(1);
+    const membershipId = target.rows[0].membership_id;
+    const tokenHash = createHash('sha256').update(`owner-confirmed-${membershipId}`).digest('hex');
+    await q(`
+      insert into public.company_invitation_tokens
+        (membership_id, company_id, email, token_hash, expires_at, accepted_at)
+      values ($1, $2, $3, $4, now() + interval '7 days', now())
+      on conflict (membership_id) do update
+        set email = excluded.email,
+            token_hash = excluded.token_hash,
+            expires_at = excluded.expires_at,
+            accepted_at = excluded.accepted_at
+    `, [membershipId, t.companyA, target.rows[0].email, tokenHash]);
+
     const result = await asUser(t.db, 'alice', () =>
       q(`
         update public.company_memberships
@@ -361,7 +401,6 @@ describe('Sécurité des appartenances — invitant et activation', () => {
         where company_id = $1 and user_id = $2
       `, [t.companyA, ids.mallory]),
     );
-
     expect(result.affectedRows).toBe(1);
 
     const membership = await q<{ status: string; invited_by: string }>(`
@@ -369,7 +408,6 @@ describe('Sécurité des appartenances — invitant et activation', () => {
       from public.company_memberships
       where company_id = $1 and user_id = $2
     `, [t.companyA, ids.mallory]);
-
     expect(membership.rows[0].status).toBe('active');
     expect(membership.rows[0].invited_by).toBe(ids.alice);
   });
@@ -417,15 +455,64 @@ describe('Sécurité des appartenances — invitant et activation', () => {
       ).rejects.toThrow(/accès refusé/)
     })
 
+    it('l’ancienne RPC est inaccessible aux utilisateurs authentifiés', async () => {
+      await expect(
+        asUser(t.db, 'frank', () =>
+          q(
+            `select public.invite_existing_company_member($1, $2, $3)`,
+            [t.companyA, 'unused@example.test', 'employee'],
+          ),
+        ),
+      ).rejects.toThrow(/permission denied|not authorized/i)
+    })
+
+    it('un propriétaire ne peut pas réactiver une invitation révoquée sans confirmation', async () => {
+      const target = await createTemporaryUser()
+      const tokenHash = randomBytes(32).toString('hex')
+
+      try {
+        const created = await asUser(t.db, 'frank', () =>
+          q<{ membership_id: string }>(
+            `select public.create_company_member_invitation($1, $2, $3, $4)
+               as membership_id`,
+            [t.companyA, target.email, 'employee', tokenHash],
+          ),
+        )
+
+        expect(created.rows).toHaveLength(1)
+        const membershipId = created.rows[0].membership_id
+
+        await asUser(t.db, 'alice', async () => {
+          await q(
+            `update public.company_memberships
+             set status = 'revoked'
+             where id = $1`,
+            [membershipId],
+          )
+
+          await expect(
+            q(
+              `update public.company_memberships
+               set status = 'active'
+               where id = $1`,
+              [membershipId],
+            ),
+          ).rejects.toThrow(/le destinataire doit confirmer/)
+        })
+      } finally {
+        await q('delete from auth.users where id = $1', [target.id])
+      }
+    })
+
     it('un administrateur peut inviter un compte existant', async () => {
       const target = await createTemporaryUser()
 
       try {
         const result = await asUser(t.db, 'frank', () =>
           q<{ membership_id: string }>(
-            `select public.invite_existing_company_member($1, $2, $3)
+            `select public.create_company_member_invitation($1, $2, $3, $4)
                as membership_id`,
-            [t.companyA, target.email, 'employee'],
+            [t.companyA, target.email, 'employee', randomBytes(32).toString('hex')],
           ),
         )
 
@@ -461,8 +548,8 @@ describe('Sécurité des appartenances — invitant et activation', () => {
         await expect(
           asUser(t.db, 'frank', () =>
             q(
-              `select public.invite_existing_company_member($1, $2, $3)`,
-              [t.companyA, target.email, 'owner'],
+              `select public.create_company_member_invitation($1, $2, $3, $4)`,
+              [t.companyA, target.email, 'owner', randomBytes(32).toString('hex')],
             ),
           ),
         ).rejects.toThrow(/seul le propriétaire/)
@@ -478,8 +565,8 @@ describe('Sécurité des appartenances — invitant et activation', () => {
         await expect(
           asUser(t.db, 'frank', () =>
             q(
-              `select public.invite_existing_company_member($1, $2, $3)`,
-              [t.companyA, target.email, 'company_admin'],
+              `select public.create_company_member_invitation($1, $2, $3, $4)`,
+              [t.companyA, target.email, 'company_admin', randomBytes(32).toString('hex')],
             ),
           ),
         ).rejects.toThrow(/seul le propriétaire/)
@@ -572,4 +659,89 @@ describe('Sécurité des appartenances — invitant et activation', () => {
     expect(result.rows[0].status).toBe('invited')
     expect(result.rows[0].invited_by).toBeNull()
   })
+});
+describe('Invitations par e-mail — jeton à usage unique', () => {
+  async function createEmailInviteUser() {
+    const idResult = await q<{ id: string }>('select gen_random_uuid()::text as id');
+    const id = idResult.rows[0].id;
+    const email = `email-invite-${id}@example.test`;
+    await q(
+      `insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)`,
+      [id, email, JSON.stringify({ full_name: 'Invited email user' })],
+    );
+    return { id, email };
+  }
+
+  const token = 'A'.repeat(43);
+  const tokenHash = () => createHash('sha256').update(token).digest('hex');
+
+  it('crée une invitation, confirme uniquement l’adresse ciblée et laisse l’activation au propriétaire', async () => {
+    const target = await createEmailInviteUser();
+    try {
+      const created = await asUser(t.db, 'alice', () =>
+        q<{ membership_id: string }>(
+          `select public.create_company_member_invitation($1, $2, $3, $4)::text as membership_id`,
+          [t.companyA, target.email, 'employee', tokenHash()],
+        ),
+      );
+      const membershipId = created.rows[0].membership_id;
+      expect(membershipId).toBeTruthy();
+
+      await asUserId(t.db, target.id, () =>
+        q(`select public.confirm_company_member_invitation($1)`, [tokenHash()]),
+      );
+
+      const saved = await q<{ status: string; accepted_at: string | null; email_sent_at: string | null }>(
+        `select m.status, it.accepted_at, it.email_sent_at
+         from public.company_memberships m
+         join public.company_invitation_tokens it on it.membership_id = m.id
+         where m.id = $1`,
+        [membershipId],
+      );
+      expect(saved.rows[0].status).toBe('invited');
+      expect(saved.rows[0].accepted_at).toBeTruthy();
+      expect(saved.rows[0].email_sent_at).toBeNull();
+
+      const metadata = await asUser(t.db, 'alice', () =>
+        q<{ accepted_at: string | null }>(
+          `select accepted_at from public.list_company_invitation_metadata($1) where membership_id = $2`,
+          [t.companyA, membershipId],
+        ),
+      );
+      expect(metadata.rows[0].accepted_at).toBeTruthy();
+
+      await expect(
+        asUserId(t.db, target.id, () => q(`select public.confirm_company_member_invitation($1)`, [tokenHash()])),
+      ).rejects.toThrow(/déjà été utilisé/);
+
+      const activation = await asUser(t.db, 'alice', () =>
+        q(`update public.company_memberships set status = 'active' where id = $1 and company_id = $2`, [membershipId, t.companyA]),
+      );
+      expect(activation.affectedRows).toBe(1);
+    } finally {
+      await q('delete from auth.users where id = $1', [target.id]);
+    }
+  });
+
+  it('refuse de confirmer une invitation avec un autre compte', async () => {
+    const target = await createEmailInviteUser();
+    const uniqueTokenHash = createHash('sha256').update(`wrong-user-${target.id}`).digest('hex');
+    try {
+      await asUser(t.db, 'alice', () =>
+        q(`select public.create_company_member_invitation($1, $2, $3, $4)`, [
+          t.companyA, target.email, 'employee', uniqueTokenHash,
+        ]),
+      );
+      await expect(
+        asUser(t.db, 'mallory', () => q(`select public.confirm_company_member_invitation($1)`, [uniqueTokenHash])),
+      ).rejects.toThrow(/adresse e-mail de ce compte/);
+      const tokenRow = await q<{ accepted_at: string | null }>(
+        `select accepted_at from public.company_invitation_tokens where token_hash = $1`,
+        [uniqueTokenHash],
+      );
+      expect(tokenRow.rows[0].accepted_at).toBeNull();
+    } finally {
+      await q('delete from auth.users where id = $1', [target.id]);
+    }
+  });
 });
