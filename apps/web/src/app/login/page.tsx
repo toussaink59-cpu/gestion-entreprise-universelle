@@ -1,4 +1,5 @@
 import { signIn } from "@/app/auth/actions";
+import { getSafeRedirectPath } from "@/lib/security/safe-redirect";
 
 export const instant = false;
 
@@ -6,11 +7,13 @@ type LoginPageProps = {
   searchParams: Promise<{
     error?: string;
     message?: string;
+    next?: string;
   }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
+  const nextPath = getSafeRedirectPath(params.next ?? null);
 
   const errorMessages: Record<string, string> = {
     "missing-fields": "Renseigne ton adresse e-mail et ton mot de passe.",
@@ -42,6 +45,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       {error && <p role="alert">{error}</p>}
 
       <form action={signIn}>
+        <input type="hidden" name="next" value={nextPath} />
         <label style={{ display: "block", marginTop: "1rem" }}>
           Adresse e-mail
           <input

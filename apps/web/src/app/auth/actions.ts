@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSafeRedirectPath } from "@/lib/security/safe-redirect";
 import {
   isValidEmail,
   isValidFullName,
@@ -10,22 +11,29 @@ import {
   readStringField,
 } from "@/lib/security/form-validation";
 
+function loginFailure(errorCode: string, nextPath: string): never {
+  const params = new URLSearchParams({ error: errorCode });
+  if (nextPath !== "/dashboard") params.set("next", nextPath);
+  redirect(`/login?${params.toString()}`);
+}
+
 export async function signIn(formData: FormData) {
+  const nextPath = getSafeRedirectPath(readStringField(formData, "next"), "/dashboard");
   const emailField = readStringField(formData, "email");
   const password = readStringField(formData, "password");
 
   if (emailField === null || password === null || !emailField.trim() || !password) {
-    redirect("/login?error=missing-fields");
+    loginFailure("missing-fields", nextPath);
   }
 
   const email = normalizeEmail(emailField);
 
   if (!isValidEmail(email)) {
-    redirect("/login?error=invalid-email");
+    loginFailure("invalid-email", nextPath);
   }
 
   if (password.length > 128) {
-    redirect("/login?error=password-too-long");
+    loginFailure("password-too-long", nextPath);
   }
 
   const supabase = await createClient();
@@ -41,13 +49,13 @@ export async function signIn(formData: FormData) {
     });
 
     if (error.code === "email_not_confirmed") {
-      redirect("/login?error=email-not-confirmed");
+      loginFailure("email-not-confirmed", nextPath);
     }
 
-    redirect("/login?error=invalid-credentials");
+    loginFailure("invalid-credentials", nextPath);
   }
 
-  redirect("/dashboard");
+  redirect(nextPath);
 }
 
 export async function signUp(formData: FormData) {
