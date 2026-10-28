@@ -125,8 +125,16 @@ fingerprint() {
     run_sql "$url" -c "select 'schema_acl', nspname, coalesce(nspacl::text, '(default)')
                         from pg_namespace where nspname in ('public', 'app', 'auth')
                         order by nspname"
+     # Normaliser les ACL explicites et les ACL par défaut équivalentes.
     run_sql "$url" -c "select 'relation_acl', n.nspname, c.relname,
-                               coalesce(c.relacl::text, '(default)')
+                               coalesce(
+                                 c.relacl,
+                                 case
+                                   when c.relkind = 'S'
+                                     then pg_catalog.acldefault('S', c.relowner)
+                                   else pg_catalog.acldefault('r', c.relowner)
+                                 end
+                               )::text
                         from pg_class c join pg_namespace n on n.oid = c.relnamespace
                         where n.nspname in ('public', 'app', 'auth')
                           and c.relkind in ('r', 'p', 'v', 'm', 'S')
