@@ -1,6 +1,6 @@
 # Plateforme universelle de gestion d’entreprise
 
-> **Nom commercial provisoire** — le nom définitif sera choisi après validation du positionnement et des vérifications de disponibilité.
+> > **Nom commercial : PolyGest** — plateforme de gestion intégrée destinée aux entrepreneurs et aux PME.
 
 Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME. Le projet vise à réunir dans un espace sécurisé les principales opérations d’une entreprise : ventes, facturation, dépenses, trésorerie, budgets, personnel, paie, stocks et rapports.
 

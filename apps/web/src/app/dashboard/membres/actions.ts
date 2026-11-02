@@ -92,7 +92,7 @@ export async function inviteCompanyMember(formData: FormData) {
     to: parsed.email,
     companyName: company.trade_name || company.legal_name,
     roleCode: parsed.roleCode,
-    inviterName: String(user.user_metadata?.full_name || user.email || "GestionPro"),
+    inviterName: String(user.user_metadata?.full_name || user.email || "PolyGest"),
     token,
     idempotencyKey: `member-invitation/${membershipId}/${tokenHash.slice(0, 16)}`,
   });
@@ -143,7 +143,7 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
     to: row.invite_email,
     companyName: row.company_name,
     roleCode: row.role_code,
-    inviterName: String(user.user_metadata?.full_name || user.email || "GestionPro"),
+    inviterName: String(user.user_metadata?.full_name || user.email || "PolyGest"),
     token,
     idempotencyKey: `member-invitation/${membershipField}/${tokenHash.slice(0, 16)}`,
   });

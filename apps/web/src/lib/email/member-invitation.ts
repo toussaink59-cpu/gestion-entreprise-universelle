@@ -71,9 +71,9 @@ export function buildInvitationEmail(params: {
   const inviter = escapeHtml(params.inviterName);
   const urlHtml = escapeHtml(params.acceptUrl);
   return {
-    subject: `Invitation à rejoindre ${params.companyName} sur GestionPro`,
-    html: `<!doctype html><html lang="fr"><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a"><main style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px"><p style="font-size:12px;font-weight:bold;letter-spacing:2px;color:#1d4ed8">GESTIONPRO · ÉQUIPE</p><h1 style="font-size:24px">Tu es invité(e) à rejoindre une entreprise</h1><p>${inviter} t’invite à rejoindre <strong>${company}</strong> avec le rôle <strong>${role}</strong>.</p><p>Confirme que tu as accès à cette adresse e-mail. Pour des raisons de sécurité, le propriétaire devra encore activer ton accès après vérification.</p><p style="margin:28px 0"><a href="${urlHtml}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:bold;display:inline-block">Confirmer l’invitation</a></p><p style="font-size:13px;color:#64748b">Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.</p><p style="font-size:12px;color:#94a3b8">GestionPro · Gestion d’entreprise</p></main></body></html>`,
-    text: `${params.inviterName} t’invite à rejoindre ${params.companyName} sur GestionPro avec le rôle ${params.roleLabel}. Confirme l’accès à ton adresse e-mail : ${params.acceptUrl}\n\nLe propriétaire devra encore activer ton accès après vérification. Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.`,
+    subject: `Invitation à rejoindre ${params.companyName} sur PolyGest`,
+    html: `<!doctype html><html lang="fr"><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a"><main style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px"><p style="font-size:12px;font-weight:bold;letter-spacing:2px;color:#1d4ed8">POLYGEST · ÉQUIPE</p><h1 style="font-size:24px">Tu es invité(e) à rejoindre une entreprise</h1><p>${inviter} t’invite à rejoindre <strong>${company}</strong> avec le rôle <strong>${role}</strong>.</p><p>Confirme que tu as accès à cette adresse e-mail. Pour des raisons de sécurité, le propriétaire devra encore activer ton accès après vérification.</p><p style="margin:28px 0"><a href="${urlHtml}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:bold;display:inline-block">Confirmer l’invitation</a></p><p style="font-size:13px;color:#64748b">Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.</p><p style="font-size:12px;color:#94a3b8">PolyGest · Gestion d’entreprise</p></main></body></html>`,
+    text: `${params.inviterName} t’invite à rejoindre ${params.companyName} sur PolyGest avec le rôle ${params.roleLabel}. Confirme l’accès à ton adresse e-mail : ${params.acceptUrl}\n\nLe propriétaire devra encore activer ton accès après vérification. Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.`,
   };
 }
 
@@ -96,7 +96,7 @@ export async function sendMemberInvitationEmail(params: {
   const email = buildInvitationEmail({
     companyName: params.companyName,
     roleLabel: roleLabelForEmail(params.roleCode),
-    inviterName: params.inviterName || "Un administrateur GestionPro",
+    inviterName: params.inviterName || "Un administrateur PolyGest",
     acceptUrl: url.toString(),
   });
   try {

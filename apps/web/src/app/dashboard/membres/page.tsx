@@ -75,7 +75,7 @@ function errorMessage(code: string | undefined): string | null {
     case "access": return "Cette entreprise n’est pas accessible avec ton compte.";
     case "permission": return "Ton rôle ne permet pas d’attribuer ce rôle ou de gérer les membres.";
     case "duplicate": return "Ce compte possède déjà une appartenance à cette entreprise.";
-    case "no-account": return "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte GestionPro.";
+    case "no-account": return "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte PolyGest.";
     case "email-config": return "L’envoi d’e-mails n’est pas configuré. Vérifie RESEND_API_KEY, RESEND_FROM_EMAIL et NEXT_PUBLIC_APP_URL côté serveur.";
     case "email-failed": return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Vérifie la configuration Resend puis réessaie.";
     case "email-rate-limit": return "Attends au moins une minute avant de renvoyer cet e-mail.";
@@ -159,7 +159,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Équipe</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1><p className="mt-2 text-slate-600">Sélectionne l’entreprise concernée.</p></div>
+          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1><p className="mt-2 text-slate-600">Sélectionne l’entreprise concernée.</p></div>
           <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
         </header>
         {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p>}
@@ -227,7 +227,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Équipe</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1>
           <p className="mt-2 text-slate-600">{company.trade_name || company.legal_name}<span className="mx-2 text-slate-300">/</span>Consultation des accès et invitations.</p>
           <p className="mt-1 text-sm text-slate-500">Ton rôle : {roleLabel(actorRole)}</p>
@@ -245,7 +245,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
 
       {canInvite && (
         <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur GestionPro et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.</p></div>
+          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur PolyGest et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.</p></div>
           <form action={inviteCompanyMember} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="company_id" value={selectedCompanyId} />
             <label className="text-sm font-medium text-slate-700">Adresse e-mail *<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="nom@entreprise.com" /></label>
@@ -270,7 +270,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
               <tbody>
                 {members.map((member) => (
                   <tr key={member.membership_id} className="border-t border-slate-100 align-top hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || "Utilisateur GestionPro"}</p><p className="mt-1 text-xs text-slate-500">{member.email || `ID utilisateur : ${member.user_id}`}</p></td>
+                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || "Utilisateur PolyGest"}</p><p className="mt-1 text-xs text-slate-500">{member.email || `ID utilisateur : ${member.user_id}`}</p></td>
                     <td className="px-5 py-4 text-slate-700">{roleLabel(member.role_code)}</td>
                     <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status, member.accepted_at)}</span></td>
                     <td className="px-5 py-4 text-slate-600">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
