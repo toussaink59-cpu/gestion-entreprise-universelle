@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,6 +8,11 @@ import {
   invitationRolesForActor,
   type MemberInvitationRole,
 } from "@/lib/security/member-invitation-validation";
+import {
+  INVITATION_LINK_COOKIE,
+  parseInvitationLinkCookie,
+  resolveAppOrigin,
+} from "@/lib/email/invitation-link";
 import { activateCompanyMember, inviteCompanyMember, resendCompanyMemberInvitation } from "./actions";
 
 export const instant = false;
@@ -88,6 +94,7 @@ function errorMessage(code: string | undefined): string | null {
 
 function successMessage(code: string | undefined): string | null {
   if (code === "invited") return "L’invitation a été enregistrée et l’e-mail de confirmation a été envoyé.";
+  if (code === "invited-link") return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Transmets le lien ci-dessous à la personne invitée.";
   if (code === "resent") return "L’e-mail d’invitation a été renvoyé.";
   if (code === "activated") return "L’accès du membre a été activé.";
   return null;
@@ -154,6 +161,22 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
 
   const currentError = errorMessage(params.error);
   const currentSuccess = successMessage(params.success);
+
+  // Lien d'invitation à transmettre à la main : visible une seule fois, uniquement après l'action.
+  let manualInvitationLink: string | null = null;
+  if (params.success === "invited-link") {
+    const store = await cookies();
+    const path = parseInvitationLinkCookie(store.get(INVITATION_LINK_COOKIE)?.value);
+    if (path) {
+      const requestHeaders = await headers();
+      const origin = resolveAppOrigin({
+        configuredUrl: process.env.NEXT_PUBLIC_APP_URL,
+        host: requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
+        forwardedProto: requestHeaders.get("x-forwarded-proto"),
+      });
+      manualInvitationLink = origin ? `${origin}${path}` : path;
+    }
+  }
 
   if (!selectedCompanyId) {
     return (
@@ -242,6 +265,13 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
 
       {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
       {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+      {manualInvitationLink && (
+        <section role="region" aria-label="Lien d’invitation" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
+          <p className="text-sm font-semibold">Lien d’invitation (valable 7 jours, à usage unique)</p>
+          <input readOnly value={manualInvitationLink} aria-label="Lien d’invitation à copier" className="mt-2 block w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-slate-900" />
+          <p className="mt-2 text-xs">Transmets-le uniquement à la personne invitée (WhatsApp, SMS…). Il ne fonctionne que si elle se connecte avec l’adresse e-mail invitée, et ne s’affiche qu’une fois. Pour en obtenir un nouveau, utilise « Renvoyer l’invitation ».</p>
+        </section>
+      )}
 
       {canInvite && (
         <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -253,7 +283,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
             <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>Créer l’invitation</button></div>
           </form>
           {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">Les rôles Propriétaire et Administrateur donnent des droits étendus. Attribue-les uniquement à des personnes de confiance.</p>}
-          <p className="mt-2 text-xs text-slate-500">Un e-mail de confirmation valable sept jours sera envoyé. Si l’envoi échoue, tu pourras réessayer depuis la liste.</p>
+          <p className="mt-2 text-xs text-slate-500">Un e-mail de confirmation valable sept jours sera envoyé. Si l’e-mail ne peut pas partir, un lien à transmettre toi-même s’affichera.</p>
         </section>
       )}
 
@@ -287,7 +317,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
                           <form action={resendCompanyMemberInvitation}>
                             <input type="hidden" name="company_id" value={selectedCompanyId} />
                             <input type="hidden" name="membership_id" value={member.membership_id} />
-                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">Renvoyer l’e-mail</button>
+                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">Renvoyer l’invitation</button>
                           </form>
                         )}
                         {member.status === "invited" && member.accepted_at && (
