@@ -135,7 +135,7 @@ async function DashboardContent() {
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">
-            GestionPro
+            PolyGest
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
             Tableau de bord

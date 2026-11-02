@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GestionPro",
-  description: "Gestion intégrée des entreprises : clients, facturation, trésorerie et opérations.",
+  title: "PolyGest",
+  description: "PolyGest : plateforme de gestion multi-entreprises pour les entrepreneurs et les PME.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

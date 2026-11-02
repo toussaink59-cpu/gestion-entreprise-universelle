@@ -199,7 +199,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Répertoires</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{pageTitle}</h1><p className="mt-2 max-w-2xl text-slate-600">Sélectionne l’entreprise concernée pour continuer.</p></div>
+          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Répertoires</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{pageTitle}</h1><p className="mt-2 max-w-2xl text-slate-600">Sélectionne l’entreprise concernée pour continuer.</p></div>
           <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
         </header>
         {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p>}
@@ -252,7 +252,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Répertoires</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Répertoires</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{pageTitle}</h1>
           <p className="mt-2 text-slate-600">{selectedCompany.trade_name || selectedCompany.legal_name}<span className="mx-2 text-slate-300">/</span>Gestion des coordonnées et des conditions de paiement.</p>
         </div>
