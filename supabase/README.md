@@ -8,7 +8,7 @@ Le schéma est la source de vérité du projet ([ADR-001](../docs/adr/0001-socle
 |---|---|
 | `20261021110000_identite_acces.sql` | Entreprises, profils, rôles et permissions, appartenances, journal d'audit, politiques RLS, création d'entreprise atomique |
 | `20261022160000_clients_fournisseurs.sql` | Clients et fournisseurs : colonnes modifiables limitées, RLS liée aux permissions, archivage sans suppression définitive, audit sans valeurs de contact |
-
+| `20261024090000_limite_creation_entreprises.sql` | Limite de cinq entreprises par propriétaire actif, avec verrou transactionnel par utilisateur |
 ## Règles
 
 - Une migration ne se modifie plus une fois fusionnée : on en ajoute une nouvelle.
@@ -32,7 +32,7 @@ npm test
 
 - La matrice rôles/permissions est un point de départ **à valider** avec le porteur du projet.
 - L'invitation par e-mail n'existe pas encore : on ne peut ajouter que des utilisateurs déjà inscrits.
-- Pas encore de limitation du nombre d'entreprises créées par utilisateur.
+- Chaque utilisateur peut être propriétaire actif d'au maximum cinq entreprises. Cette limite est imposée par `public.create_company` dans la migration `20261024090000_limite_creation_entreprises.sql`.
 - L'accès exceptionnel de l'équipe plateforme aux données clients reste à concevoir (§4 du cahier des charges).
 
 ## Sauvegarde et restauration (ACC-07)
