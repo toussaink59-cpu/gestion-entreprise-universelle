@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createCompany } from "@/app/onboarding/actions";
@@ -41,10 +42,12 @@ export default async function OnboardingPage({
     return (
       <main style={{ maxWidth: 520, margin: "4rem auto", padding: "1.5rem" }}>
         <h1>Vérification des accès impossible</h1>
+
         <p role="alert">
           Nous ne pouvons pas vérifier les entreprises associées à ce compte.
           Pour éviter une création en double, aucun formulaire n&apos;est affiché.
         </p>
+
         <p>
           <a href="/onboarding">Réessayer</a>
         </p>
@@ -59,21 +62,42 @@ export default async function OnboardingPage({
   return (
     <main style={{ maxWidth: 520, margin: "4rem auto", padding: "1.5rem" }}>
       <h1>Configurer ton entreprise</h1>
+
       <p>
         Renseigne les informations de ton entreprise pour créer ton espace de
         gestion.
       </p>
 
       {params.error === "missing-name" && (
-        <p role="alert">La raison sociale est obligatoire.</p>
+        <p role="alert">
+          La raison sociale est obligatoire.
+        </p>
       )}
 
       {params.error === "invalid-name" && (
-        <p role="alert">La raison sociale doit contenir entre 2 et 200 caracteres.</p>
+        <p role="alert">
+          La raison sociale doit contenir entre 2 et 200 caractères.
+        </p>
       )}
 
       {params.error === "invalid-trade-name" && (
-        <p role="alert">Le nom commercial doit contenir entre 2 et 200 caracteres.</p>
+        <p role="alert">
+          Le nom commercial doit contenir entre 2 et 200 caractères.
+        </p>
+      )}
+
+      {params.error === "invalid-company-data" && (
+  <p role="alert">
+    Les informations de l&apos;entreprise sont invalides. Vérifie la raison
+    sociale et le nom commercial.
+  </p>
+)}
+
+      {params.error === "limit-reached" && (
+        <p role="alert">
+          Tu as atteint la limite de cinq entreprises dont tu peux être
+          propriétaire.
+        </p>
       )}
 
       {params.error === "creation-failed" && (
@@ -90,8 +114,13 @@ export default async function OnboardingPage({
             name="legal_name"
             type="text"
             required
+            minLength={2}
             maxLength={200}
-            style={{ display: "block", width: "100%", padding: "0.7rem" }}
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "0.7rem",
+            }}
           />
         </label>
 
@@ -100,16 +129,25 @@ export default async function OnboardingPage({
           <input
             name="trade_name"
             type="text"
+            minLength={2}
             maxLength={200}
-            style={{ display: "block", width: "100%", padding: "0.7rem" }}
+            style={{
+              display: "block",
+              width: "100%",
+              padding: "0.7rem",
+            }}
           />
         </label>
 
         <p>
-          Pays : Burkina Faso · Devise : XOF · Fuseau horaire : Africa/Ouagadougou
+          Pays : Burkina Faso · Devise : XOF · Fuseau horaire :
+          Africa/Ouagadougou
         </p>
 
-        <button type="submit" style={{ marginTop: "1rem", padding: "0.7rem 1rem" }}>
+        <button
+          type="submit"
+          style={{ marginTop: "1rem", padding: "0.7rem 1rem" }}
+        >
           Créer mon entreprise
         </button>
       </form>
