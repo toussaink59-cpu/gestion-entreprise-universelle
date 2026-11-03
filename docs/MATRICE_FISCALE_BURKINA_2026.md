@@ -1000,7 +1000,6 @@ Aucun taux ou résultat fiscal n'est réputé valide tant que les scénarios ci-
 | WHT-08 | Retenue déjà reversée | Interdiction du double reversement |
 | WHT-09 | Attestation de retenue reçue | Conservation et rapprochement avec le paiement initial |
 | PAY-02 | Paiements fractionnés ou règlements multiples liés à une opération | Contrôle selon la règle légale confirmée ; aucune règle anti-fractionnement inventée |
-
 | ARCH-01 | Export du dossier fiscal | Pièces, document original, règles et preuves réunis |
 | PAY-03 | Achat de 1 000 000 FCFA TTC exactement réglé en espèces | Seuil inclusif atteint ; déclencher le contrôle prévu par l'article 568 si les autres conditions sont remplies |
 | PAY-04 | Achat de 1 000 001 FCFA TTC réglé en espèces | Seuil dépassé ; déclencher le même contrôle, sans extrapoler les sanctions |
