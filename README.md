@@ -31,6 +31,7 @@ Le détail des constats de l’audit, de leur état et des décisions attendues 
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
 - [Audit de la Phase 1](docs/PHASE1_CHECKLIST.md)
+- [Design system PolyGest](docs/POLYGEST_DESIGN_SYSTEM.md)
 - [Sécurité et confidentialité](SECURITY.md)
 - [Contribution au projet](CONTRIBUTING.md)
 
