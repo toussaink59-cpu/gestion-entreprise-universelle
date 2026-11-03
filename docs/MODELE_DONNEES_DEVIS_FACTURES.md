@@ -445,6 +445,17 @@ Le dossier client doit pouvoir conserver, selon le type de client : nom/prénoms
 
 Le profil fiscal client doit également pouvoir enregistrer sa catégorie administrative (notamment entité publique / RND lorsque ce statut est justifié) et un indicateur daté indiquant si le client exige une FEC de ses fournisseurs locaux. Cette exigence côté acheteur ne constitue pas une autorisation pour PolyGest de certifier lui-même une facture.
 
+#### Profil client fiscal (conceptuel)
+
+customer_fiscal_profiles doit permettre de conserver :
+- company_id et customer_id ;
+- buyer_category (public_entity, RND, ordinary_business, individual ou code contrôlé) ;
+- fec_acceptance_required et sa date d'effet ;
+- legal_basis_reference, proof_document_id, verified_at et verified_by ;
+- historique de modification et statut actif/inactif.
+
+Une exigence FEC déclarée par le client doit être vérifiée et datée ; elle ne déclenche jamais à elle seule une certification locale.
+
 ### 14.2 Historique fiscal à effet daté
 
 Ajouter company_tax_profile_history plutôt que de remplacer silencieusement le régime actuel. Champs conceptuels :
@@ -498,7 +509,7 @@ Ces données sont figées à l'émission ; une modification ultérieure du profi
 ### 14.5 Événements fiscaux de paiement
 
 Créer invoice_fiscal_events, registre minimal pour les dates/montants qui déterminent l'exigibilité fiscale, en attendant l'intégration complète à Encaissements :
-- company_id, invoice_id, event_type ;
+- company_id, invoice_id nullable, quote_id nullable, event_type ; l'événement peut être relié à un devis lorsqu'un acompte est reçu avant l'émission de la facture ;
 - amount et currency_code ;
 - occurred_at, received_at ;
 - payment_method (cash, scriptural, withholding, other controlled value) ;
