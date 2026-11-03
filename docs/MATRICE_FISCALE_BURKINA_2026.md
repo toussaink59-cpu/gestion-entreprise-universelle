@@ -103,7 +103,7 @@ Ne jamais écraser une ancienne version fiscale. Une facture émise en 2025 doit
 
 ## 3. Point de vigilance réglementaire majeur : loi de finances rectificative 2026
 
-La loi de finances rectificative (LFR) 2026 a été adoptée en séance plénière le **23 septembre 2026**, selon l'Assemblée législative du Peuple. Le ministère de l'Économie et des Finances a publié le 25 septembre 2026 une communication présentant des mesures fiscales prévues par cette LFR.
+Le projet de loi portant loi de finances rectificative (LFR) 2026 a été adopté en séance plénière le **23 septembre 2026**, selon le compte rendu de l'Assemblée législative du Peuple. Le ministère de l'Économie et des Finances a publié le 25 septembre 2026 une communication présentant les mesures fiscales prévues par le texte. Ces deux éléments établissent l'adoption parlementaire du projet et la communication gouvernementale sur les mesures annoncées ; ils ne remplacent pas la loi promulguée ni sa publication au Journal officiel.
 
 Les mesures annoncées incluent notamment :
 - exonération de retenue à la source sur certaines primes versées à des sociétés de réassurance établies dans les États membres de la CIMA ;
@@ -114,9 +114,11 @@ Les mesures annoncées incluent notamment :
 - modification du régime fiscal des boissons non alcoolisées ;
 - rétablissement d'incitations fiscales et douanières au profit des PME.
 
-**Statut de vérification au 3 novembre 2026 :** l'adoption et les mesures annoncées sont confirmées par des sources institutionnelles. La copie intégrale du texte promulgué, ses articles définitifs, sa date exacte de promulgation/publication et chacune de ses dates d'effet n'ont pas été versés au dossier documentaire de cette matrice. Les mesures annoncées ne doivent donc pas être codées comme exonérations directement applicables sur la seule base du communiqué.
+**Statut de vérification au 3 novembre 2026 :** l'adoption parlementaire du projet et les mesures annoncées sont confirmées par des sources institutionnelles. La page officielle « Lois » de la DGI répertorie le CGI 2026 et le Journal officiel spécial de la loi de finances initiale 2026, mais la liste consultée ne présente pas de fichier intitulé « loi de finances rectificative 2026 ». La copie intégrale de la LFR promulguée, son numéro, sa date de promulgation/publication et les dates d'effet de ses dispositions n'ont pas été obtenus dans le dossier de recherche. Il ne faut donc ni affirmer que la promulgation est établie, ni conclure qu'elle n'a pas eu lieu : le statut documentaire demeure non vérifié.
 
-**Blocage P0 :** obtenir et archiver le texte promulgué de la LFR 2026 et le Journal officiel correspondant, puis comparer article par article avec le CGI 2026 publié par la DGI. Tant que cette comparaison n'est pas faite, le présent document n'est pas un référentiel consolidé exhaustif de la fiscalité 2026.
+Les mesures annoncées par le ministère ne doivent pas être codées comme exonérations directement applicables sur la seule base d'un communiqué. Il faut retrouver le texte promulgué, vérifier les articles définitifs, les bénéficiaires, les biens/opérations visés, les conditions, les pièces justificatives, les dates d'effet et les dispositions transitoires.
+
+**Blocage P0 :** obtenir et archiver la LFR promulguée et le Journal officiel correspondant, puis comparer article par article le CGI 2026 et ses modifications. Le site DGI affiche un accès intitulé « Code général des impôts 2026 » ; cet accès doit être téléchargé et archivé avec son identité/version, car le simple référencement sur le site n'est pas encore une preuve que le fichier source a été intégré au dépôt.
 
 ---
 
@@ -156,10 +158,11 @@ La DGI décrit le RNI comme applicable en principe aux entreprises dont le chiff
 
 ### 4.3 Régime du réel simplifié (RSI)
 
-L'article 529 du CGI a été modifié par la loi de finances initiale 2026, avec effet annoncé au 1er janvier 2026. Le texte publié fixe la tranche générale de CA annuel HT entre 15 000 000 FCFA inclus et 50 000 000 FCFA exclu, et prévoit notamment :
-- prorata temporis pour les activités commencées en cours d'année ;
-- perte/caducité du RSI en cas de dépassement du seuil supérieur en cours d'année, avec information de l'administration dans les 30 jours ;
-- passage vers la CME seulement lorsque le CA reste sous le seuil inférieur pendant trois années consécutives, dans les conditions prévues.
+L'article 529, réécrit par l'article 27 de la loi n°021-2025/ALT du 27 décembre 2025 portant loi de finances pour l'exécution du budget de l'État, exercice 2026, prend effet au 1er janvier 2026. Le texte publié au Journal officiel fixe la tranche générale de CA annuel HT entre 15 000 000 FCFA inclus et 50 000 000 FCFA exclu. Il prévoit également que les contribuables personnes physiques ou morales exclus de la CME et qui ne remplissent pas les conditions d'admission au RNI relèvent du RSI. Les autres points explicitement prévus sont :
+- prorata temporis des seuils pour les exploitants qui commencent leurs activités en cours d'année ;
+- caducité systématique du RSI en cas de dépassement du seuil supérieur en cours d'année ;
+- obligation d'informer l'administration dans un délai de 30 jours ;
+- maintien sous RSI, avant éventuel passage en CME, lorsque le CA HT demeure inférieur au seuil limite pendant trois années consécutives, dans les conditions du texte.
 
 La DGI précise que :
 - le RSI ne permet pas, à lui seul, de facturer la TVA ;
@@ -221,16 +224,19 @@ La CSE est un régime sectoriel. La loi de finances initiale 2026 a modifié l'a
 
 ### 4.6 Régime du non-déterminé (RND)
 
-La DGI présente le RND comme une catégorie de situations particulières, distincte des régimes ordinaires des entreprises commerciales récurrentes. La documentation administrative mentionne notamment certaines associations, ONG, projets, fondations, organismes publics et internationaux, personnes publiques ou privées et opérations occasionnelles. La qualification dépend toutefois du statut réel et de la nature de l'opération.
+La DGI définit le RND comme la catégorie des contribuables qui ne sont classés ni au RNI, ni au RSI, ni à la CME, ni à la CSE. À titre illustratif, la page DGI mentionne notamment les organisations non gouvernementales, associations, projets et programmes, fondations, institutions et administrations publiques, collectivités territoriales, établissements publics, organismes internationaux, missions diplomatiques, bailleurs, salariés des secteurs public et privé et particuliers.
+
+La DGI précise que les sommes perçues par les contribuables relevant du RND à l'occasion d'opérations de toute nature, quel qu'en soit le montant, sont soumises à une retenue à la source libératoire (article 220 du CGI, sous réserve des règles de taux et de recouvrement applicables). Les entités RND qui réalisent des ventes de biens ou prestations de services de façon récurrente sont susceptibles d'être reclassées dans un régime de droit commun. Le statut RND ne doit donc pas être assimilé à une simple tranche de petit chiffre d'affaires.
 
 **Règles PolyGest :**
-- Le RND ne doit pas être disponible comme choix générique pour toute petite entreprise.
-- En cas d'activité commerciale ou de prestation habituelle, demander confirmation de la qualification.
-- Distinguer le statut du client RND de celui du fournisseur.
-- Le statut du client RND peut déclencher des contrôles FEC en réception, selon l'arrêté FEC et ses exceptions.
-- Enregistrer le texte ou l'attestation justifiant le rattachement.
+- Le RND ne doit pas être proposé comme régime commercial ordinaire à une entreprise exerçant une activité professionnelle récurrente.
+- Le profil doit enregistrer la catégorie exacte (association, ONG, organisme public, salarié, particulier, opération occasionnelle ou autre catégorie visée) et le fondement de rattachement.
+- Pour les recettes d'un fournisseur RND, prévoir un contrôle de retenue libératoire selon les articles 220 à 222 et la nature du bénéficiaire.
+- Distinguer le RND du fournisseur du statut RND du client : le second peut entraîner des contrôles distincts liés à la réception FEC.
+- Ne pas appliquer automatiquement à toute entité citée à titre illustratif une même retenue, un même taux ou une même obligation FEC.
+- En présence d'opérations récurrentes, demander une revue de classification et conserver la décision de l'administration.
 
-**Niveau :** documentation DGI (A1) ; champ juridique exact à valider pour chaque catégorie.
+**Niveau :** page officielle DGI (A1) pour la définition et les exemples ; articles 220 à 222 du CGI et rédaction consolidée 2026 à vérifier avant d'activer le traitement.
 
 ---
 
@@ -402,7 +408,22 @@ PolyGest doit donc gérer deux questions indépendantes :
 
 Ne pas extrapoler toutes les dispenses de facture normalisée aux dispenses de FEC. Vérifier les dispositions spécifiques de l'article 566, paragraphe 2, et de l'arrêté.
 
-### 8.3 Obligations matérielles et opérationnelles
+### 8.3 Documents tenant lieu de FEC
+
+L'arrêté distinct relatif aux documents tenant lieu de FEC prévoit des justificatifs admis expressément par l'administration fiscale. Il ne s'agit pas d'une extension implicite des dispenses de facture normalisée de l'article 566. La liste publiée comprend notamment :
+- les factures et documents assimilés émis avant la date d'entrée en vigueur de l'obligation d'émission des FEC ;
+- les factures de fournisseurs et prestataires étrangers sans établissement stable au Burkina Faso ;
+- les documents douaniers ;
+- les titres de perception et avis d'imposition ;
+- certains bordereaux de réception pour les achats auprès d'agriculteurs vendant au bord champ leur production ;
+- certains bordereaux de réception d'agrégats pour les entreprises du BTP ;
+- certains bordereaux de réception d'achats effectués par les restaurateurs pour les besoins de leur cuisine ;
+- certains bordereaux de réception de ferraille et plastiques usagés achetés auprès d'individus pour recyclage ;
+- les factures et documents assimilés provenant de personnes bénéficiant d'une exonération.
+
+Les conditions de validité, les mentions exigées et le champ de chaque catégorie doivent être lus dans l'arrêté intégral. PolyGest doit identifier ces pièces comme « document tenant lieu de FEC » uniquement lorsque les conditions de l'arrêté sont satisfaites ; ne pas les qualifier de FEC certifiée.
+
+### 8.4 Obligations matérielles et opérationnelles
 
 L'arrêté prévoit, pour les utilisateurs de systèmes physiques, des obligations concernant :
 - équipement du ou des points de vente ;
@@ -417,13 +438,13 @@ L'arrêté prévoit, pour les utilisateurs de systèmes physiques, des obligatio
 
 Ces obligations ne peuvent pas être satisfaites par le seul module PDF d'un SaaS.
 
-### 8.4 Calendrier de déploiement — prudence
+### 8.5 Calendrier de déploiement — prudence
 
 La DGI a publié des communiqués sur le déploiement des SECeF, et un communiqué du 29 octobre 2026 intitulé « Utilisation obligatoire des SECeF par les grandes entreprises ». Des annonces opérationnelles ont notamment mentionné un calendrier différencié DGE / DME selon les catégories de contribuables.
 
 Toutefois, la date d'annonce, la mise à disposition d'un matériel et la date d'obligation légale ne sont pas nécessairement la même chose. La copie intégrale des communiqués applicables, leur champ exact, les périodes transitoires et les catégories concernées doivent être archivés avant d'afficher une échéance ou un blocage automatique. La date du 1er janvier 2027 annoncée pour la DGE doit être vérifiée directement dans le communiqué officiel intégral.
 
-### 8.5 Position produit
+### 8.6 Position produit
 
 Tant que PolyGest n'a pas reçu l'homologation/attestation correspondante :
 - ne jamais afficher « FEC certifiée », « homologuée DGI » ou équivalent ;
@@ -513,72 +534,83 @@ Une correction doit créer un événement correctif traçable ; elle ne doit pas
 
 ## 10. Retenues à la source et retenues de TVA
 
-Ces retenues ne sont pas des remises commerciales. Elles doivent être traitées indépendamment du calcul de la facture et du règlement bancaire/net à payer.
+Les retenues fiscales ne sont ni des remises commerciales ni des retenues contractuelles (par exemple une retenue de garantie BTP). Leur fait générateur, leur assiette, le débiteur légal, le bénéficiaire, le taux, le reversement et l'imputation doivent être identifiés séparément. L'existence de plusieurs retenues susceptibles de concerner un même marché ne signifie pas qu'elles se cumulent automatiquement : le cumul et l'articulation des textes doivent être validés.
 
-### 10.1 Retenue visée à l'article 207 (LFI 2026)
+### 10.1 Retenue sur les sommes versées aux prestataires résidents — articles 206 et 207
 
-La loi de finances initiale 2026 a modifié l'article 207 à compter du 1er janvier 2026. Le texte consulté prévoit notamment :
-- 5 % sur le montant HT pour les bénéficiaires justifiant d'une immatriculation IFU ;
-- 1 % pour les travaux immobiliers et travaux publics dans les conditions du texte ;
-- 2 % pour les prestations de travail temporaire dans les conditions prévues ;
-- 25 % des sommes versées pour certains bénéficiaires non salariés ne justifiant pas d'une immatriculation IFU.
+L'article 206 détermine le champ des sommes soumises à retenue et les débiteurs établis au Burkina Faso. L'article 207, réécrit par l'article 15 de la loi de finances 2026 avec effet au 1er janvier 2026, fixe les taux suivants :
+- 5 % du montant HT des sommes versées aux personnes justifiant d'une immatriculation à l'IFU ;
+- taux réduit de 1 % pour les travaux immobiliers et les travaux publics ;
+- taux réduit de 2 % pour les prestations de travail temporaire ;
+- 25 % du montant des sommes versées aux personnes non salariées ne justifiant pas d'une immatriculation à l'IFU.
 
-Ces taux ne constituent pas une grille applicable indistinctement à tous les paiements. Les catégories de bénéficiaires, débiteurs, exclusions, attestations, assiettes et modalités de reversement doivent être codées à partir de l'article complet.
+Le taux de 2 % vise les prestations de travail temporaire, et non indistinctement toutes les opérations commerciales réalisées par une entreprise de travail temporaire. Le taux réduit doit être rattaché à la nature exacte de la prestation et à la condition d'immatriculation IFU prévue pour les taux de faveur.
 
-### 10.2 Retenue visée à l'article 221 (LFI 2026)
+**Contrôles PolyGest :** vérifier le statut du débiteur, le statut fiscal du bénéficiaire, l'IFU, la nature réelle de la prestation, la base HT, l'attestation éventuelle et la version de l'article 207 applicable à la date du paiement. Ne pas appliquer ces taux à chaque facture de façon automatique sans vérifier le champ de l'article 206.
 
-La loi de finances 2026 prévoit notamment les taux suivants pour les catégories visées :
-- 2 % pour les vacations d'enseignement et certaines prestations manuelles exécutées par des personnes physiques non salariées ;
-- 5 % pour certaines personnes morales publiques/parapubliques ou personnes morales non lucratives dans les conditions prévues ;
-- 10 % pour certaines rémunérations d'individus salariés ou prestations intellectuelles occasionnelles visées par le texte.
+### 10.2 Retenue libératoire applicable aux contribuables RND — articles 220 à 222
 
-La charge de la retenue ne doit pas être supportée par le débiteur dans les conditions prévues par l'article. Le champ précis, les justificatifs et les cas de cumul doivent être validés.
+L'article 220 prévoit une retenue à la source libératoire sur les sommes perçues par les contribuables relevant du RND à l'occasion d'opérations de toute nature, quel qu'en soit le montant. L'article 221, dans sa rédaction issue de la loi de finances 2026, prévoit notamment :
+- 2 % pour les vacations d'enseignement et les prestations manuelles réalisées par des personnes physiques non salariées ;
+- 5 % pour les entités publiques et parapubliques ne réalisant pas habituellement d'activités lucratives, ainsi que pour les autres personnes morales ne réalisant pas habituellement d'activités lucratives, sous réserve de l'exception prévue pour certaines recettes de services publics justifiées par une attestation DGI ;
+- 10 % pour les personnes physiques salariées des secteurs public et privé et pour les personnes physiques non salariées accomplissant occasionnellement une prestation intellectuelle qui ne peut être considérée comme une activité de professionnel indépendant, y compris certaines vacations médicales.
 
-### 10.3 Retenue de 30 % sur la TVA (article 334 §4, LFI 2026)
+L'article 222 encadre les personnes tenues d'opérer la retenue et ses modalités de reversement. Les taux et la qualité du bénéficiaire doivent être lus avec la catégorie exacte du contribuable RND ; un libellé « RND » seul ne suffit pas pour calculer la retenue.
 
-La loi de finances initiale 2026 prévoit une retenue correspondant à 30 % du montant de TVA dû dans certaines situations, notamment :
-- entreprises relevant de la DGE ;
-- certaines entreprises exportatrices éligibles au remboursement de crédit TVA ;
-- organismes payeurs lors des paiements au profit de titulaires résidents de commandes publiques, selon le texte.
+### 10.3 Retenue à la source sur les commandes publiques — article 226-1
 
-Le texte prévoit des déclarations permettant d'identifier le fournisseur, l'IFU, les factures, les paiements et les montants retenus, ainsi qu'une attestation individuelle de retenue destinée au fournisseur.
+L'article 226-1 prévoit une retenue sur les sommes versées à des personnes physiques ou morales résidentes au Burkina Faso en rémunération de commandes publiques, quel qu'en soit l'objet. La version consultée du CGI, mise à jour par les lois de finances antérieures, prévoit notamment :
+- une exception pour les contribuables relevant de la DGE et pour ceux qui disposent d'une exonération totale des impôts sur les bénéfices, sous réserve de produire l'attestation exigée ;
+- un taux de 5 % du montant HT pour les entreprises relevant du régime du réel et de la CME ;
+- un taux réduit de 1 % pour les fournitures de biens, les travaux immobiliers et les travaux publics ;
+- un taux réduit de 0,2 % pour les livraisons d'hydrocarbures et les recharges téléphoniques ;
+- pour les entités relevant du RND, application de la retenue libératoire visée par les articles 220 et 221.
 
-**Modèle de traitement conceptuel :**
-- TVA brute facturée ;
-- retenue de TVA applicable (oui/non, avec fondement) ;
-- base et montant de la retenue ;
-- payeur/reteneur ;
-- date de paiement ;
-- référence de l'attestation ;
-- montant reversé au Trésor ;
-- montant réconcilié avec la déclaration de TVA du fournisseur.
+**Réserve P0 :** la rédaction consolidée de l'article 226-1 doit être confirmée dans le CGI 2026 et rapprochée de toute modification ultérieure. En particulier, PolyGest ne doit pas appliquer simultanément la retenue de l'article 207 et celle de l'article 226-1 sans règle de priorité/cumul validée par un fiscaliste. Les marchés BTP et commandes publiques doivent être des scénarios dédiés.
 
-Exemple mathématique uniquement : si la TVA applicable sur une opération est de 180 000 FCFA et que le texte impose la retenue de 30 %, le montant de la retenue serait de 54 000 FCFA. Cela ne signifie pas que le client est toujours autorisé ou obligé à effectuer cette retenue : son statut, celui du fournisseur et la nature du marché doivent être contrôlés.
+### 10.4 Retenue de 30 % sur la TVA — article 334, paragraphe 4, LFI 2026
 
-### 10.4 Architecture des retenues
+La loi de finances initiale 2026, article 23, prévoit une retenue de 30 % sur le montant de TVA dû dans des situations distinctes :
+- entreprises exportatrices de biens taxables en régime intérieur éligibles au remboursement de crédit de TVA, telles que définies à l'article 328 ;
+- entreprises relevant de la DGE, sur leurs achats de biens et services ;
+- organismes payeurs, sur le montant de TVA dû à l'occasion de tout paiement au profit des titulaires de commandes publiques résidents.
 
-Ne pas créer un champ unique `withholding_rate` sur la facture. Distinguer :
-- retenues sur paiements de fournisseurs (articles 207, 221 et autres dispositions) ;
-- retenue de TVA ;
-- acompte imputable sur impôt sur bénéfices ;
-- retenues contractuelles non fiscales (ex. retenue de garantie BTP).
+Le texte prévoit une déclaration réglementaire identifiant notamment le fournisseur, l'IFU, la facture, les dates et montants des paiements et la retenue opérée. Une attestation individuelle annotée des références de quittance est remise au fournisseur pour faire valoir la retenue sur ses déclarations de TVA.
 
-Ces catégories ont des assiettes, événements, responsables, justificatifs et traitements comptables différents.
+Exemple purement arithmétique : si la TVA due sur une opération est de 180 000 FCFA et si la retenue de 30 % est légalement applicable, la retenue représente 54 000 FCFA. Cela ne signifie pas que tous les clients doivent opérer cette retenue : la qualité du payeur, du fournisseur, la nature de l'achat et la situation de l'opération doivent être vérifiées.
+
+### 10.5 Architecture des retenues
+
+Ne pas créer un champ unique `withholding_rate` sur la facture. Distinguer au minimum :
+- retenue sur prestations résidentes (articles 206-207) ;
+- retenue libératoire RND (articles 220-222) ;
+- retenue sur commandes publiques (articles 226-1 et 226-2) ;
+- retenue de TVA (article 334) ;
+- acomptes imputables sur impôt sur bénéfices ;
+- retenues contractuelles non fiscales, notamment la retenue de garantie.
+
+Chaque événement doit stocker le débiteur légal, le bénéficiaire, le texte, l'assiette, le taux, la date de paiement, le montant retenu, le délai de reversement, le justificatif/attestation et les conditions d'imputation. Les règles de cumul, d'ordre d'application et de restitution ne sont pas à déduire : elles exigent validation professionnelle.
 
 ---
 
 ## 11. Paiement scriptural et seuil de 1 000 000 FCFA TTC
 
-Les modifications apportées à l'article 568 par la loi de finances 2024 ont porté à 1 000 000 FCFA TTC le seuil de règlement par moyens de paiement scripturaux, à l'exclusion du règlement en espèces, dans le champ prévu par le texte.
+L'article 568, réécrit par la loi de finances 2025 avec effet au 1er janvier 2025, prévoit que les achats de biens, services et immobilisations d'un montant **au moins égal à 1 000 000 FCFA TTC** doivent être réglés par des moyens de paiement scripturaux. Le texte définit ces moyens comme tout moyen de paiement autre que les espèces.
 
-La loi de finances 2025 contient également des dispositions de sanction liées au non-respect des paiements scripturaux. Le champ des achats, catégories de contribuables concernés, exceptions et modalités doit être vérifié dans les textes consolidés 2025-2026 avant d'activer un blocage.
+La rédaction 2025 prévoit les conséquences suivantes en cas d'infraction :
+- pour l'acheteur : non-déductibilité de l'achat au titre de l'impôt sur les bénéfices, ou des amortissements pour une immobilisation, et non-déductibilité de la TVA acquittée ;
+- pour le fournisseur : amende égale à 25 % du montant encaissé ;
+- pour l'acheteur relevant du RND ou de la CME : amende égale à 25 % du montant payé.
+
+**Point de lecture juridique :** le seuil de 1 000 000 FCFA TTC a été introduit par la loi de finances 2024 ; la rédaction applicable depuis le 1er janvier 2025 ajoute/réorganise les sanctions ci-dessus. L'obligation porte sur les achats de biens, services et immobilisations dans la rédaction 2025 consultée. Ne pas restreindre silencieusement la règle aux seuls contribuables du réel sur la base d'une ancienne version.
 
 **Décision PolyGest :**
-- paramètre distinct des règles TVA ;
-- alerte au niveau du paiement ou de l'achat, pas simple ligne sur la facture ;
-- enregistrer le montant TTC, le mode de paiement et l'éventuel fondement d'exception ;
-- ne pas interpréter un paiement fractionné comme une dispense automatique ;
-- ne pas affirmer qu'une dépense ou une TVA est déductible lorsque le moyen de paiement ne respecte pas le texte.
+- contrôler le seuil au niveau de l'achat et de son règlement, pas seulement au niveau de la facture de vente ;
+- conserver montant TTC, date, mode de paiement, acheteur, fournisseur et preuve du paiement ;
+- faire contrôler le seuil par opération d'achat conformément au texte ; ne pas traiter un fractionnement contractuel ou des paiements partiels comme une dispense automatique ;
+- calculer les conséquences fiscales séparément pour l'acheteur et le fournisseur ;
+- ne pas affirmer qu'une dépense ou une TVA est déductible lorsque le moyen de paiement ne respecte pas le texte ;
+- demander une revue en cas de paiement multi-moyens, de versements fractionnés ou d'opérations liées, car les règles anti-contournement et le périmètre exact doivent être confirmés.
 
 ---
 
@@ -791,7 +823,8 @@ Les liens suivants constituent le dossier de départ. Les fichiers téléchargé
 
 ### Sources DGI
 - [DGI — Lois et Code général des impôts, dont édition 2026](https://dgi.bf/lois/)
-- [DGI — Code général des impôts](https://dgi.bf/code-general/)
+- [DGI — Code général des impôts 2026 (accès officiel référencé par la DGI)](https://dgi.bf/code-general/) — le fichier exact doit être téléchargé et archivé dans le dépôt ; le référencement sur le site ne suffit pas à établir une copie locale vérifiée.
+- [DGI — Régimes d'imposition (définition RNI, RSI, CME, CSE et RND)](https://dgi.bf/regime_imposition/)
 - [DGI — Régimes d'imposition](https://dgi.bf/regime_imposition/)
 - [DGI — FAQ](https://dgi.bf/faq/)
 - [DGI — Facture électronique certifiée](https://dgi.bf/facture-electronique-certifie/)
@@ -802,7 +835,9 @@ Les liens suivants constituent le dossier de départ. Les fichiers téléchargé
 - [Journal officiel spécial n°01 — Loi de finances 2026](https://dgi.bf/wp-content/uploads/2026/01/JOURNAL-OFFICIEL-N%C2%B001-SPECIAL-LOI-DE-FINANCES-2026.pdf)
 - [Loi de finances 2025 — copie diffusée par la Direction générale des douanes](https://douanes.bf/sydoniabf/files/Loi_Finances_2025.pdf)
 - [Arrêté n°2025-0049 — conditions et modalités d'émission de la FEC](https://dgi.bf/wp-content/uploads/2026/01/arrete-portant-Conditions-et-Modalites-demission-de-la-FEC.pdf)
-- [Loi de finances 2024 — référence à archiver et contrôler pour l'article 568](https://www.finances.gov.bf/)
+- [Arrêté sur les documents tenant lieu de FEC](https://dgi.bf/wp-content/uploads/2023/10/ARRETE-SUR-LES-DOCUMENTS-TENANT-LIEU-DE-LA-FEC.pdf)
+- [Loi de finances 2024 — texte DGI, notamment modification de l'article 568](https://dgi.bf/wp-content/uploads/2023/10/LOI-DE-FINANCES-2024.pdf)
+- [Loi de finances 2025 — répertoriée par la DGI ; copie et article 47 à archiver depuis le texte promulgué](https://dgi.bf/lois/)
 
 ### LFR 2026 — étapes institutionnelles
 - [Assemblée législative du Peuple — adoption de la LFR 2026 le 23 septembre 2026](https://www.assembleenationale.bf/945)
@@ -824,3 +859,47 @@ Les liens suivants constituent le dossier de départ. Les fichiers téléchargé
 - la LFR 2026 et le CGI 2026 consolidé sont des pièces P0 manquantes au dossier de validation.
 
 **Aucune migration SQL, aucun calcul fiscal présenté comme conforme et aucune émission FEC ne doivent être développés avant fermeture des validations P0.** La prochaine étape après approbation documentaire sera une revue professionnelle des règles, puis une conception détaillée du domaine fiscal et des scénarios de tests, toujours sans migration tant que la spécification n'est pas validée.
+
+
+---
+
+## 20. Journal de revue documentaire — 3 novembre 2026
+
+Cette édition 0.2 intègre une première confrontation de la matrice avec les pages et textes officiels retrouvés le 3 novembre 2026. Cette revue documentaire améliore la précision de la recherche ; elle ne constitue pas la validation par un fiscaliste.
+
+### 20.1 Sources officielles directement retrouvées
+
+| Source | Éléments établis | Limite restante |
+|---|---|---|
+| DGI — Régimes d'imposition | Cinq régimes, seuils RNI/RSI, option RSI vers RNI, CME forfaitaire/déclarative et exemples RND | Une page pratique DGI ne remplace pas la lecture intégrale du CGI 2026 |
+| Journal officiel spécial n°01 du 2 janvier 2026 | Articles 207, 221, 334 §4, 529 et 548 de la LFI 2026 | Rapprocher le CGI consolidé 2026 |
+| Arrêté n°2025-0049 du 5 février 2025 | Cadre d'émission FEC, systèmes physiques et SFE | Spécifications techniques et procédure d'homologation à archiver |
+| Arrêté sur les documents tenant lieu de FEC | Catégories de pièces substitutives et mentions requises | Vérifier la validité et l'actualité de chaque cas concret |
+| Loi de finances 2024 | Relèvement du seuil de paiement scriptural à 1 000 000 FCFA TTC | La LFI 2025 modifie ensuite l'article 568 et ses sanctions |
+| Loi de finances 2025 | Nouvelle rédaction de l'article 568 et sanctions annoncées dans le texte consulté | Archiver et contrôler le texte promulgué complet, pas seulement le rapport parlementaire |
+| Assemblée législative du Peuple — 23 septembre 2026 | Adoption en plénière du projet de LFR 2026 | Promulgation et publication au Journal officiel non établies dans le dossier |
+| Ministère de l'Économie et des Finances — 25 septembre 2026 | Mesures fiscales annoncées pour la LFR 2026 | Le communiqué ne remplace pas les articles définitifs |
+
+### 20.2 Corrections de fond apportées
+
+1. RSI : ajout de la catégorie des contribuables exclus de la CME qui ne remplissent pas les conditions du RNI, prévue à l'article 529 nouveau.
+2. RND : précision de sa définition DGI, de ses catégories illustratives et de la retenue libératoire visée à l'article 220.
+3. FEC : ajout des documents tenant lieu de FEC, avec distinction explicite des dispenses de facture normalisée et du statut de FEC certifiée.
+4. Retenues : séparation des articles 206-207, 220-222, 226-1/226-2 et 334.
+5. Paiement scriptural : distinction entre le relèvement du seuil par la LFI 2024 et les sanctions issues de la rédaction 2025 de l'article 568.
+6. LFR 2026 : formulation ramenée à l'adoption parlementaire du projet et à l'annonce ministérielle ; aucune date d'effet fiscale n'est activée sans texte promulgué consulté.
+
+### 20.3 Points de vigilance identifiés pour la prochaine revue
+
+- Vérifier dans le CGI 2026 les mentions exactes de l'article 562, les listes complètes de l'article 566 et les sanctions applicables aux factures normalisées et FEC.
+- Obtenir le texte promulgué de la LFR 2026 et le Journal officiel.
+- Archiver le CGI 2026 indiqué sur le site DGI, puis contrôler les articles 206-207, 220-222, 226-1/226-2, 315-316, 334, 529, 548 et 562-568.
+- Vérifier la rédaction consolidée et la portée de l'article 226-1, notamment les exceptions DGE et exonération totale, les taux de commande publique et l'articulation avec l'article 207.
+- Vérifier les règles de cumul ou de priorité entre retenue sur prestations, retenue sur commande publique et retenue de TVA.
+- Vérifier les sanctions de l'article 568 et les modalités de calcul par opération, y compris paiements partiels et fractionnés.
+- Télécharger les communiqués DGI du 28 août et du 29 octobre 2026 relatifs aux SECeF et archiver leurs annexes et délais exacts.
+- Vérifier l'articulation entre article 566 §2, arrêté FEC et documents tenant lieu de FEC.
+
+### 20.4 Règle de non-activation
+
+Toute règle dont le texte consolidé, l'entrée en vigueur, le champ, l'assiette, l'exception ou l'articulation n'est pas vérifié doit rester à l'état `requires_tax_review`. Aucune valeur par défaut ne doit transformer une lacune documentaire en décision fiscale.
