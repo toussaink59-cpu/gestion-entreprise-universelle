@@ -73,6 +73,8 @@ La facture normalisée est un document fiscal obligatoire pour les industriels, 
 
 La facture électronique certifiée (FEC) relève d'un régime distinct. Les textes consultés prévoient l'obligation pour les entreprises relevant de la DGE et des DME, sous réserve des conditions et étapes d'application fixées par les textes et communiqués DGI. PolyGest doit enregistrer séparément le rattachement DGE/DME et le régime fiscal (RNI/RSI/CME/etc.).
 
+Le calendrier de mise à disposition annoncé le 28 août 2026 distingue la DGE (7 septembre 2026), les contribuables RNI des DME (2 novembre 2026) et les contribuables RND des DME (1er décembre 2026), avec 30 jours de mise en conformité après chaque date. Un communiqué DGI du 29 octobre 2026 annonce une utilisation effectivement exigée par les contribuables DGE à partir du 1er janvier 2027. Les échéances DME non explicitement publiées pour une catégorie donnée ne doivent pas être extrapolées ; joindre les copies officielles et confirmer la situation de chaque entreprise avant activation. L'arrêté FEC prévoit aussi une exigence d'acceptation côté acheteur public/RND pour les FEC émises par des fournisseurs locaux, sous réserve d'exceptions.
+
 Un document PDF produit par PolyGest ne doit jamais être présenté comme une FEC sans émission et authentification par un système SECeF/SFE homologué. Le chantier FEC est bloqué jusqu'à obtention de la documentation technique officielle, de l'homologation pertinente et des tests requis. Référentiel détaillé : [Conformité fiscale — Facturation au Burkina Faso](CONFORMITE_FISCALE_BURKINA_FACTURATION.md).
 
 ### Exigibilité de TVA et facturation fractionnée
