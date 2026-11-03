@@ -420,12 +420,6 @@ La liste des dispenses de facture normalisée n'est donc pas la liste des dispen
 
 L'arrêté relatif aux documents tenant lieu de FEC traite d'une catégorie encore différente : des documents expressément admis comme justificatifs de transaction dans les cas prévus par l'arrêté. Ces documents ne sont pas des FEC certifiées, même s'ils peuvent en tenir lieu légalement.
 
-PolyGest doit donc gérer deux questions indépendantes :
-1. le fournisseur est-il obligé d'émettre une FEC ?
-2. le client est-il soumis à une obligation ou à une exigence de réception FEC ?
-
-Ne pas extrapoler toutes les dispenses de facture normalisée aux dispenses de FEC. Vérifier les dispositions spécifiques de l'article 566, paragraphe 2, et de l'arrêté.
-
 ### 8.3 Documents tenant lieu de FEC
 
 L'arrêté distinct relatif aux documents tenant lieu de FEC prévoit des justificatifs admis expressément par l'administration fiscale. Il ne s'agit pas d'une extension implicite des dispenses de facture normalisée de l'article 566. La liste publiée comprend notamment :
@@ -514,9 +508,9 @@ Les articles 315 et 316 doivent être lus ensemble. Ne pas déduire l'exigibilit
 | Importation | Dédouanement/mise à la consommation | Règles douanières ; ne pas calculer à partir d'une facture commerciale seule |
 | Services/biens immatériels de non-résident | Règles spécifiques liées à la facture/comptabilisation | Revue fiscale et potentielle autoliquidation/retenue selon la situation |
 | Livraison à soi-même | Première utilisation | Cas spécialisé ; validation nécessaire |
-| Opération avec entité publique | Règle spécifique possible de report ou de retenue | Contrôler visa/autorisation, qualité du client et texte applicable avant calcul |
+| Fournitures/livraisons à l'État, aux collectivités ou à certains démembrements non commerciaux | Article 316 §6 : différé de paiement possible jusqu'au paiement du Trésor ; TVA retenue au taux indiqué au visa fiscal | Vérifier la qualité du client, le visa des décomptes/marché/contrat et l'articulation avec les autres retenues |
 
-6) Pour les fournitures ou livraisons à l'État, aux collectivités territoriales ou à leurs démembrements n'ayant pas un caractère industriel ou commercial, l'article 316 prévoit qu'un différé de paiement de la TVA peut être accordé par le service des impôts jusqu'au paiement par les services du Trésor public. Le montant dû est alors retenu à la source par le service chargé du paiement, au taux indiqué par le service des impôts lors du visa des décomptes, du marché ou du contrat. À défaut de visa, le texte prévoit une pénalité de 25 % en cas de mauvaise foi et de 200 % en cas de manœuvres frauduleuses, sur les droits dus.
+**Cas particulier — article 316, paragraphe 6.** Pour les fournitures ou livraisons à l'État, aux collectivités territoriales ou à leurs démembrements n'ayant pas un caractère industriel ou commercial, le service des impôts peut accorder un différé de paiement de la TVA jusqu'au paiement par les services du Trésor public. Le service chargé du paiement retient alors le montant dû au taux indiqué par le service des impôts lors du visa des décomptes, du marché ou du contrat. À défaut de visa, le texte prévoit une pénalité de 25 % en cas de mauvaise foi et de 200 % en cas de manœuvres frauduleuses, sur les droits dus.
 
 Cette disposition doit être traitée séparément :
 - de la retenue sur commandes publiques prévue aux articles 226-1 et suivants ;
@@ -810,6 +804,8 @@ Aucun taux ou résultat fiscal n'est réputé valide tant que les scénarios ci-
 | EVT-02 | Service avec acompte | Calculer la part exigible si règle applicable |
 | EVT-03 | Travaux immobiliers avec avance et situations | Tracer contrat, exécution, situation, avance, encaissement et TVA |
 | EVT-04 | Service relevant du cas particulier IBNC | Appliquer la règle spéciale validée |
+| EVT-05 | Livraison/fourniture à l'État ou à une collectivité non commerciale | Vérifier le visa fiscal, le taux indiqué et le différé jusqu'au paiement du Trésor selon l'article 316 §6 |
+| EVT-06 | Marché public avec retenue article 226-1 et/ou retenue TVA article 334 | Interdire le cumul automatique ; déterminer retenue et exigibilité après qualification des parties et du contrat |
 | WHT-01 | Article 207, bénéficiaire IFU | Vérifier assiette et catégorie avant taux |
 | WHT-02 | Travaux publics/travaux immobiliers | Vérifier catégorie et base avant taux réduit |
 | WHT-03 | Article 221, vacation | Vérifier statut du bénéficiaire et nature du paiement |
@@ -927,7 +923,7 @@ Cette édition 0.2 intègre une première confrontation de la matrice avec les p
 | Arrêté n°2025-0049 du 5 février 2025 | Cadre d'émission FEC, systèmes physiques et SFE | Spécifications techniques et procédure d'homologation à archiver |
 | Arrêté sur les documents tenant lieu de FEC | Catégories de pièces substitutives et mentions requises | Vérifier la validité et l'actualité de chaque cas concret |
 | Loi de finances 2024 | Relèvement du seuil de paiement scriptural à 1 000 000 FCFA TTC | La LFI 2025 modifie ensuite l'article 568 et ses sanctions |
-| Loi de finances 2025 | Nouvelle rédaction de l'article 568 et sanctions annoncées dans le texte consulté | Archiver et contrôler le texte promulgué complet, pas seulement le rapport parlementaire |
+| Loi de finances 2025 | Articles 44-47 et 53-55 consultés : FEC DGE/DME, dispenses, conservation, article 568 et sanctions | Rapprocher du CGI 2026 consolidé et archiver la copie institutionnelle |
 | Assemblée législative du Peuple — 23 septembre 2026 | Adoption en plénière du projet de LFR 2026 | Promulgation et publication au Journal officiel non établies dans le dossier |
 | Ministère de l'Économie et des Finances — 25 septembre 2026 | Mesures fiscales annoncées pour la LFR 2026 | Le communiqué ne remplace pas les articles définitifs |
 
@@ -942,7 +938,7 @@ Cette édition 0.2 intègre une première confrontation de la matrice avec les p
 
 ### 20.3 Points de vigilance identifiés pour la prochaine revue
 
-- Vérifier dans le CGI 2026 les mentions exactes de l'article 562, les listes complètes de l'article 566 et les sanctions applicables aux factures normalisées et FEC.
+- Rapprocher les mentions de l'article 562, les articles 564 et 566 et les sanctions des articles 798-1/798-2 du CGI 2026 consolidé, afin de vérifier l'absence de modification ultérieure.
 - Obtenir le texte promulgué de la LFR 2026 et le Journal officiel.
 - Archiver le CGI 2026 indiqué sur le site DGI, puis contrôler les articles 206-207, 220-222, 226-1/226-2, 315-316, 334, 529, 548 et 562-568.
 - Vérifier la rédaction consolidée et la portée de l'article 226-1, notamment les exceptions DGE et exonération totale, les taux de commande publique et l'articulation avec l'article 207.
@@ -953,7 +949,7 @@ Cette édition 0.2 intègre une première confrontation de la matrice avec les p
 
 
 
-### 20.5 Précisions complémentaires issues de la loi de finances 2025 et du CGI consulté
+### 20.4 Précisions complémentaires issues de la loi de finances 2025 et du CGI consulté
 
 - **Article 564 :** à compter du 1er janvier 2025, les contribuables DGE et DME doivent délivrer exclusivement une FEC ou un document tenant lieu de FEC, sous réserve des dispenses prévues à l'article 566 et des textes d'application. La date législative et le calendrier opérationnel de déploiement doivent être gérés comme deux données distinctes.
 - **Article 566 :** la loi distingue expressément les dispenses de facture normalisée (paragraphe 1) et les dispenses de FEC pour certains contribuables DGE (paragraphe 2).
@@ -962,6 +958,6 @@ Cette édition 0.2 intègre une première confrontation de la matrice avec les p
 - **Article 802 :** amende de 100 000 FCFA par document manquant et amende de 5 000 000 FCFA en cas de destruction volontaire avant le terme.
 - **Article 316, paragraphe 6 :** cas particulier de fourniture/livraison à l'État, aux collectivités et à leurs démembrements non industriels ou commerciaux, avec possibilité de différé de paiement jusqu'au règlement du Trésor et retenue au taux indiqué lors du visa fiscal.
 
-### 20.6 Règle de non-activation
+### 20.5 Règle de non-activation
 
 Toute règle dont le texte consolidé, l'entrée en vigueur, le champ, l'assiette, l'exception ou l'articulation n'est pas vérifié doit rester à l'état `requires_tax_review`. Aucune valeur par défaut ne doit transformer une lacune documentaire en décision fiscale.
