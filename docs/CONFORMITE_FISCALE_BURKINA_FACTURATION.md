@@ -80,6 +80,8 @@ Il faut donc distinguer :
 
 Une entreprise non assujettie ou non autorisée à collecter la TVA n'est pas, pour cette seule raison, dispensée de facturation.
 
+**Nuance importante sur la forme du document :** l'instruction administrative DGI du 7 octobre 2020 précise qu'en attendant la mise en œuvre effective de la facture normalisée pré-imprimée, les contribuables du RSI et de la CME portent sur leurs factures les mentions obligatoires de l'article 562. Le RNI a connu la facture normalisée personnalisée et sécurisée. Il faut donc distinguer l'obligation de délivrer une facture conforme, le support normalisé/sécurisé effectivement applicable à l'entreprise et, pour les catégories concernées, l'obligation FEC. PolyGest ne doit pas imposer à tous les régimes un même sticker ou un même rendu papier sans vérifier la consigne DGI en vigueur à la date de l'opération.
+
 ### 3.2 Données attendues sur la facture
 
 Le socle de l'article 562 du CGI et de l'instruction administrative de la DGI relative à la facture normalisée conduit à prévoir au minimum les informations suivantes, selon le type de fournisseur et de client :
@@ -277,12 +279,11 @@ La loi de finances 2025 a également complété l'article 334 pour les ventes et
 
 ### 7.3 Paiements scripturaux à partir de 1 000 000 FCFA
 
-La loi de finances 2025 a fixé un seuil de 1 000 000 FCFA TTC pour le règlement par moyens scripturaux de certaines acquisitions de biens, services et actifs. Le texte prévoit des conséquences spécifiques en cas de paiement en espèces non conforme :
-- côté acheteur, le coût d'acquisition ou l'amortissement ne peut pas être déduit du résultat imposable et la TVA correspondante ne peut pas être déduite ;
-- côté fournisseur, une amende de 25 % des sommes encaissées en espèces est prévue ;
-- pour un acheteur relevant du RND ou de la CME, une amende de 25 % des sommes payées en espèces est également prévue.
+Depuis le 1er janvier 2024, l'article 568 du CGI impose aux contribuables soumis à un régime réel d'imposition (RNI et RSI) de régler par des moyens de paiement scripturaux les achats de biens, services et immobilisations d'un montant au moins égal à 1 000 000 FCFA toutes taxes comprises. Les moyens scripturaux comprennent notamment le chèque, la carte bancaire, le prélèvement, le télérèglement et le virement. Cette obligation vise le paiement des achats par le contribuable assujetti ; elle ne doit pas être étendue automatiquement à tous les régimes ou à toutes les transactions.
 
-PolyGest ne doit pas interpréter ce seuil comme une simple préférence commerciale. Le futur écran de réception de paiements doit connaître le moyen de paiement, distinguer espèces et moyens scripturaux, et signaler les opérations dépassant le seuil. Le périmètre exact des achats concernés, le traitement du fractionnement, les exemptions et la mécanique des sanctions doivent être revus avec un conseil fiscal avant d'en faire un blocage automatique.
+La conséquence fiscale exacte et les sanctions applicables doivent être lues dans la version consolidée du CGI 2026 et validées avant de créer une règle de blocage. La documentation DGI sur la mesure de 2024 confirme le seuil et le champ des contribuables soumis au réel, mais ne suffit pas à elle seule à décrire l'ensemble des sanctions en vigueur.
+
+PolyGest doit donc enregistrer le moyen de paiement et pouvoir signaler une acquisition/paiement d'au moins 1 000 000 FCFA TTC pour une entreprise au RNI ou RSI. Le système ne doit pas bloquer automatiquement un paiement ni appliquer une amende sans règle consolidée et validation fiscale.
 
 ## 8. Numérotation, corrections et archivage
 
@@ -394,6 +395,7 @@ Sources institutionnelles prioritaires. Les pages et documents doivent être rec
 - [Reproduction du communiqué DGI sur l'utilisation obligatoire des SECeF par les contribuables de la DGE dès le 1er janvier 2027](https://www.minute.bf/burkina-la-facture-electronique-certifiee-obligatoire-pour-les-grandes-entreprises-des-le-1er-janvier-2027/)
 - DGI — [Documentation FEC](https://dgi.bf/facture-electronique-certifie/) et [notes FEC / homologation](https://dgi.bf/note-fec/)
 - DGI — [Code général des impôts — version en ligne](https://dgi.bf/verification/CGI)
+- DGI — [Livret des mesures fiscales de la loi de finances 2024](https://dgi.bf/wp-content/uploads/2024/01/LIVRET-SUR-LES-NOUVELLES-MESURES-FISCALES-DE-LA-LOI-DE-FINANCES-EXERCICE-2024.pdf) (seuil de 1 000 000 FCFA, article 568, à compter du 1er janvier 2024)
 - Burkina Faso — [Loi de finances 2025](https://douanes.bf/sydoniabf/files/Loi_Finances_2025.pdf)
 - Ministère de l'Économie et des Finances — [Loi de finances 2026, Journal officiel spécial n°01](https://www.finances.gov.bf/fileadmin/user_upload/storage/fichiers/jo-N__01-special_Loi_de_finances_2026.pdf)
 
