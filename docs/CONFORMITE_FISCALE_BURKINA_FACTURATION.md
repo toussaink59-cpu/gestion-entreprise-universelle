@@ -183,6 +183,16 @@ Séparer les objets suivants :
 
 L'état commercial d'une facture ne doit pas être confondu avec son état de certification fiscale.
 
+### 4.5 Risque de non-conformité
+
+La loi de finances 2025 prévoit notamment :
+- une amende de 100 000 FCFA par facture normalisée non conforme ou comportant des mentions inexactes ;
+- pour une personne tenue d'émettre une FEC qui ne la délivre pas, une amende égale à cinq fois la TVA compromise avec un minimum de 500 000 FCFA ; en cas de récidive, dix fois la TVA compromise avec un minimum de 1 000 000 FCFA, pouvant être cumulée avec une fermeture administrative de dix jours renouvelables ;
+- une amende de 1 000 000 FCFA pour le fournisseur d'un SFE non homologué, portée à 2 000 000 FCFA en cas de récidive ; une sanction similaire vise les entreprises ayant développé leur propre système sans homologation ;
+- une amende de 2 000 000 FCFA par facture en cas de modification frauduleuse du SFE ou d'usurpation d'identité pour émettre des FEC falsifiées.
+
+Ces sanctions démontrent que l'homologation ne peut pas être traitée comme une formalité facultative ou une simple validation interne par PolyGest.
+
 ## 5. TVA : taux, exemptions et traitements
 
 ### 5.1 Taux de référence
@@ -298,7 +308,7 @@ La procédure de correction (avoir, facture rectificative, annulation technique 
 
 ### 8.3 Conservation
 
-Le dossier fiscal doit conserver les factures, pièces justificatives, réponses de certification et éléments d'audit pendant au moins la durée légale applicable. La loi consultée prévoit une conservation de dix ans pour les documents comptables visés ; l'arrêté FEC impose aussi une lisibilité d'au moins dix ans pour certains supports thermiques d'UF.
+Le dossier fiscal doit conserver les factures, pièces justificatives, réponses de certification et éléments d'audit pendant au moins la durée légale applicable. La loi consultée prévoit une conservation de dix ans pour les documents comptables visés ; l'arrêté FEC impose aussi une lisibilité d'au moins dix ans pour certains supports thermiques d'UF. La loi de finances prévoit une amende de 100 000 FCFA par document manquant lorsque les documents ne sont pas présentés ; la destruction volontaire avant l'expiration du délai peut entraîner une amende fiscale de 5 000 000 FCFA.
 
 PolyGest doit donc prévoir :
 - stockage privé et contrôle d'accès ;
