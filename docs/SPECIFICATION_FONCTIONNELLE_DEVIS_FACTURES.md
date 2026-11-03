@@ -40,6 +40,31 @@ Le module doit préserver l'historique des documents émis, empêcher la factura
 - Comptabilité générale et déclarations fiscales.
 - Garantie de conformité fiscale ou légale sans validation par un professionnel compétent du pays et du régime concernés.
 
+### Règle de TVA retenue pour le marché initial (Burkina Faso)
+
+La présentation d'une facture « avec TVA » ou « sans TVA » dépend du régime fiscal et de l'autorisation effective de l'entreprise émettrice. Ce n'est pas une option libre que l'utilisateur peut choisir facture par facture.
+
+Selon les informations publiées par la Direction générale des impôts (DGI) :
+
+| Chiffre d'affaires annuel HT | Régime indiqué | Autorisation de facturer la TVA |
+|---|---|---|
+| Inférieur à 15 000 000 FCFA | Contribution des micro-entreprises (CME) | Non |
+| De 15 000 000 FCFA inclus à moins de 50 000 000 FCFA | Réel simplifié d'imposition (RSI) | Non |
+| Égal ou supérieur à 50 000 000 FCFA | Réel normal d'imposition (RNI) | Oui |
+
+La DGI précise que seuls les contribuables relevant du RNI sont habilités à facturer la TVA. Le seuil est exprimé en chiffre d'affaires annuel hors taxes. Il est ajusté au prorata du temps d'exploitation pour une activité commencée en cours d'année. Une entreprise au RSI peut demander l'option pour le RNI, sous conditions, notamment l'acceptation de la DGI, la régularité fiscale, un système comptable et un engagement de déclarer/payer la TVA. La DGI indique également qu'une baisse du chiffre d'affaires sous le seuil ne conduit au RSI qu'après trois années consécutives sous ce seuil.
+
+**Conséquences fonctionnelles pour PolyGest :**
+- Le profil de facturation de l'entreprise porte son régime fiscal, son statut d'autorisation de collecte de TVA et la période d'effet de cette autorisation.
+- L'application détermine les modèles de document disponibles à partir de ce profil : présentation sans TVA pour une entreprise non autorisée ; présentation avec TVA pour une entreprise autorisée.
+- Un utilisateur ne peut ni activer la TVA sur une facture isolée, ni la désactiver pour contourner le régime de l'entreprise.
+- Le serveur vérifie le statut fiscal effectif à la date d'émission. Les taux et mentions exactes restent paramétrables et doivent être validés avec un professionnel fiscal au Burkina Faso ; aucun taux n'est présumé ici.
+- Les documents transmis/émis conservent un snapshot du régime et du statut TVA de l'émetteur. Un changement ultérieur du profil ne modifie jamais un document historique.
+- Si le régime ou l'autorisation change entre l'envoi d'un devis et l'émission de la facture, l'émission est bloquée jusqu'à revue du devis et validation des montants/mentions applicables.
+- Les situations particulières (notamment les régimes CSE/RND, activités particulières ou décisions fiscales individuelles) ne sont pas déduites automatiquement du chiffre d'affaires : elles nécessitent une configuration vérifiée.
+
+Références officielles : [DGI — Régimes d'imposition](https://dgi.bf/regime_imposition/) et [DGI — FAQ Régimes d'imposition](https://dgi.bf/faq-regimes-dimposition/). Le paramétrage doit être revalidé en cas d'évolution de la législation.
+
 ## 3. Acteurs et permissions proposées
 
 La base actuelle possède les rôles `owner`, `company_admin`, `finance`, `sales_purchasing`, `auditor`, `hr_payroll`, `operations` et `employee`. Elle possède déjà les actions `read`, `create`, `update`, `validate`, `cancel` et `export`, mais le module `quotes` n'existe pas encore dans le référentiel des permissions.
@@ -76,7 +101,7 @@ Précisions :
 1. L'utilisateur choisit un client actif de la même entreprise.
 2. Il saisit la date, la durée de validité, l'objet, les conditions et les lignes du devis.
 3. Chaque ligne comprend au minimum une description, une quantité positive, une unité et un prix unitaire.
-4. Il peut ajouter une remise de ligne et sélectionner une taxe parmi les paramètres autorisés pour l'entreprise.
+4. Il peut ajouter une remise de ligne et appliquer uniquement les taxes autorisées par le profil fiscal effectif de l'entreprise ; la TVA ne peut pas être activée librement sur un document.
 5. Le serveur valide et calcule les montants ; le navigateur peut afficher une prévisualisation mais ne fait pas autorité.
 6. Le devis est sauvegardé en brouillon. Un brouillon peut être modifié ou annulé. La suppression définitive des documents commerciaux n'est pas proposée en V1 afin de préserver la traçabilité.
 7. Le numéro définitif est attribué de façon atomique au moment de la transmission ; les brouillons non transmis ne consomment donc pas de numéro officiel.
@@ -190,6 +215,7 @@ Les états « impayée », « partiellement payée », « payée » et « en ret
 - V1 : remise par ligne uniquement ; la remise globale au niveau du document est reportée si elle n'est pas nécessaire au pilote.
 - V1 : une seule devise par document, issue de la devise par défaut de l'entreprise ; aucune conversion.
 - Les taux, exemptions, catégories de taxe, mentions obligatoires et règles d'arrondi doivent être paramétrables et validés pour le Burkina Faso et chaque régime visé. Aucun taux légal n'est codé en dur dans cette spécification.
+- La possibilité de facturer la TVA est contrôlée au niveau de l'entreprise et à la date d'émission, conformément à la section « Règle de TVA retenue pour le marché initial » ; une ligne à taux nul ne doit pas être utilisée pour simuler une facture sans TVA.
 
 ## 7. Expérience utilisateur attendue
 
