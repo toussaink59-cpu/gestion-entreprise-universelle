@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -13,6 +13,8 @@ import {
   INVITATION_LINK_COOKIE_MAX_AGE_SECONDS,
   INVITATION_LINK_COOKIE_PATH,
   invitationAcceptPath,
+  parseInvitationLinkCookie,
+  resolveAppOrigin,
 } from "@/lib/email/invitation-link";
 import {
   canActivateMember,
@@ -43,9 +45,9 @@ function mapRpcError(code: string, companyId: string): never {
  * Quand l'e-mail ne part pas (Resend non configuré, échec, limite), le lien est montré une seule
  * fois à l'invitant, via un cookie court, httpOnly, limité à la page des membres.
  */
-async function keepInvitationLinkForInviter(token: string) {
+async function keepInvitationLinkForInviter(token: string, userId: string) {
   const store = await cookies();
-  store.set(INVITATION_LINK_COOKIE, invitationAcceptPath(token), {
+  store.set(INVITATION_LINK_COOKIE, `${userId}|${invitationAcceptPath(token)}`, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -121,7 +123,7 @@ export async function inviteCompanyMember(formData: FormData) {
     : null;
   if (!sent || !sent.ok) {
     console.error("Member invitation email not delivered:", { reason: sent ? sent.reason : "not-configured" });
-    await keepInvitationLinkForInviter(token);
+    await keepInvitationLinkForInviter(token, user.id);
     returnTo(parsed.companyId, { success: "invited-link" });
   }
   await markEmailSent(supabase, membershipId, tokenHash, sent.emailId);
@@ -174,11 +176,30 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
     : null;
   if (!sent || !sent.ok) {
     console.error("Member invitation resend not delivered:", { reason: sent ? sent.reason : "not-configured" });
-    await keepInvitationLinkForInviter(token);
+    await keepInvitationLinkForInviter(token, user.id);
     returnTo(companyField, { success: "invited-link" });
   }
   await markEmailSent(supabase, membershipField, tokenHash, sent.emailId);
   returnTo(companyField, { success: "resent" });
+}
+
+/** Consomme le lien manuel : il est réservé à l'invitant connecté et supprimé dès lecture. */
+export async function consumeInvitationLink(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  const store = await cookies();
+  const raw = store.get(INVITATION_LINK_COOKIE)?.value;
+  store.delete(INVITATION_LINK_COOKIE);
+  if (error || !user) return null;
+  const path = parseInvitationLinkCookie(raw, user.id);
+  if (!path) return null;
+  const requestHeaders = await headers();
+  const origin = resolveAppOrigin({
+    configuredUrl: process.env.NEXT_PUBLIC_APP_URL,
+    host: requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
+    forwardedProto: requestHeaders.get("x-forwarded-proto"),
+  });
+  return origin ? `${origin}${path}` : path;
 }
 
 export async function activateCompanyMember(formData: FormData) {

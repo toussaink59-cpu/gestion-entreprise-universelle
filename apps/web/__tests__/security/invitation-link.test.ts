@@ -7,11 +7,12 @@ import {
 import { createInvitationToken } from "../../src/lib/email/member-invitation";
 
 describe("lien d’invitation transmis à la main", () => {
+  const inviterId = "123e4567-e89b-42d3-a456-426614174000";
   it("construit un chemin d’acceptation relisible depuis le cookie", () => {
     const { token } = createInvitationToken();
     const path = invitationAcceptPath(token);
     expect(path).toBe(`/invitations/accept?token=${token}`);
-    expect(parseInvitationLinkCookie(path)).toBe(path);
+    expect(parseInvitationLinkCookie(`${inviterId}|${path}`, inviterId)).toBe(path);
   });
 
   it("refuse un jeton mal formé", () => {
@@ -27,7 +28,23 @@ describe("lien d’invitation transmis à la main", () => {
     "/invitations/accept?token=" + "A".repeat(43) + "&next=//evil.example",
     "/dashboard",
   ])("ignore un cookie falsifié (%s)", (value) => {
-    expect(parseInvitationLinkCookie(value)).toBeNull();
+    expect(parseInvitationLinkCookie(value, inviterId)).toBeNull();
+  });
+
+  it("refuse un lien associé à un autre invitant", () => {
+    const { token } = createInvitationToken();
+    const path = invitationAcceptPath(token);
+    expect(parseInvitationLinkCookie(`${inviterId}|${path}`, "123e4567-e89b-42d3-a456-426614174001")).toBeNull();
+  });
+
+  it("refuse un cookie ancien sans identité d’invitant", () => {
+    const { token } = createInvitationToken();
+    expect(parseInvitationLinkCookie(invitationAcceptPath(token), inviterId)).toBeNull();
+  });
+
+  it("refuse l’absence d’identité authentifiée", () => {
+    const { token } = createInvitationToken();
+    expect(parseInvitationLinkCookie(`${inviterId}|${invitationAcceptPath(token)}`, null)).toBeNull();
   });
 
   it("préfère NEXT_PUBLIC_APP_URL valide", () => {
