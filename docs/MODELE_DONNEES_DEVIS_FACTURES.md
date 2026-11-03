@@ -72,7 +72,7 @@ Compteur atomique par entreprise, type de document et période de numérotation.
 |---|---|---|
 | `company_id` | uuid | FK `companies.id` |
 | `document_type` | text | `quote` ou `invoice` |
-| `period_key` | text | Période de numérotation définie par l'entreprise |
+| `period_key` | text nullable | Segmentation uniquement si le format de série est validé ; ne signifie pas un redémarrage automatique à chaque année civile ou exercice |
 | `prefix` | text | Préfixe de série |
 | `next_number` | bigint | Prochain numéro strictement positif |
 | `padding` | smallint | Largeur minimale du compteur |
@@ -80,7 +80,7 @@ Compteur atomique par entreprise, type de document et période de numérotation.
 
 Clé primaire : `(company_id, document_type, period_key)`.
 
-**Accès :** aucune lecture/écriture directe depuis le client authentifié. Une fonction dédiée réserve le numéro sous verrou transactionnel, puis retourne la valeur formatée. Un numéro utilisé ne doit jamais être réattribué ; les trous de séquence ne doivent pas provoquer de réutilisation.
+**Accès :** aucune lecture/écriture directe depuis le client authentifié. Une fonction dédiée réserve le numéro sous verrou transactionnel, puis retourne la valeur formatée. Un numéro utilisé ne doit jamais être réattribué ; les trous de séquence ne doivent pas provoquer de réutilisation. La série légale doit rester vérifiable et ininterrompue ; format, séries par établissement et périodicité doivent être validés localement avant tout redémarrage de compteur.
 
 ### 3.3 `quotes`
 
