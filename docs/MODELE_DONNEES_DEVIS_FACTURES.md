@@ -72,15 +72,17 @@ Compteur atomique par entreprise, type de document et période de numérotation.
 |---|---|---|
 | `company_id` | uuid | FK `companies.id` |
 | `document_type` | text | `quote` ou `invoice` |
-| `period_key` | text | Période de numérotation définie par l'entreprise |
+| `series_code` | text | Code de série commerciale/légale validé ; une série de devis est distincte de celle des factures |
+| `establishment_id` | uuid nullable | Point de vente/établissement, seulement si plusieurs séries sont juridiquement admises |
+| `period_key` | text nullable | Métadonnée de période ; ne provoque jamais à elle seule une remise à zéro du compteur |
 | `prefix` | text | Préfixe de série |
 | `next_number` | bigint | Prochain numéro strictement positif |
 | `padding` | smallint | Largeur minimale du compteur |
 | `updated_at` | timestamptz | Dernière réservation |
 
-Clé primaire : `(company_id, document_type, period_key)`.
+Clé/contrainte conceptuelle : `(company_id, document_type, establishment_id, series_code)`. La numérotation légale progresse continûment dans la série validée ; aucun redémarrage annuel n'est supposé autorisé. Le découpage par période est une métadonnée éventuelle et non la clé de remise à zéro.
 
-**Accès :** aucune lecture/écriture directe depuis le client authentifié. Une fonction dédiée réserve le numéro sous verrou transactionnel, puis retourne la valeur formatée. Un numéro utilisé ne doit jamais être réattribué ; les trous de séquence ne doivent pas provoquer de réutilisation.
+**Accès :** aucune lecture/écriture directe depuis le client authentifié. Une fonction dédiée réserve le numéro sous verrou transactionnel, puis retourne la valeur formatée. Un numéro utilisé ne doit jamais être réattribué ; les trous de séquence ne doivent pas provoquer de réutilisation. La série légale doit rester vérifiable et ininterrompue ; format, séries par établissement et périodicité doivent être validés localement avant tout redémarrage de compteur.
 
 ### 3.3 `quotes`
 
@@ -171,7 +173,7 @@ En-tête des factures autonomes ou issues d'un devis.
 | `customer_id` | uuid | Client de la même entreprise |
 | `source_quote_id` | uuid nullable | Devis source, si applicable |
 | `invoice_number` | text nullable | Null en brouillon ; unique par entreprise après émission |
-| `status` | text | `draft`, `issued`, `cancelled` |
+| `status` | text | `draft`, `issued`, `abandoned_draft` ; une correction après émission est enregistrée dans une entité séparée et ne supprime pas l'original |
 | `billing_kind` | text | `standalone`, `full`, `deposit`, `progress`, `final` |
 | `issue_date` | date | Date de facture |
 | `due_date` | date nullable | Échéance |
@@ -203,7 +205,7 @@ Contraintes proposées :
 - `quote_allocated_amount` est null pour une facture autonome. Pour une facture émise issue d'un devis, il est positif et égal au montant TTC imputé au devis pour cette tranche.
 - `full` n'est autorisé que si aucune autre facture émise non annulée n'existe pour le devis.
 - `final` consomme exactement le reste à facturer et interdit toute émission ultérieure sur ce devis.
-- Les factures émises sont immuables, hormis une procédure d'annulation contrôlée.
+- Les factures émises sont immuables. Une erreur après émission est corrigée par un document/dossier lié à l'original selon la procédure fiscale validée ; aucun statut d'annulation simple ne permet d'effacer une facture délivrée.
 
 Index : `(company_id, status, issue_date desc)`, `(company_id, customer_id, issue_date desc)`, `(company_id, source_quote_id, status)`, unicité du numéro.
 
@@ -258,7 +260,7 @@ La table contient déjà raison sociale, nom commercial, pays, devise par défau
 
 Réutiliser `app.log_event(company_id, action, entity_type, entity_id, metadata)`. Événements suggérés :
 - `quote.created`, `quote.updated`, `quote.sent`, `quote.accepted`, `quote.rejected`, `quote.cancelled`;
-- `invoice.created`, `invoice.issued`, `invoice.cancelled`;
+- `invoice.created`, `invoice.issued`, `invoice.draft_abandoned`, `invoice.correction_opened`, `invoice.correction_resolved`;
 - `invoice.quote_allocation_created` si une trace dédiée de l'imputation est souhaitée.
 
 Les métadonnées ne contiennent que les changements utiles, les montants de synthèse et les références nécessaires ; éviter les coordonnées client, notes privées, identifiants sensibles et données de paiement.
@@ -288,7 +290,8 @@ Les noms sont indicatifs ; les signatures exactes seront conçues dans l'implém
 2. `public.send_quote(quote_id)` : vérifie permission, entreprise, état, lignes, snapshots et numérotation ; passe le devis à `sent`.
 3. `public.record_quote_decision(quote_id, decision, method, reference)` : accepte ou refuse un devis transmis et encore valide.
 4. `public.issue_invoice(invoice_id)` : vérifie la facture brouillon, recalcule ses totaux, verrouille le devis source le cas échéant, valide le type de facturation, les quantités, le solde et la numérotation ; fige la facture et journalise.
-5. `public.cancel_invoice(invoice_id, reason)` : vérifie permission et conditions d'annulation ; conserve la trace et libère l'allocation du devis uniquement si la politique d'annulation validée le permet.
+5. `public.abandon_invoice_draft(invoice_id, reason)` : abandonne uniquement un brouillon non émis et conserve sa trace.
+6. `public.open_invoice_correction(invoice_id, reason)` : crée un dossier lié à une facture déjà émise, sans modifier l'original ni libérer son allocation ; la correction fiscale réelle attend la procédure validée.
 6. Fonctions de lecture du solde du devis et du cumul des quantités facturées, filtrées par entreprise et permission.
 
 **Concurrence :** lors de l'émission d'une facture issue d'un devis, verrouiller la ligne du devis avec `SELECT ... FOR UPDATE` ; recalculer le cumul dans la même transaction. Le numéro de document est réservé dans cette même transaction. Deux requêtes simultanées ne doivent jamais pouvoir franchir le plafond de facturation ou réutiliser un numéro.
@@ -421,3 +424,159 @@ Les fonctions et privilèges doivent être déployés dans le même changement c
 - Date opérationnelle utilisée pour déterminer la période de numérotation (date calendaire ou exercice).
 
 Aucune de ces questions ne doit être résolue par une valeur arbitraire dans une migration. Documenter la décision et sa source avant l'implémentation.
+
+
+## 15. Extension du modèle — conformité fiscale burkinabè
+
+Cette section complète les tables conceptuelles précédentes. Elle ne constitue pas une migration SQL. Les règles doivent être revues avec un professionnel fiscal avant leur codage.
+
+### 14.1 Profil d'identité de facturation
+
+Le company_billing_profiles doit en plus contenir, ou référencer de manière fiable :
+- forme juridique et raison sociale officielle ;
+- IFU ;
+- RCCM ou numéro de registre professionnel/artisanal applicable ;
+- adresse géographique, adresse cadastrale et adresse postale/boîte postale ;
+- téléphone ;
+- références bancaires devant être imprimées sur la facture ;
+- service des impôts de rattachement ;
+- informations d'établissement/point de vente lorsque cela conditionne la série ou le système de facturation.
+
+Ne pas stocker des identifiants bancaires secrets, clés d'accès ou données d'authentification dans le profil d'impression. Les références à afficher sur la facture ne sont pas des secrets d'authentification.
+
+Le dossier client doit pouvoir conserver, selon le type de client : nom/prénoms ou raison sociale/forme juridique, adresse, téléphone, IFU, RCCM ou registre professionnel. Les champs deviennent obligatoires à la validation/émission selon les dispositions applicables à la catégorie du client.
+
+Le profil fiscal client doit également pouvoir enregistrer sa catégorie administrative (notamment entité publique / RND lorsque ce statut est justifié) et un indicateur daté indiquant si le client exige une FEC de ses fournisseurs locaux. Cette exigence côté acheteur ne constitue pas une autorisation pour PolyGest de certifier lui-même une facture.
+
+#### Profil client fiscal (conceptuel)
+
+customer_fiscal_profiles doit permettre de conserver :
+- company_id et customer_id ;
+- buyer_category (public_entity, RND, ordinary_business, individual ou code contrôlé) ;
+- fec_acceptance_required et sa date d'effet ;
+- legal_basis_reference, proof_document_id, verified_at et verified_by ;
+- historique de modification et statut actif/inactif.
+
+Une exigence FEC déclarée par le client doit être vérifiée et datée ; elle ne déclenche jamais à elle seule une certification locale.
+
+### 14.2 Historique fiscal à effet daté
+
+Ajouter company_tax_profile_history plutôt que de remplacer silencieusement le régime actuel. Champs conceptuels :
+- company_id ;
+- regime_code (RNI, RSI, CME, CSE, RND ou code futur contrôlé) ;
+- regime_variant (notamment CME forfaitaire/déclarative si pertinent) ;
+- tax_department_code et tax_department_name ;
+- tax_management_category (DGE, DME, autre) ;
+- vat_collection_status ;
+- vat_option_or_authorization_reference ;
+- vat_effective_from et vat_effective_to ;
+- normalized_invoice_status et effective dates ;
+- fec_required_status et effective dates ;
+- exemption_reference / exemption_reason si une dispense est officiellement applicable ;
+- proof_document_id, verified_at, verified_by, legal_source_reference ;
+- turnover_alert_amount / turnover_period, à titre d'alerte seulement, sans changement automatique de régime.
+
+Une seule ligne de profil fiscal doit être effective à une date donnée. Les intervalles doivent être contrôlés pour empêcher des périodes qui se chevauchent. Un changement doit créer une nouvelle période et un événement d'audit.
+
+### 14.3 Référentiel fiscal versionné
+
+Créer tax_rule_versions avec au minimum :
+- country_code ;
+- tax_code et tax_label ;
+- tax_type (TVA, taxe additionnelle, autre) ;
+- tax_treatment (taxable, exempt, non_vat_supplier, out_of_scope) ;
+- rate ;
+- valid_from / valid_to ;
+- eligible_regimes, eligible_activity_codes et conditions d'agrément ;
+- legal_reference et source_url ;
+- exemption_reason_code lorsque nécessaire ;
+- rounding_policy_version ;
+- created_at, approved_by, approval_status.
+
+La TVA normale (18 %) et les cas réduits documentés (10 % pour les activités éligibles) sont des versions de règles, non des constantes UI. Les règles d'exonération doivent être identifiables par une référence. Le statut non-autorisé à collecter la TVA ne doit pas être modélisé par une règle de taux 0 %.
+
+### 14.4 Snapshots fiscaux de facture et de ligne
+
+Compléter quotes / invoices et leurs lignes par des snapshots explicites :
+- régime fiscal et sous-régime de l'émetteur ;
+- service/direction fiscale et catégorie DGE/DME à la date du document ;
+- statut d'autorisation TVA et référence/date de validité ;
+- catégorie d'opération (biens, services, travaux immobiliers, importation/service non-résident, autre valeur contrôlée) ;
+- traitement fiscal de ligne : taxable, exonéré, non-collecteur TVA, hors champ si confirmé ;
+- tax_rule_version_id, base taxable, taux, montant TVA et motif d'exonération ;
+- référence juridique/version de règle utilisée ;
+- identifiant et données fiscales du client requises par sa catégorie.
+
+Ces données sont figées à l'émission ; une modification ultérieure du profil entreprise ou client ne réécrit jamais le document.
+
+### 14.5 Événements fiscaux de paiement
+
+Créer invoice_fiscal_events, registre minimal pour les dates/montants qui déterminent l'exigibilité fiscale, en attendant l'intégration complète à Encaissements :
+- company_id, invoice_id nullable, quote_id nullable, event_type ; l'événement peut être relié à un devis lorsqu'un acompte est reçu avant l'émission de la facture ;
+- amount et currency_code ;
+- occurred_at, received_at ;
+- payment_method (cash, scriptural, withholding, other controlled value) ;
+- receipt_reference et private_proof_document_id ;
+- vat_withheld_amount, withholding_rate, withholding_certificate_reference et withholding_payer_id ;
+- created_by, created_at, correction/reversal reference.
+
+Un événement doit être immuable après validation ; une correction se fait par événement inverse/rectificatif lié. Le futur module Trésorerie pourra devenir la source de ces événements sans supprimer leur historique. Ce registre n'effectue pas le rapprochement bancaire.
+
+La retenue à la source de TVA à 30 % ne doit être appliquée que pour les catégories d'acheteurs/opérations explicitement visées par les textes en vigueur et après vérification du certificat. Ce montant n'est ni une remise commerciale ni une baisse du total TTC.
+
+### 14.6 Sortie normalisée et certification
+
+Créer invoice_fiscal_outputs pour séparer la facture commerciale de sa sortie fiscale :
+- invoice_id, company_id ;
+- output_type (normalized_invoice, fec) ;
+- output_status (not_required, pending, issued, certified, rejected, recovery_required, corrected — valeurs à finaliser avec la procédure DGI) ;
+- secef_type (physical_uf, physical_mcf, sfe) ;
+- provider_name, provider_ifu, homologation_reference, attestation_id ;
+- secef_system_id, transaction_authentication_code, qr_payload/reference ;
+- issued_at, response_at, request_id/idempotency_key ;
+- structured_payload_hash, response_reference, private_document_id ;
+- original_output_id pour correction/annulation autorisée.
+
+Ne jamais simuler les champs de sécurité d'une FEC. Les champs de certification ne peuvent être remplis que par une réponse authentifiée de la solution homologuée. Le schéma et le protocole réels ne seront fixés qu'à partir des spécifications DGI remises dans le cadre de l'homologation.
+
+Créer company_secef_profiles pour l'équipement ou SFE réellement utilisé, son fournisseur, son attestation, sa période de validité, les points de vente concernés et son statut de connexion. Ajouter les champs customer_fiscal_profiles pour documenter les exigences FEC côté acheteur public/RND, avec dates et justificatifs.
+
+### 14.7 Numérotation et correction
+
+La série légale de factures doit être ininterrompue. Le modèle actuel de séquence par période ne doit pas imposer un redémarrage annuel. En attendant la validation de la DGI/conseil fiscal :
+- numéroter dans une série dont la continuité est vérifiable ;
+- tracer les numéros réservés, émis, rejetés, annulés ou en attente ;
+- ne jamais réattribuer un numéro déjà consommé ;
+- séparer série de devis et série de factures ;
+- gérer une série par établissement/point de vente uniquement si elle est juridiquement validée.
+
+Une facture émise ne peut pas être supprimée ni simplement passée à cancelled pour effacer ses effets. En attendant la procédure fiscale validée, le statut `issued` de l'original est conservé et une correction n'ajuste pas automatiquement l'allocation du devis. Les corrections/avoirs doivent être représentés par un document lié à l'original ou par la procédure officielle du SECeF/SFE homologué. Le modèle de correction précis attend la validation juridique et technique.
+
+### 14.8 Archivage
+
+Conserver, dans un stockage privé :
+- les données structurées de la facture ;
+- la représentation originale délivrée au client ;
+- la réponse et les données fiscales de certification le cas échéant ;
+- les justificatifs d'événements fiscaux, retenues et corrections ;
+- les événements d'audit et empreintes de document.
+
+La durée cible minimale est de dix ans pour les pièces visées par les textes consultés, à revalider selon la nature du document et le point de départ légal du délai. La suppression automatique ne doit pas être autorisée en présence d'une obligation de conservation ou d'un contentieux.
+
+## 16. Contraintes et tests supplémentaires
+
+- Impossible d'émettre une facture avec TVA sans statut de collecte autorisé et effectif à la date du document.
+- Impossible de simuler une facture sans TVA avec une taxe à 0 %.
+- Les règles de taux réduit ne peuvent être utilisées qu'avec une activité et les justificatifs/agréments prévus.
+- Un dépassement de chiffre d'affaires déclenche une alerte et une demande de justificatif fiscal, jamais un changement automatique de régime.
+- Le changement de régime, de catégorie DGE/DME ou d'autorisation TVA est historisé avec ses dates d'effet.
+- Les champs obligatoires d'émetteur et de client sont contrôlés selon le régime et la catégorie.
+- Une facture FEC ne peut pas être marquée certified sans réponse valide du système homologué et ses données d'authentification.
+- Le PDF standard n'est jamais présenté comme une FEC.
+- Les tests de TVA distinguent biens, services, travaux immobiliers, avances reçues et cas particuliers.
+- Une avance non encaissée ne doit pas être assimilée silencieusement à une avance reçue pour le calcul de l'exigibilité, sous réserve de validation des règles applicables.
+- Les événements d'encaissement et de retenue sont auditables et ne peuvent être supprimés ; les corrections sont liées à l'original.
+- Une retenue TVA ne diminue pas le montant TTC de la vente et ne devient un crédit déductible qu'avec les preuves admises.
+- Les paiements dépassant le seuil légal de paiement scriptural déclenchent une vérification du moyen de paiement ; le blocage automatique attend une validation juridique.
+- Les numéros légaux ne sont jamais réattribués ; chaque trou doit être explicable et documenté.
+- Les documents et preuves sont archivés selon la politique de conservation et exportables en cas de contrôle.

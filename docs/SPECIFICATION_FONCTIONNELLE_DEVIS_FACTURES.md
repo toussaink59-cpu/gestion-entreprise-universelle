@@ -16,9 +16,9 @@ Le module doit préserver l'historique des documents émis, empêcher la factura
 ### Inclus
 
 - Création, consultation et modification des devis à l'état brouillon.
-- Gestion des lignes : description libre, unité, quantité, prix unitaire, remise de ligne et taxe paramétrable.
+- Gestion des lignes : description libre, unité, quantité, prix unitaire, remise et traitement fiscal sélectionné dans le référentiel autorisé du profil entreprise.
 - Calcul des sous-totaux, remises, taxes et totaux avec une arithmétique décimale fiable.
-- Numérotation des devis et factures par entreprise et période.
+- Numérotation des devis par série commerciale et des factures par série légale validée ; aucune remise à zéro annuelle ou réattribution d'un numéro n'est supposée autorisée sans validation locale.
 - Enregistrement de l'envoi d'un devis et de la réponse du client.
 - Acceptation, refus, expiration calculée à partir de la date de validité et annulation d'un devis.
 - Génération d'une facture autonome ou depuis un devis accepté.
@@ -27,17 +27,19 @@ Le module doit préserver l'historique des documents émis, empêcher la factura
 - Calcul du montant déjà facturé et du reste à facturer pour chaque devis.
 - Aperçu et génération PDF à partir des données figées du document.
 - Journalisation des événements importants dans le journal d'audit existant.
+- Registre minimal des événements d'avance/acompte et des paiements reçus nécessaires à la détermination de l'exigibilité de la TVA ; ce registre ne remplace pas le module Trésorerie.
 - Contrôles de permissions et isolation multi-entreprises côté serveur et en base.
 
 ### Hors périmètre de la V1
 
-- Enregistrement et rapprochement des paiements, rapprochement bancaire et caisse : ils feront l'objet du module Encaissements / Trésorerie. Le modèle prévoit le lien futur avec les factures.
+- Gestion complète des paiements, rapprochement bancaire, caisse, comptes de trésorerie et lettrage : ils feront l'objet du module Encaissements / Trésorerie. En revanche, le registre fiscal minimal des événements de paiement (date, montant, moyen, justificatif, retenue éventuelle) est requis dès la V1 pour calculer correctement l'exigibilité de TVA sur certaines avances et prestations.
 - Catalogue de produits/services, stocks et mouvements de stock : les lignes sont saisies librement dans cette V1.
-- Avoirs, notes de crédit, remboursements et corrections comptables avancées.
+- Automatisation complète des avoirs, notes de crédit et remboursements. Une procédure contrôlée de correction des factures émises/certifiées reste toutefois obligatoire avant utilisation réelle ; une facture émise ne doit jamais être supprimée ou modifiée silencieusement.
 - Signature électronique ou portail client.
 - Relances automatiques, échéanciers automatisés et envoi d'e-mails transactionnels intégré. L'utilisateur peut marquer un document comme transmis après l'avoir envoyé par son canal habituel.
 - Facturation multi-devises et conversion de devises.
 - Comptabilité générale et déclarations fiscales.
+- Émission de FEC par PolyGest tant que le SFE n'a pas obtenu l'homologation requise et que les spécifications officielles d'intégration n'ont pas été validées.
 - Garantie de conformité fiscale ou légale sans validation par un professionnel compétent du pays et du régime concernés.
 
 ### Règle de TVA retenue pour le marché initial (Burkina Faso)
@@ -65,6 +67,26 @@ La DGI précise que seuls les contribuables relevant du RNI sont habilités à f
 
 Références officielles : [DGI — Régimes d'imposition](https://dgi.bf/regime_imposition/) et [DGI — FAQ Régimes d'imposition](https://dgi.bf/faq-regimes-dimposition/). Le paramétrage doit être revalidé en cas d'évolution de la législation.
 
+### Facture normalisée et FEC : exigences distinctes
+
+La facture normalisée est un document fiscal obligatoire pour les industriels, commerçants, prestataires de services, importateurs, producteurs et entrepreneurs de travaux immobiliers visés par les textes, quel que soit leur régime, sous réserve des dispenses légales. Une entreprise qui ne collecte pas la TVA n'est donc pas automatiquement dispensée d'émettre une facture normalisée.
+
+La facture électronique certifiée (FEC) relève d'un régime distinct. Les textes consultés prévoient l'obligation pour les entreprises relevant de la DGE et des DME, sous réserve des conditions et étapes d'application fixées par les textes et communiqués DGI. PolyGest doit enregistrer séparément le rattachement DGE/DME et le régime fiscal (RNI/RSI/CME/etc.).
+
+Le calendrier de mise à disposition annoncé le 28 août 2026 distingue la DGE (7 septembre 2026), les contribuables RNI des DME (2 novembre 2026) et les contribuables RND des DME (1er décembre 2026), avec 30 jours de mise en conformité après chaque date. Un communiqué DGI du 29 octobre 2026 annonce une utilisation effectivement exigée par les contribuables DGE à partir du 1er janvier 2027. Les échéances DME non explicitement publiées pour une catégorie donnée ne doivent pas être extrapolées ; joindre les copies officielles et confirmer la situation de chaque entreprise avant activation. L'arrêté FEC prévoit aussi une exigence d'acceptation côté acheteur public/RND pour les FEC émises par des fournisseurs locaux, sous réserve d'exceptions.
+
+Un document PDF produit par PolyGest ne doit jamais être présenté comme une FEC sans émission et authentification par un système SECeF/SFE homologué. Le chantier FEC est bloqué jusqu'à obtention de la documentation technique officielle, de l'homologation pertinente et des tests requis. Référentiel détaillé : [Conformité fiscale — Facturation au Burkina Faso](CONFORMITE_FISCALE_BURKINA_FACTURATION.md).
+
+### Exigibilité de TVA et facturation fractionnée
+
+Les avances/acompte effectivement reçus peuvent rendre la TVA exigible avant l'achèvement d'une prestation de services ou de travaux immobiliers. La date d'émission de facture, la date de livraison/achèvement et la date réelle d'encaissement ne sont donc pas toujours interchangeables. Pour les entreprises autorisées à collecter la TVA, la V1 doit enregistrer les événements d'encaissement fiscalement pertinents, même si le rapprochement bancaire et la trésorerie complète restent hors périmètre.
+
+Le type d'opération (biens, services, travaux immobiliers, importation/service de non-résident ou autre catégorie validée) doit déterminer les règles de fait générateur et d'exigibilité. Ne pas appliquer une seule date de TVA à toutes les factures.
+
+### Règles de taux et de présentation
+
+Le taux normal de référence documenté est 18 %. Le taux réduit de 10 % ne s'applique qu'à des catégories et conditions spécifiques, notamment les prestations d'hébergement/restauration par des établissements agréés et le transport aérien domestique. Les taux, exonérations et dates d'effet doivent être versionnés, sourcés et autorisés par le profil fiscal et la nature de l'opération. Une facture émise par un fournisseur non autorisé à collecter la TVA doit être présentée sans ligne fictive de TVA à 0 %.
+
 ## 3. Acteurs et permissions proposées
 
 La base actuelle possède les rôles `owner`, `company_admin`, `finance`, `sales_purchasing`, `auditor`, `hr_payroll`, `operations` et `employee`. Elle possède déjà les actions `read`, `create`, `update`, `validate`, `cancel` et `export`, mais le module `quotes` n'existe pas encore dans le référentiel des permissions.
@@ -75,7 +97,7 @@ Matrice initiale proposée (à faire valider par le porteur du projet) :
 |---|---|---|
 | owner | Tous droits | Tous droits |
 | company_admin | Tous droits | Tous droits |
-| finance | Lecture et export | Lecture, création, modification des brouillons, émission, annulation autorisée et export |
+| finance | Lecture et export | Lecture, création, modification des brouillons, émission et export ; ouverture d'un dossier de correction selon habilitation |
 | sales_purchasing | Lecture, création, modification des brouillons, transmission et enregistrement de la réponse client | Lecture et création/modification des brouillons ; pas d'émission ni d'annulation en V1 |
 | auditor | Lecture et export | Lecture et export |
 | hr_payroll, operations, employee | Aucun accès par défaut | Aucun accès par défaut |
@@ -143,12 +165,12 @@ La V1 doit permettre trois catégories de tranches :
 Règles impératives :
 - Chaque facture partielle correspond uniquement à une nouvelle tranche du montant du devis. Elle ne répète pas les montants déjà facturés.
 - Le montant imputé au devis est le total TTC (ou total du document selon le régime fiscal paramétré) de la facture émise.
-- Le cumul des montants imputés par les factures émises et non annulées ne peut jamais dépasser le total accepté du devis.
+- Le cumul des montants imputés par les factures émises ne peut jamais dépasser le total accepté du devis. Une correction fiscale ne libère pas automatiquement l'allocation ; seul le mécanisme de correction validé peut ajuster le solde.
 - Le solde restant à facturer est calculé par le serveur : total accepté moins cumul déjà facturé.
 - Une facture de situation liée à une ligne du devis ne peut pas porter le cumul des quantités facturées au-delà de la quantité acceptée sur cette ligne.
 - Un acompte augmente le montant facturé du devis mais ne consomme pas la quantité des lignes.
 - Une facture de solde doit utiliser exactement le solde restant ; après elle, aucune autre facture ne peut être émise sur le devis.
-- Une facture annulée selon une procédure autorisée n'est plus comptée dans le cumul ; l'annulation doit être justifiée et journalisée.
+- Une facture émise reste comptabilisée dans le cumul tant qu'un document de correction légalement admis n'a pas été émis et relié à l'original ; la simple ouverture d'un dossier de correction ne libère pas le montant.
 - Les contrôles doivent être transactionnels avec verrouillage du devis afin d'éviter deux émissions simultanées qui dépasseraient le total.
 
 **Convention de facturation retenue pour la V1 :** une facture de situation représente une tranche nouvelle, et non un cumul d'avancement déjà facturé. Les montants des factures successives s'additionnent pour atteindre le total accepté ; les acomptes ne sont pas déduits une seconde fois dans les factures suivantes. Cette convention doit être explicitement affichée dans l'interface et validée par un professionnel comptable/fiscal avant toute utilisation réelle, car les usages et mentions de facture peuvent dépendre du pays et du régime.
@@ -170,12 +192,13 @@ Exemple purement illustratif, hors taxe et sans portée réglementaire :
 - Elle n'entre dans aucun calcul de reste à facturer d'un devis.
 - Le client doit appartenir à la même entreprise.
 
-### 4.7 Émission, consultation et annulation d'une facture
+### 4.7 Émission, consultation et correction d'une facture
 
-- Une facture brouillon est modifiable ou annulable ; la suppression définitive n'est pas proposée en V1.
+- Une facture brouillon est modifiable ou peut être abandonnée ; la suppression définitive n'est pas proposée en V1.
 - À l'émission, son numéro, ses dates, les coordonnées du client et de l'émetteur, les lignes, la devise, les taxes et les totaux sont figés.
-- Une facture émise n'est jamais modifiée silencieusement. Toute correction doit passer par une procédure tracée.
-- La V1 prévoit une action d'annulation avec motif, acteur, date et permission dédiée. La légitimité de l'annulation d'une facture émise et le besoin éventuel d'un avoir doivent être validés selon les règles du pays/régime ; les avoirs ne sont pas inclus dans cette V1.
+- Une facture émise n'est jamais modifiée ni supprimée silencieusement.
+- Une facture émise ne passe pas simplement à l'état `cancelled` pour effacer sa portée fiscale. Une erreur après émission ouvre un dossier de correction lié à l'original ; le mécanisme légal (avoir, facture rectificative ou procédure SECeF/SFE) doit être établi avant toute mise en production.
+- La correction complète et l'émission d'avoirs sont hors du périmètre fonctionnel actuel ; tant que ce mécanisme n'est pas livré et validé, l'émission réelle doit être désactivée dans les cas où une correction pourrait être nécessaire.
 - Le statut de paiement ne sera pas modifié manuellement dans ce module. Il sera calculé à partir des encaissements et affectations de paiements, développés dans le module suivant.
 
 ## 5. Statuts et transitions
@@ -198,9 +221,9 @@ Le niveau de facturation (non facturé, partiellement facturé, totalement factu
 
 | Statut stocké | Signification | Transitions permises |
 |---|---|---|
-| `draft` | Préparation, non opposable comme facture émise | `issued`, `cancelled` |
-| `issued` | Numérotée et figée | `cancelled` via procédure autorisée uniquement |
-| `cancelled` | Annulée avec motif et trace | Terminal |
+| `draft` | Préparation, non opposable comme facture émise | `issued`, `abandoned_draft` |
+| `issued` | Numérotée et figée | Reste émise ; une correction est portée par un dossier/document lié, pas par effacement de l'original |
+| `abandoned_draft` | Brouillon abandonné avant émission, sans facture fiscale délivrée | Terminal |
 
 Les états « impayée », « partiellement payée », « payée » et « en retard » sont des états de règlement calculés après intégration des paiements. « En retard » dépend de l'échéance et du solde restant dû ; ce n'est pas un statut métier à saisir manuellement.
 
@@ -225,7 +248,7 @@ Les états « impayée », « partiellement payée », « payée » et « en ret
 3. Détail du devis : document, statut, historique, aperçu PDF, transmission, décision et action de facturation.
 4. Liste des factures : recherche, filtres par statut/période/client, indicateur de provenance (devis ou autonome).
 5. Création/édition de facture : mode autonome ou depuis devis, lignes, échéance et total.
-6. Détail de facture : aperçu figé, PDF, émission et annulation autorisée.
+6. Détail de facture : aperçu figé, PDF, émission et ouverture d'un dossier de correction.
 
 Règles UI :
 - Respecter `docs/POLYGEST_DESIGN_SYSTEM.md` et les skills `polygest-frontend-design` et `polygest-ui-quality`.
@@ -300,8 +323,13 @@ Les éléments suivants ne sont pas déterminés par les migrations actuelles et
 2. **Profil émetteur :** adresse, téléphone, e-mail, identifiant fiscal, logo et conditions de règlement requis sur les documents.
 3. **Numérotation :** format souhaité (préfixe, année, compteur) et éventuelles obligations de séquence.
 4. **Permissions :** valider la matrice proposée, particulièrement le droit d'émission pour finance et la transmission des devis pour sales_purchasing.
-5. **Annulation :** confirmer les cas où une facture émise peut être annulée et quand un avoir sera indispensable.
+5. **Correction :** confirmer la procédure légale d'avoir, facture rectificative ou correction SECeF/SFE pour une facture émise.
 6. **Mode de transmission :** manuel en V1 ou intégration d'un fournisseur d'e-mail.
 7. **Devise et précision :** confirmer les paramètres de devise et d'arrondi par entreprise.
 
 Aucune migration SQL de production ne doit être préparée comme définitive tant que ces décisions ne sont pas validées. La présente spécification constitue le contrat fonctionnel proposé pour la conception technique.
+
+
+### Référentiel réglementaire burkinabè
+
+La spécification doit être lue avec [CONFORMITE_FISCALE_BURKINA_FACTURATION.md](CONFORMITE_FISCALE_BURKINA_FACTURATION.md), qui documente les régimes, la facture normalisée, la FEC, les taux, l'exigibilité, les retenues, les moyens de paiement et la conservation. Ce référentiel est daté du 3 novembre 2026 et demeure soumis à validation fiscale avant mise en production.
