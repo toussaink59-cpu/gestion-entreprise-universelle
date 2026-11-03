@@ -8,7 +8,7 @@
 
 1. Toute donnée commerciale appartient à une entreprise via `company_id`.
 2. L'identifiant de l'entreprise est conservé dans les clés étrangères et index utiles pour rendre les erreurs de tenant impossibles à valider.
-3. Les documents envoyés/émis contiennent des snapshots des parties, des lignes, de la devise, des taxes et des totaux. Une modification ultérieure de la fiche client ne réécrit jamais l'historique.
+3. Les documents envoyés/émis contiennent des snapshots des parties, des lignes, de la devise, des taxes et des totaux. Une modification ultérieure de la fiche client ne réécrit jamais l'historique. Les brouillons peuvent être annulés, mais les documents ne sont pas supprimés définitivement depuis l'interface.
 4. Tous les montants sont stockés en types décimaux ; aucun calcul financier n'utilise `float` ou `double precision`.
 5. Les numéros sont attribués par une opération transactionnelle, avec verrouillage du compteur.
 6. Les brouillons sont éditables ; les documents transmis ou émis sont figés.
