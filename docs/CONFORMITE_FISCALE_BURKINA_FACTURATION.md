@@ -113,9 +113,30 @@ Les anciennes instructions sur les stickers, formats papier et dispositifs de s�
 
 ### 3.3 Exceptions
 
-Des dispenses existent dans les textes pour certaines catégories d'opérations ou d'entités. L'instruction administrative de 2020 décrit notamment des exceptions relatives à certaines activités publiques non commerciales, aux fournisseurs sans établissement stable, à des ventes au détail et à des secteurs particuliers. L'article 566 du CGI et les textes FEC plus récents prévoient leurs propres listes d'exemptions, qui ne doivent pas être confondues.
+L'article 566 du CGI distingue deux listes différentes :
 
-**Règle produit :** aucune dispense ne doit être déduite à partir d'un champ libre. Une exception doit être choisie dans une liste contrôlée, justifiée par un texte/référence, datée et validée par un administrateur habilité.
+**Dispenses d'usage de facture normalisée (article 566, paragraphe 1)** :
+- État, collectivités territoriales et établissements publics sans activité industrielle ou commerciale ;
+- entreprises sans établissement stable au Burkina Faso ;
+- entreprises de vente à rayons multiples pour les ventes au détail donnant lieu à tickets/tickets de caisse ;
+- pharmacies ;
+- sociétés de navigation aérienne ;
+- entreprises de transport urbain en commun pour les transports de personnes donnant lieu à tickets ;
+- stations-services pour les ventes de carburant ;
+- banques, établissements financiers et systèmes financiers décentralisés ;
+- sociétés d'assurance ;
+- concessionnaires de service public d'eau et d'électricité ;
+- entreprises de téléphonie titulaires d'une licence ;
+- opérateurs de télévision privée pour les seuls abonnements/réabonnements de particuliers ;
+- fournisseurs d'accès internet pour les seuls abonnements/réabonnements de particuliers ;
+- CCVA, SONABHY, Poste Burkina Faso et LONAB, dans les conditions du texte.
+
+**Dispenses de FEC (article 566, paragraphe 2)** :
+- pour les contribuables relevant de la DGE : État, collectivités et établissements publics sans activité industrielle ou commerciale ; entreprises sans établissement stable au Burkina Faso ; sociétés de navigation aérienne ; entreprises de transport urbain en commun pour les transports de personnes donnant lieu à tickets.
+
+La liste des dispenses de facture normalisée ne doit pas être automatiquement appliquée à la FEC : le paragraphe 2 est une liste distincte, formulée pour les contribuables de la DGE. L'arrêté FEC prévoit par ailleurs des documents tenant lieu de FEC pour des situations déterminées ; ces cas doivent être traités séparément après examen du texte applicable.
+
+**Règle produit :** aucune dispense ne doit être déduite à partir d'un champ libre. Une exception doit être choisie dans une liste contrôlée, rattachée à son fondement légal, à l'opération et à la période, justifiée par une pièce/référence et validée par un administrateur habilité.
 
 ## 4. Facture électronique certifiée (FEC) et homologation
 
@@ -224,7 +245,9 @@ Ce registre ne remplace pas la trésorerie : il ne réalise ni rapprochement ban
 
 ### 7.1 Retenue à la source de TVA en 2026
 
-La loi de finances 2026 a introduit/renforcé une retenue à la source de TVA de 30 % dans des situations définies, notamment pour certaines catégories d'acheteurs/entreprises relevant de la DGE et pour les paiements effectués par les organismes payeurs publics à des fournisseurs locaux titulaires de marchés publics, selon les conditions de l'article 334.
+La loi de finances 2026, applicable à compter du 1er janvier 2026, prévoit à l'article 334, paragraphe 4, une retenue de 30 % sur le montant de la TVA due :
+- par les entreprises exportatrices de biens taxables en régime intérieur éligibles au remboursement de crédit de TVA au sens de l'article 328, ainsi que par les entreprises relevant de la DGE, à l'occasion de leurs achats de biens et services ;
+- par les organismes payeurs, à l'occasion de tout paiement au profit des titulaires de commandes publiques résidents.
 
 Cette retenue ne constitue pas une réduction du prix ou une remise commerciale. Elle ne doit pas être déduite du total TTC de la facture comme si la vente avait été moins chère. Elle doit être enregistrée comme un montant retenu à la source, avec :
 - montant de TVA facturé ;
@@ -236,9 +259,13 @@ Cette retenue ne constitue pas une réduction du prix ou une remise commerciale.
 - référence du certificat délivré ;
 - référence de déclaration/reversement, quand disponible.
 
-Le certificat doit être conservé pour permettre le traitement dans les déclarations et crédits de TVA du fournisseur. Les cas précis d'application et le taux effectif doivent être paramétrés après revue de l'article et de la situation de l'acheteur.
+Le certificat doit être conservé pour permettre le traitement dans les déclarations et crédits de TVA du fournisseur. La déclaration de retenue comporte notamment les informations du fournisseur, l'IFU, les dates et montants de facture et de paiements, ainsi que la retenue opérée. Le certificat individuel remis au fournisseur doit comporter les références de la quittance de paiement.
 
-### 7.2 Paiements scripturaux à partir de 1 000 000 FCFA
+### 7.2 Plateformes de commerce électronique
+
+La loi de finances 2025 a également complété l'article 334 pour les ventes et prestations réalisées par l'intermédiaire de plateformes de commerce électronique : l'opérateur de la plateforme est chargé de liquider, déclarer et reverser la TVA due sur les ventes/prestations concernées pour le compte des fournisseurs, et de déclarer/reverser la TVA due sur les commissions qu'il perçoit. Cette règle vise l'opérateur de plateforme ; elle ne doit pas être attribuée automatiquement à chaque entreprise utilisant un logiciel de gestion. Si un module de marketplace est un jour intégré à PolyGest, ce rôle et ces obligations devront faire l'objet d'une analyse juridique distincte.
+
+### 7.3 Paiements scripturaux à partir de 1 000 000 FCFA
 
 La loi de finances 2025 a fixé un seuil de 1 000 000 FCFA TTC pour le règlement par moyens scripturaux de certaines acquisitions de biens, services et actifs. Le texte prévoit des conséquences fiscales et pénalités en cas de paiement en espèces non conforme. Cela concerne autant le contrôle des achats que la façon dont le fournisseur enregistre les encaissements concernés.
 
