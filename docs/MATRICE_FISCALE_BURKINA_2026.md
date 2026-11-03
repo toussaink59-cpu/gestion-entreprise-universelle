@@ -3,7 +3,7 @@
 **Produit :** PolyGest  
 **Juridiction :** Burkina Faso  
 **Date de cadrage :** 3 novembre 2026  
-**Version :** 0.3 — projet de consolidation documentaire, non validé professionnellement  
+**Version :** 0.4 — revue corrective documentaire, non validée professionnellement  
 **Périmètre :** régimes d'imposition, TVA, facturation normalisée, facture électronique certifiée (FEC), retenues, acomptes, situations de travaux, conservation et contrôles de cohérence  
 **Décision d'architecture :** aucun calcul fiscal irréversible ni aucune affirmation de conformité ne peut être activé sur la seule base de ce document.
 
