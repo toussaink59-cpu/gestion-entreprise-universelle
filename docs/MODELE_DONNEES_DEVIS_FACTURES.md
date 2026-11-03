@@ -43,6 +43,12 @@ Une ligne par entreprise pour les informations complémentaires de l'émetteur. 
 |---|---|---|
 | `company_id` | uuid | PK et FK vers `companies.id`, suppression restreinte |
 | `tax_identifier` | text nullable | Identifiant fiscal de l'entreprise |
+| `tax_regime_code` | text nullable | Régime fiscal vérifié : `CME`, `RSI`, `RNI`, `CSE`, `RND` ou autre code documenté ; ne pas le déduire uniquement du chiffre d'affaires |
+| `vat_collection_status` | text | `not_authorized`, `authorized_rni`, `authorized_by_option`, `special_case_to_validate` |
+| `vat_authorization_reference` | text nullable | Référence de la décision/option ou pièce justificative si applicable |
+| `vat_effective_from`, `vat_effective_to` | date nullable | Période pendant laquelle l'autorisation TVA est effective |
+| `tax_profile_verified_at` | timestamptz nullable | Date de vérification du profil fiscal |
+| `tax_profile_verified_by` | uuid nullable | Membre ayant enregistré la vérification |
 | `address` | text nullable | Adresse à afficher |
 | `city` | text nullable | Ville |
 | `postal_code` | text nullable | Code postal si applicable |
@@ -54,7 +60,9 @@ Une ligne par entreprise pour les informations complémentaires de l'émetteur. 
 | `updated_by` | uuid nullable | FK vers `users.id` |
 | `created_at`, `updated_at` | timestamptz | Horodatage |
 
-**Accès proposé :** lecture aux membres disposant de `company:read`, modification aux membres disposant de `company:update`. RLS obligatoire. Les secrets bancaires ou moyens de paiement sensibles ne sont pas stockés dans ce profil.
+**Règle fiscale Burkina Faso :** le profil enregistre le régime confirmé par l'entreprise/conseil fiscal et l'autorisation effective de facturer la TVA. Pour la règle générale publiée par la DGI, le RNI (CA annuel HT égal ou supérieur à 50 millions FCFA) est habilité à facturer la TVA ; le RSI (15 à moins de 50 millions) et la CME (moins de 15 millions) ne le sont pas. Le RSI peut toutefois demander l'option pour le RNI, sous conditions et après acceptation. Les cas particuliers doivent être vérifiés, pas inférés automatiquement.
+
+**Accès proposé :** lecture aux membres disposant de `company:read`, modification aux membres disposant de `company:update`. RLS obligatoire. Les changements de régime/autorisation doivent être datés et audités. Les secrets bancaires ou moyens de paiement sensibles ne sont pas stockés dans ce profil. Référence : [DGI — Régimes d'imposition](https://dgi.bf/regime_imposition/).
 
 ### 3.2 `document_sequences`
 
@@ -90,7 +98,7 @@ En-tête des devis.
 | `currency_code` | char(3) | Devise figée à partir de l'entreprise |
 | `subject` | text nullable | Objet |
 | `customer_snapshot` | jsonb | Coordonnées client figées à la transmission |
-| `issuer_snapshot` | jsonb | Identité émetteur figée à la transmission |
+| `issuer_snapshot` | jsonb | Identité émetteur, régime fiscal et statut TVA effectif figés à la transmission |
 | `terms` | text nullable | Conditions du devis |
 | `notes` | text nullable | Note non contractuelle selon règle d'affichage |
 | `subtotal_amount` | numeric(20,4) | Somme avant remises |
@@ -169,7 +177,7 @@ En-tête des factures autonomes ou issues d'un devis.
 | `due_date` | date nullable | Échéance |
 | `currency_code` | char(3) | Devise figée |
 | `customer_snapshot` | jsonb | Client figé à l'émission |
-| `issuer_snapshot` | jsonb | Émetteur figé à l'émission |
+| `issuer_snapshot` | jsonb | Émetteur, régime fiscal et statut TVA effectif figés à l'émission |
 | `subject` | text nullable | Objet |
 | `terms` | text nullable | Conditions |
 | `notes` | text nullable | Note d'affichage |
@@ -294,6 +302,11 @@ Les noms sont indicatifs ; les signatures exactes seront conçues dans l'implém
 - Le total de taxe et le total de document doivent correspondre à la somme des lignes selon une règle d'arrondi unique documentée et testée.
 - La précision affichée dépend de la devise ; le modèle stocke une précision technique suffisante et ne suppose pas que toutes les devises ont deux décimales.
 - Les taxes et exemptions sont configurables ; les taux/mentions réglementaires seront fournis après validation locale.
+- Le droit de facturer la TVA est contrôlé par `company_billing_profiles.vat_collection_status` et sa période d'effet ; il n'est jamais décidé par un champ libre sur chaque facture.
+- À l'émission, une facture avec TVA est refusée si l'entreprise n'est pas autorisée à la collecter à la date du document. Une facture sans TVA utilise le modèle de mentions validées pour son régime ; elle ne doit pas être simulée par une TVA à 0 %.
+- En cas de changement de régime/autorisation depuis la transmission du devis, l'émission est suspendue jusqu'à revue et validation du document. Les snapshots historiques ne sont jamais réécrits.
+- Le seuil général publié par la DGI est de 50 000 000 FCFA de chiffre d'affaires annuel HT pour le RNI ; la CME (< 15 000 000 FCFA) et le RSI (15 000 000 à < 50 000 000 FCFA) ne sont pas habilités à facturer la TVA, sauf option RSI vers RNI acceptée par la DGI. Les cas particuliers restent à vérifier.
+
 
 ### Calcul conceptuel d'une ligne
 
