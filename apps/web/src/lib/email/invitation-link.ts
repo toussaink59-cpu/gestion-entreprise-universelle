@@ -14,10 +14,12 @@ export function invitationAcceptPath(token: string): string {
 }
 
 /** Relit le cookie en refusant tout ce qui n'est pas exactement un chemin d'acceptation valide. */
-export function parseInvitationLinkCookie(value: string | undefined): string | null {
-  if (!value) return null;
-  const match = /^\/invitations\/accept\?token=([A-Za-z0-9_-]{43})$/.exec(value);
-  return match ? value : null;
+export function parseInvitationLinkCookie(value: string | undefined, expectedUserId: string | null | undefined): string | null {
+  if (!value || !expectedUserId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(expectedUserId)) return null;
+  const separator = value.indexOf("|");
+  if (separator < 0 || value.slice(0, separator).toLowerCase() !== expectedUserId.toLowerCase()) return null;
+  const path = value.slice(separator + 1);
+  return /^\/invitations\/accept\?token=[A-Za-z0-9_-]{43}$/.test(path) ? path : null;
 }
 
 function validOrigin(raw: string | undefined): string | null {
