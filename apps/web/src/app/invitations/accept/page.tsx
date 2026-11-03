@@ -7,7 +7,7 @@ import { confirmCompanyInvitation } from "../actions";
 export const instant = false;
 
 export const metadata: Metadata = {
-  title: "Confirmer une invitation · GestionPro",
+  title: "Confirmer une invitation · PolyGest",
   referrer: "no-referrer",
   robots: { index: false, follow: false },
 };
@@ -48,9 +48,9 @@ export default async function AcceptInvitationPage({ searchParams }: { searchPar
   return (
     <main className="mx-auto max-w-2xl px-4 py-16">
       <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Équipe</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p>
         <h1 className="mt-2 text-2xl font-bold text-slate-950">Confirmer ton invitation</h1>
-        <p className="mt-4 text-slate-700">Tu es connecté en tant que <strong>{user.email ?? "compte GestionPro"}</strong>. Confirme que tu as accès à cette adresse e-mail. Le lien est à usage unique et expire après sept jours.</p>
+        <p className="mt-4 text-slate-700">Tu es connecté en tant que <strong>{user.email ?? "compte PolyGest"}</strong>. Confirme que tu as accès à cette adresse e-mail. Le lien est à usage unique et expire après sept jours.</p>
         <p className="mt-3 text-sm text-slate-600">Cette confirmation ne donne pas immédiatement accès à l’entreprise : le propriétaire devra encore activer ton appartenance.</p>
         <form action={confirmCompanyInvitation} className="mt-6">
           <input type="hidden" name="token" value={params.token} />

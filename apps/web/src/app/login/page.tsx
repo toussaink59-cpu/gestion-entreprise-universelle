@@ -32,7 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main style={{ maxWidth: 460, margin: "4rem auto", padding: "1.5rem" }}>
-      <h1>Connexion à GestionPro</h1>
+      <h1>Connexion à PolyGest</h1>
       <p>Connecte-toi pour accéder à ton espace entreprise.</p>
 
       {params.message === "check-email" && (

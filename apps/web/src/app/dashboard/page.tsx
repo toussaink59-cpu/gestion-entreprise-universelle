@@ -135,7 +135,7 @@ async function DashboardContent() {
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">
-            GestionPro
+            PolyGest
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
             Tableau de bord
@@ -149,14 +149,23 @@ async function DashboardContent() {
           </p>
           <p className="mt-1 text-sm text-slate-500">Compte : {user.email}</p>
         </div>
-        <form action={signOut}>
-          <button
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            type="submit"
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href="/dashboard/entreprises/nouvelle"
+            className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
           >
-            Se déconnecter
-          </button>
-        </form>
+            + Créer une entreprise
+          </a>
+
+          <form action={signOut}>
+            <button
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              type="submit"
+            >
+              Se déconnecter
+            </button>
+          </form>
+        </div>
       </header>
 
       <section className="mb-6">

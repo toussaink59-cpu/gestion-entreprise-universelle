@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
+
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -8,6 +9,7 @@ import {
   type MemberInvitationRole,
 } from "@/lib/security/member-invitation-validation";
 import { activateCompanyMember, inviteCompanyMember, resendCompanyMemberInvitation } from "./actions";
+import { InvitationLinkReveal } from "./invitation-link-reveal";
 
 export const instant = false;
 
@@ -75,7 +77,7 @@ function errorMessage(code: string | undefined): string | null {
     case "access": return "Cette entreprise n’est pas accessible avec ton compte.";
     case "permission": return "Ton rôle ne permet pas d’attribuer ce rôle ou de gérer les membres.";
     case "duplicate": return "Ce compte possède déjà une appartenance à cette entreprise.";
-    case "no-account": return "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte GestionPro.";
+    case "no-account": return "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte PolyGest.";
     case "email-config": return "L’envoi d’e-mails n’est pas configuré. Vérifie RESEND_API_KEY, RESEND_FROM_EMAIL et NEXT_PUBLIC_APP_URL côté serveur.";
     case "email-failed": return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Vérifie la configuration Resend puis réessaie.";
     case "email-rate-limit": return "Attends au moins une minute avant de renvoyer cet e-mail.";
@@ -88,6 +90,7 @@ function errorMessage(code: string | undefined): string | null {
 
 function successMessage(code: string | undefined): string | null {
   if (code === "invited") return "L’invitation a été enregistrée et l’e-mail de confirmation a été envoyé.";
+  if (code === "invited-link") return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Transmets le lien ci-dessous à la personne invitée.";
   if (code === "resent") return "L’e-mail d’invitation a été renvoyé.";
   if (code === "activated") return "L’accès du membre a été activé.";
   return null;
@@ -155,16 +158,19 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
   const currentError = errorMessage(params.error);
   const currentSuccess = successMessage(params.success);
 
+
+
   if (!selectedCompanyId) {
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Équipe</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1><p className="mt-2 text-slate-600">Sélectionne l’entreprise concernée.</p></div>
+          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1><p className="mt-2 text-slate-600">Sélectionne l’entreprise concernée.</p></div>
           <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
         </header>
         {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p>}
         {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
         {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+        {params.success === "invited-link" && <InvitationLinkReveal />}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">Mes entreprises</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -227,7 +233,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">GestionPro · Équipe</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1>
           <p className="mt-2 text-slate-600">{company.trade_name || company.legal_name}<span className="mx-2 text-slate-300">/</span>Consultation des accès et invitations.</p>
           <p className="mt-1 text-sm text-slate-500">Ton rôle : {roleLabel(actorRole)}</p>
@@ -242,10 +248,11 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
 
       {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
       {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+      {params.success === "invited-link" && <InvitationLinkReveal />}
 
       {canInvite && (
         <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur GestionPro et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.</p></div>
+          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur PolyGest et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.</p></div>
           <form action={inviteCompanyMember} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="company_id" value={selectedCompanyId} />
             <label className="text-sm font-medium text-slate-700">Adresse e-mail *<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="nom@entreprise.com" /></label>
@@ -253,7 +260,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
             <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>Créer l’invitation</button></div>
           </form>
           {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">Les rôles Propriétaire et Administrateur donnent des droits étendus. Attribue-les uniquement à des personnes de confiance.</p>}
-          <p className="mt-2 text-xs text-slate-500">Un e-mail de confirmation valable sept jours sera envoyé. Si l’envoi échoue, tu pourras réessayer depuis la liste.</p>
+          <p className="mt-2 text-xs text-slate-500">Un e-mail de confirmation valable sept jours sera envoyé. Si l’e-mail ne peut pas partir, un lien à transmettre toi-même s’affichera.</p>
         </section>
       )}
 
@@ -270,7 +277,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
               <tbody>
                 {members.map((member) => (
                   <tr key={member.membership_id} className="border-t border-slate-100 align-top hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || "Utilisateur GestionPro"}</p><p className="mt-1 text-xs text-slate-500">{member.email || `ID utilisateur : ${member.user_id}`}</p></td>
+                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || "Utilisateur PolyGest"}</p><p className="mt-1 text-xs text-slate-500">{member.email || `ID utilisateur : ${member.user_id}`}</p></td>
                     <td className="px-5 py-4 text-slate-700">{roleLabel(member.role_code)}</td>
                     <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status, member.accepted_at)}</span></td>
                     <td className="px-5 py-4 text-slate-600">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
@@ -287,7 +294,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
                           <form action={resendCompanyMemberInvitation}>
                             <input type="hidden" name="company_id" value={selectedCompanyId} />
                             <input type="hidden" name="membership_id" value={member.membership_id} />
-                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">Renvoyer l’e-mail</button>
+                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">Renvoyer l’invitation</button>
                           </form>
                         )}
                         {member.status === "invited" && member.accepted_at && (

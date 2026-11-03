@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,6 +8,14 @@ import {
   isMemberInvitationEmailConfigured,
   sendMemberInvitationEmail,
 } from "@/lib/email/member-invitation";
+import {
+  INVITATION_LINK_COOKIE,
+  INVITATION_LINK_COOKIE_MAX_AGE_SECONDS,
+  INVITATION_LINK_COOKIE_PATH,
+  invitationAcceptPath,
+  parseInvitationLinkCookie,
+  resolveAppOrigin,
+} from "@/lib/email/invitation-link";
 import {
   canActivateMember,
   canAssignMemberRole,
@@ -30,6 +39,21 @@ function mapRpcError(code: string, companyId: string): never {
   if (code === "42501") returnTo(companyId, { error: "permission" });
   if (code === "P0001") returnTo(companyId, { error: "email-rate-limit" });
   returnTo(companyId, { error: "save" });
+}
+
+/**
+ * Quand l'e-mail ne part pas (Resend non configuré, échec, limite), le lien est montré une seule
+ * fois à l'invitant, via un cookie court, httpOnly, limité à la page des membres.
+ */
+async function keepInvitationLinkForInviter(token: string, userId: string) {
+  const store = await cookies();
+  store.set(INVITATION_LINK_COOKIE, `${userId}|${invitationAcceptPath(token)}`, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: INVITATION_LINK_COOKIE_PATH,
+    maxAge: INVITATION_LINK_COOKIE_MAX_AGE_SECONDS,
+  });
 }
 
 async function markEmailSent(
@@ -67,7 +91,6 @@ export async function inviteCompanyMember(formData: FormData) {
   if (!canAssignMemberRole(String(membership.role_code), parsed.roleCode)) {
     returnTo(parsed.companyId, { error: "permission" });
   }
-  if (!isMemberInvitationEmailConfigured()) returnTo(parsed.companyId, { error: "email-config" });
 
   const { data: company, error: companyError } = await supabase
     .from("companies")
@@ -88,17 +111,20 @@ export async function inviteCompanyMember(formData: FormData) {
     returnTo(parsed.companyId, { error: "save" });
   }
 
-  const sent = await sendMemberInvitationEmail({
-    to: parsed.email,
-    companyName: company.trade_name || company.legal_name,
-    roleCode: parsed.roleCode,
-    inviterName: String(user.user_metadata?.full_name || user.email || "GestionPro"),
-    token,
-    idempotencyKey: `member-invitation/${membershipId}/${tokenHash.slice(0, 16)}`,
-  });
-  if (!sent.ok) {
-    console.error("Member invitation email delivery failed:", { reason: sent.reason });
-    returnTo(parsed.companyId, { error: sent.reason === "rate-limit" ? "email-rate-limit" : "email-failed" });
+  const sent = isMemberInvitationEmailConfigured()
+    ? await sendMemberInvitationEmail({
+        to: parsed.email,
+        companyName: company.trade_name || company.legal_name,
+        roleCode: parsed.roleCode,
+        inviterName: String(user.user_metadata?.full_name || user.email || "PolyGest"),
+        token,
+        idempotencyKey: `member-invitation/${membershipId}/${tokenHash.slice(0, 16)}`,
+      })
+    : null;
+  if (!sent || !sent.ok) {
+    console.error("Member invitation email not delivered:", { reason: sent ? sent.reason : "not-configured" });
+    await keepInvitationLinkForInviter(token, user.id);
+    returnTo(parsed.companyId, { success: "invited-link" });
   }
   await markEmailSent(supabase, membershipId, tokenHash, sent.emailId);
   returnTo(parsed.companyId, { success: "invited" });
@@ -125,7 +151,6 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
   if (!canActivateMember(String(actorMembership.role_code)) && String(actorMembership.role_code) !== "company_admin") {
     returnTo(companyField, { error: "permission" });
   }
-  if (!isMemberInvitationEmailConfigured()) returnTo(companyField, { error: "email-config" });
 
   const { token, tokenHash } = createInvitationToken();
   const { data, error } = await supabase.rpc("prepare_company_member_invitation_resend", {
@@ -139,20 +164,42 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
     returnTo(companyField, { error: "save" });
   }
 
-  const sent = await sendMemberInvitationEmail({
-    to: row.invite_email,
-    companyName: row.company_name,
-    roleCode: row.role_code,
-    inviterName: String(user.user_metadata?.full_name || user.email || "GestionPro"),
-    token,
-    idempotencyKey: `member-invitation/${membershipField}/${tokenHash.slice(0, 16)}`,
-  });
-  if (!sent.ok) {
-    console.error("Member invitation resend failed:", { reason: sent.reason });
-    returnTo(companyField, { error: sent.reason === "rate-limit" ? "email-rate-limit" : "email-failed" });
+  const sent = isMemberInvitationEmailConfigured()
+    ? await sendMemberInvitationEmail({
+        to: row.invite_email,
+        companyName: row.company_name,
+        roleCode: row.role_code,
+        inviterName: String(user.user_metadata?.full_name || user.email || "PolyGest"),
+        token,
+        idempotencyKey: `member-invitation/${membershipField}/${tokenHash.slice(0, 16)}`,
+      })
+    : null;
+  if (!sent || !sent.ok) {
+    console.error("Member invitation resend not delivered:", { reason: sent ? sent.reason : "not-configured" });
+    await keepInvitationLinkForInviter(token, user.id);
+    returnTo(companyField, { success: "invited-link" });
   }
   await markEmailSent(supabase, membershipField, tokenHash, sent.emailId);
   returnTo(companyField, { success: "resent" });
+}
+
+/** Consomme le lien manuel : il est réservé à l'invitant connecté et supprimé dès lecture. */
+export async function consumeInvitationLink(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  const store = await cookies();
+  const raw = store.get(INVITATION_LINK_COOKIE)?.value;
+  store.delete(INVITATION_LINK_COOKIE);
+  if (error || !user) return null;
+  const path = parseInvitationLinkCookie(raw, user.id);
+  if (!path) return null;
+  const requestHeaders = await headers();
+  const origin = resolveAppOrigin({
+    configuredUrl: process.env.NEXT_PUBLIC_APP_URL,
+    host: requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"),
+    forwardedProto: requestHeaders.get("x-forwarded-proto"),
+  });
+  return origin ? `${origin}${path}` : path;
 }
 
 export async function activateCompanyMember(formData: FormData) {

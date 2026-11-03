@@ -36,5 +36,8 @@
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true
+  },
+  "overrides": {
+    "minimatch": "^11.0.3"
   }
 }
