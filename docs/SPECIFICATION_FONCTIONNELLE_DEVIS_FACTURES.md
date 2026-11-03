@@ -97,7 +97,7 @@ Matrice initiale proposée (à faire valider par le porteur du projet) :
 |---|---|---|
 | owner | Tous droits | Tous droits |
 | company_admin | Tous droits | Tous droits |
-| finance | Lecture et export | Lecture, création, modification des brouillons, émission, annulation autorisée et export |
+| finance | Lecture et export | Lecture, création, modification des brouillons, émission et export ; ouverture d'un dossier de correction selon habilitation |
 | sales_purchasing | Lecture, création, modification des brouillons, transmission et enregistrement de la réponse client | Lecture et création/modification des brouillons ; pas d'émission ni d'annulation en V1 |
 | auditor | Lecture et export | Lecture et export |
 | hr_payroll, operations, employee | Aucun accès par défaut | Aucun accès par défaut |
@@ -165,12 +165,12 @@ La V1 doit permettre trois catégories de tranches :
 Règles impératives :
 - Chaque facture partielle correspond uniquement à une nouvelle tranche du montant du devis. Elle ne répète pas les montants déjà facturés.
 - Le montant imputé au devis est le total TTC (ou total du document selon le régime fiscal paramétré) de la facture émise.
-- Le cumul des montants imputés par les factures émises et non annulées ne peut jamais dépasser le total accepté du devis.
+- Le cumul des montants imputés par les factures émises ne peut jamais dépasser le total accepté du devis. Une correction fiscale ne libère pas automatiquement l'allocation ; seul le mécanisme de correction validé peut ajuster le solde.
 - Le solde restant à facturer est calculé par le serveur : total accepté moins cumul déjà facturé.
 - Une facture de situation liée à une ligne du devis ne peut pas porter le cumul des quantités facturées au-delà de la quantité acceptée sur cette ligne.
 - Un acompte augmente le montant facturé du devis mais ne consomme pas la quantité des lignes.
 - Une facture de solde doit utiliser exactement le solde restant ; après elle, aucune autre facture ne peut être émise sur le devis.
-- Une facture annulée selon une procédure autorisée n'est plus comptée dans le cumul ; l'annulation doit être justifiée et journalisée.
+- Une facture émise reste comptabilisée dans le cumul tant qu'un document de correction légalement admis n'a pas été émis et relié à l'original ; la simple ouverture d'un dossier de correction ne libère pas le montant.
 - Les contrôles doivent être transactionnels avec verrouillage du devis afin d'éviter deux émissions simultanées qui dépasseraient le total.
 
 **Convention de facturation retenue pour la V1 :** une facture de situation représente une tranche nouvelle, et non un cumul d'avancement déjà facturé. Les montants des factures successives s'additionnent pour atteindre le total accepté ; les acomptes ne sont pas déduits une seconde fois dans les factures suivantes. Cette convention doit être explicitement affichée dans l'interface et validée par un professionnel comptable/fiscal avant toute utilisation réelle, car les usages et mentions de facture peuvent dépendre du pays et du régime.
@@ -192,12 +192,13 @@ Exemple purement illustratif, hors taxe et sans portée réglementaire :
 - Elle n'entre dans aucun calcul de reste à facturer d'un devis.
 - Le client doit appartenir à la même entreprise.
 
-### 4.7 Émission, consultation et annulation d'une facture
+### 4.7 Émission, consultation et correction d'une facture
 
-- Une facture brouillon est modifiable ou annulable ; la suppression définitive n'est pas proposée en V1.
+- Une facture brouillon est modifiable ou peut être abandonnée ; la suppression définitive n'est pas proposée en V1.
 - À l'émission, son numéro, ses dates, les coordonnées du client et de l'émetteur, les lignes, la devise, les taxes et les totaux sont figés.
-- Une facture émise n'est jamais modifiée silencieusement. Toute correction doit passer par une procédure tracée.
-- La V1 prévoit une action d'annulation avec motif, acteur, date et permission dédiée. La légitimité de l'annulation d'une facture émise et le besoin éventuel d'un avoir doivent être validés selon les règles du pays/régime ; les avoirs ne sont pas inclus dans cette V1.
+- Une facture émise n'est jamais modifiée ni supprimée silencieusement.
+- Une facture émise ne passe pas simplement à l'état `cancelled` pour effacer sa portée fiscale. Une erreur après émission ouvre un dossier de correction lié à l'original ; le mécanisme légal (avoir, facture rectificative ou procédure SECeF/SFE) doit être établi avant toute mise en production.
+- La correction complète et l'émission d'avoirs sont hors du périmètre fonctionnel actuel ; tant que ce mécanisme n'est pas livré et validé, l'émission réelle doit être désactivée dans les cas où une correction pourrait être nécessaire.
 - Le statut de paiement ne sera pas modifié manuellement dans ce module. Il sera calculé à partir des encaissements et affectations de paiements, développés dans le module suivant.
 
 ## 5. Statuts et transitions
@@ -220,9 +221,9 @@ Le niveau de facturation (non facturé, partiellement facturé, totalement factu
 
 | Statut stocké | Signification | Transitions permises |
 |---|---|---|
-| `draft` | Préparation, non opposable comme facture émise | `issued`, `cancelled` |
-| `issued` | Numérotée et figée | `cancelled` via procédure autorisée uniquement |
-| `cancelled` | Annulée avec motif et trace | Terminal |
+| `draft` | Préparation, non opposable comme facture émise | `issued`, `abandoned_draft` |
+| `issued` | Numérotée et figée | Reste émise ; une correction est portée par un dossier/document lié, pas par effacement de l'original |
+| `abandoned_draft` | Brouillon abandonné avant émission, sans facture fiscale délivrée | Terminal |
 
 Les états « impayée », « partiellement payée », « payée » et « en retard » sont des états de règlement calculés après intégration des paiements. « En retard » dépend de l'échéance et du solde restant dû ; ce n'est pas un statut métier à saisir manuellement.
 
@@ -247,7 +248,7 @@ Les états « impayée », « partiellement payée », « payée » et « en ret
 3. Détail du devis : document, statut, historique, aperçu PDF, transmission, décision et action de facturation.
 4. Liste des factures : recherche, filtres par statut/période/client, indicateur de provenance (devis ou autonome).
 5. Création/édition de facture : mode autonome ou depuis devis, lignes, échéance et total.
-6. Détail de facture : aperçu figé, PDF, émission et annulation autorisée.
+6. Détail de facture : aperçu figé, PDF, émission et ouverture d'un dossier de correction.
 
 Règles UI :
 - Respecter `docs/POLYGEST_DESIGN_SYSTEM.md` et les skills `polygest-frontend-design` et `polygest-ui-quality`.
@@ -322,7 +323,7 @@ Les éléments suivants ne sont pas déterminés par les migrations actuelles et
 2. **Profil émetteur :** adresse, téléphone, e-mail, identifiant fiscal, logo et conditions de règlement requis sur les documents.
 3. **Numérotation :** format souhaité (préfixe, année, compteur) et éventuelles obligations de séquence.
 4. **Permissions :** valider la matrice proposée, particulièrement le droit d'émission pour finance et la transmission des devis pour sales_purchasing.
-5. **Annulation :** confirmer les cas où une facture émise peut être annulée et quand un avoir sera indispensable.
+5. **Correction :** confirmer la procédure légale d'avoir, facture rectificative ou correction SECeF/SFE pour une facture émise.
 6. **Mode de transmission :** manuel en V1 ou intégration d'un fournisseur d'e-mail.
 7. **Devise et précision :** confirmer les paramètres de devise et d'arrondi par entreprise.
 
