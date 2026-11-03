@@ -3,7 +3,7 @@
 **Produit :** PolyGest  
 **Juridiction :** Burkina Faso  
 **Date de cadrage :** 3 novembre 2026  
-**Version :** 0.1 — matrice de travail, non validée professionnellement  
+**Version :** 0.3 — projet de consolidation documentaire, non validé professionnellement  
 **Périmètre :** régimes d'imposition, TVA, facturation normalisée, facture électronique certifiée (FEC), retenues, acomptes, situations de travaux, conservation et contrôles de cohérence  
 **Décision d'architecture :** aucun calcul fiscal irréversible ni aucune affirmation de conformité ne peut être activé sur la seule base de ce document.
 
@@ -121,6 +121,24 @@ Les mesures annoncées par le ministère ne doivent pas être codées comme exon
 **Blocage P0 :** obtenir et archiver la LFR promulguée et le Journal officiel correspondant, puis comparer article par article le CGI 2026 et ses modifications. Le site DGI affiche un accès intitulé « Code général des impôts 2026 » ; cet accès doit être téléchargé et archivé avec son identité/version, car le simple référencement sur le site n'est pas encore une preuve que le fichier source a été intégré au dépôt.
 
 ---
+
+### 3.1 Registre de vérification de la LFR 2026
+
+Chaque disposition annoncée doit faire l'objet d'une fiche de vérification comprenant :
+
+- référence et numéro de l'article définitif ;
+- copie du Journal officiel ;
+- date de promulgation et de publication ;
+- date d'entrée en vigueur ;
+- contribuables, activités et opérations concernés ;
+- conditions d'application et justificatifs requis ;
+- dispositions transitoires éventuelles ;
+- articles du CGI modifiés ou abrogés ;
+- date de validation professionnelle.
+
+Tant que ces éléments ne sont pas documentés, la mesure conserve le statut `requires_tax_review`.
+
+Une annonce institutionnelle ne suffit jamais à activer une exonération, une retenue ou un nouveau taux dans PolyGest.
 
 ## 4. Matrice des régimes d'imposition
 
@@ -240,6 +258,26 @@ La DGI précise que les sommes perçues par les contribuables relevant du RND à
 
 ---
 
+### 4.7 Historisation et preuve du régime fiscal
+
+Le profil fiscal d'une entreprise doit être constitué à partir d'informations vérifiables.
+
+Pour chaque période, conserver :
+
+- le régime déclaré ;
+- la catégorie juridique de l'entreprise ;
+- l'activité principale et les activités secondaires ;
+- le chiffre d'affaires de référence et l'exercice concerné ;
+- la décision ou pièce administrative justifiant le régime ;
+- la date de début et, le cas échéant, la date de fin d'effet ;
+- la date de vérification et son auteur.
+
+Le chiffre d'affaires calculé par PolyGest sert à produire des alertes. Il ne constitue pas, à lui seul, une décision administrative de changement de régime.
+
+En cas de dépassement d'un seuil, le logiciel doit créer une alerte, demander une vérification et conserver le statut enregistré jusqu'à la confirmation d'une décision ou d'une règle de changement juridiquement applicable.
+
+Aucune période fiscale clôturée ne doit être réécrite silencieusement.
+
 ## 5. Statut TVA : dimension indépendante du régime fiscal
 
 ### 5.1 États internes du profil TVA
@@ -271,6 +309,29 @@ Cela ne signifie pas que toute opération facturée par un RNI supporte automati
 | Opération hors champ | Opération ne relevant pas du champ de la TVA | Ne pas la coder comme exonération ; afficher la mention appropriée uniquement après validation |
 
 ---
+
+### 5.4 Conditions d'activation du droit de collecte
+
+Le droit de collecte de TVA doit être géré indépendamment du régime d'imposition.
+
+Son activation exige au minimum :
+
+- l'identification de l'entreprise concernée ;
+- le fondement juridique du droit de collecte ;
+- la décision ou pièce justificative requise ;
+- la date de prise d'effet ;
+- la période de validité ;
+- la vérification de l'absence de suspension ou de retrait.
+
+Une demande d'option, une déclaration de l'utilisateur ou une simple sélection dans les paramètres ne constitue pas une preuve suffisante.
+
+Avant chaque émission de facture, PolyGest doit contrôler le statut applicable à la date de l'opération. En l'absence de preuve suffisante, la collecte doit être bloquée ou soumise à une revue fiscale.
+
+Le statut de collecte ne dispense jamais de qualifier séparément l'opération : taxable, exonérée ou hors champ.
+
+Il faut notamment distinguer :
+- une entreprise autorisée à collecter la TVA qui réalise une opération exonérée ;
+- une entreprise qui n'est pas autorisée à collecter la TVA.
 
 ## 6. Matrice des opérations et taux de TVA
 
@@ -313,6 +374,26 @@ Pour chaque ligne d'une facture :
 Les arrondis doivent être déterminés par une règle écrite et testée. Le moteur doit conserver les montants intermédiaires et la méthode d'arrondi. Le choix « arrondi par ligne » ou « arrondi au total » ne doit pas être improvisé ; il doit être aligné sur le texte et la pratique comptable validée.
 
 ---
+
+### 6.4 Conditions de validité des taux
+
+Chaque taux fiscal doit être rattaché à une version de règle documentée comprenant :
+
+- le texte et l'article applicables ;
+- la date d'entrée en vigueur ;
+- la catégorie d'opération concernée ;
+- les conditions liées au fournisseur et au client ;
+- les éventuelles conditions d'agrément ;
+- les justificatifs obligatoires ;
+- les exclusions et exceptions.
+
+Un taux réduit ne peut être appliqué que si toutes les conditions prévues par le texte applicable sont vérifiées.
+
+Une exonération doit être distinguée d'une opération hors champ et de l'absence de droit de collecte du fournisseur.
+
+Lorsqu'une condition manque ou qu'une référence juridique est incertaine, le moteur doit retourner `requires_tax_review`.
+
+Les taux historiques doivent rester accessibles pour les opérations antérieures à une modification réglementaire.
 
 ## 7. Facture, facture normalisée et mentions obligatoires
 
@@ -383,6 +464,24 @@ La loi de finances 2025 a été signalée comme ayant ajouté une catégorie li�
 - une exception applicable au vendeur n'est pas automatiquement applicable à l'acheteur.
 
 ---
+
+### 7.5 Référentiel versionné des mentions obligatoires
+
+Les mentions obligatoires doivent être gérées dans un référentiel versionné par date d'effet.
+
+Pour chaque type de document, ce référentiel doit distinguer :
+
+- les mentions légalement obligatoires ;
+- les mentions conditionnelles selon le régime ou l'opération ;
+- les mentions propres à la facture normalisée ;
+- les données techniques exigées par un système certifié ;
+- les informations commerciales facultatives.
+
+La présence de toutes les informations commerciales ne garantit pas la conformité fiscale du document.
+
+Toute modification du référentiel doit être accompagnée de sa source, de sa date d'effet et de sa validation.
+
+Une facture déjà émise conserve son contenu original. Toute correction doit suivre une procédure documentée d'avoir ou de document rectificatif.
 
 ## 8. FEC et systèmes électroniques certifiés (SECeF/SFE)
 
@@ -487,6 +586,34 @@ Une fonction de préparation de données de facture peut exister indépendamment
 
 ---
 
+### 8.8 Séparation entre préparation et certification
+
+PolyGest doit distinguer explicitement les opérations suivantes :
+
+1. préparation des données de facturation ;
+2. génération d'un document commercial ou fiscal non certifié ;
+3. transmission éventuelle à un système de facturation certifié ;
+4. réception de la réponse du système ;
+5. conservation de la preuve de certification.
+
+La préparation ou la génération d'un PDF ne constitue pas une certification fiscale.
+
+Le statut `certified` ne peut être attribué que si une réponse positive et vérifiable du système compétent a été reçue et conservée.
+
+Chaque transmission doit permettre de retrouver :
+
+- le document transmis ;
+- l'identifiant de transmission ;
+- la date et l'heure ;
+- le système destinataire ;
+- la réponse originale ;
+- le statut final ;
+- les éventuelles erreurs.
+
+En cas d'échec ou d'indisponibilité, le logiciel ne doit jamais fabriquer une preuve de certification.
+
+Le futur connecteur SECeF/SFE doit être un composant distinct du moteur de calcul fiscal. Les mécanismes propres au système certifié ne doivent pas être confondus avec les règles métier internes de PolyGest.
+
 ## 9. Fait générateur et exigibilité de TVA
 
 ### 9.1 Notions
@@ -571,6 +698,33 @@ Une correction doit créer un événement correctif traçable ; elle ne doit pas
 
 ---
 
+### 9.6 Contrôles de cohérence des événements fiscaux
+
+Pour chaque opération, PolyGest doit distinguer :
+
+- la date du contrat ;
+- la date de livraison ou d'exécution ;
+- la date d'émission de la facture ;
+- la date de réception d'un acompte ;
+- la date de chaque situation de travaux ;
+- la date d'encaissement ;
+- la date d'exigibilité fiscale ;
+- la date de déclaration.
+
+Ces dates ne doivent pas être automatiquement assimilées.
+
+Chaque événement fiscal doit être rattaché à une opération, à une pièce justificative et à une version de règle.
+
+Le système doit empêcher :
+- la double prise en compte d'un même acompte ;
+- la double déclaration d'une même base taxable ;
+- la suppression d'un événement fiscal déjà enregistré ;
+- la modification silencieuse d'une période fiscale clôturée.
+
+Toute correction doit produire un événement correctif lié à l'événement initial.
+
+Les règles particulières aux marchés publics, aux travaux immobiliers et aux prestations relevant de régimes spéciaux doivent rester soumises à validation lorsque leur application n'est pas établie.
+
 ## 10. Retenues à la source et retenues de TVA
 
 Les retenues fiscales ne sont ni des remises commerciales ni des retenues contractuelles (par exemple une retenue de garantie BTP). Leur fait générateur, leur assiette, le débiteur légal, le bénéficiaire, le taux, le reversement et l'imputation doivent être identifiés séparément. L'existence de plusieurs retenues susceptibles de concerner un même marché ne signifie pas qu'elles se cumulent automatiquement : le cumul et l'articulation des textes doivent être validés.
@@ -631,6 +785,29 @@ Ne pas créer un champ unique `withholding_rate` sur la facture. Distinguer au m
 Chaque événement doit stocker le débiteur légal, le bénéficiaire, le texte, l'assiette, le taux, la date de paiement, le montant retenu, le délai de reversement, le justificatif/attestation et les conditions d'imputation. Les règles de cumul, d'ordre d'application et de restitution ne sont pas à déduire : elles exigent validation professionnelle.
 
 ---
+
+### 10.6 Moteur de qualification des retenues
+
+Chaque retenue doit être qualifiée indépendamment avant son calcul.
+
+La qualification doit vérifier :
+
+- l'identité et le statut fiscal du fournisseur ;
+- l'identité et le statut fiscal du payeur ;
+- la nature de la commande ou de la prestation ;
+- la qualité de résident ou de non-résident ;
+- l'existence d'un IFU valide lorsque nécessaire ;
+- le fondement juridique ;
+- l'assiette applicable ;
+- la date de paiement ;
+- les conditions d'exonération ou de dispense ;
+- les règles de reversement et d'imputation.
+
+Une retenue contractuelle, telle qu'une retenue de garantie BTP, ne doit jamais être enregistrée comme une retenue fiscale.
+
+Lorsque plusieurs retenues semblent applicables, le moteur doit produire une demande de revue fiscale au lieu de les additionner automatiquement.
+
+Chaque retenue validée doit disposer de sa propre référence, de son montant, de son justificatif et de son historique.
 
 ## 11. Paiement scriptural et seuil de 1 000 000 FCFA TTC
 
@@ -814,6 +991,16 @@ Aucun taux ou résultat fiscal n'est réputé valide tant que les scénarios ci-
 | DOC-01 | Attribution simultanée de factures | Numéros uniques et continus selon séquence approuvée |
 | DOC-02 | Facture émise puis corrigée | Original conservé, correction liée, audit complet |
 | DOC-03 | Document fiscal de 2025 relu en 2026 | Version de règle 2025 conservée |
+| EVT-07 | Acompte enregistré puis facture finale | Pas de double comptabilisation de la même base/TVA |
+| EVT-08 | Situation de travaux rectifiée | Situation initiale conservée et correction traçable |
+| EVT-09 | Encaissement postérieur à la facture | Application de la règle d'exigibilité correspondant à l'opération |
+| WHT-05 | Même opération susceptible de relever des articles 207 et 226-1 | Pas de cumul sans règle validée |
+| WHT-06 | Retenue fiscale et retenue de garantie BTP | Deux traitements distincts |
+| WHT-07 | Fournisseur sans IFU | Vérification du champ et des conditions légales avant application d'un taux |
+| WHT-08 | Retenue déjà reversée | Interdiction du double reversement |
+| WHT-09 | Attestation de retenue reçue | Conservation et rapprochement avec le paiement initial |
+| PAY-02 | Paiements fractionnés ou règlements multiples liés à une opération | Contrôle selon la règle légale confirmée ; aucune règle anti-fractionnement inventée |
+
 | ARCH-01 | Export du dossier fiscal | Pièces, document original, règles et preuves réunis |
 
 ---
@@ -961,3 +1148,22 @@ Cette édition 0.2 intègre une première confrontation de la matrice avec les p
 ### 20.5 Règle de non-activation
 
 Toute règle dont le texte consolidé, l'entrée en vigueur, le champ, l'assiette, l'exception ou l'articulation n'est pas vérifié doit rester à l'état `requires_tax_review`. Aucune valeur par défaut ne doit transformer une lacune documentaire en décision fiscale.
+
+
+### 20.6 Consolidation documentaire — édition 0.3
+
+L'édition 0.3 ajoute des garde-fous documentaires et fonctionnels aux sections 3 à 10. Les ajouts portent notamment sur :
+
+- la fiche de vérification des dispositions annoncées dans la LFR 2026 ;
+- l'historisation des régimes fiscaux et des preuves associées ;
+- les conditions d'activation du droit de collecte de TVA ;
+- la traçabilité des taux, exonérations et mentions obligatoires ;
+- la séparation entre préparation de facture et certification par un système admis ;
+- la cohérence des événements d'exigibilité et la prévention des doubles prises en compte ;
+- la qualification indépendante des retenues et l'interdiction de cumul automatique non validé ;
+- l'ajout de scénarios de tests EVT-07 à EVT-09, WHT-05 à WHT-09 et PAY-02.
+
+Ces ajouts sont des exigences de conception et des contrôles de prudence. Ils ne constituent pas une validation juridique des taux, seuils, exonérations, retenues ou échéances mentionnés ailleurs dans la matrice.
+
+Les règles fiscales non vérifiées dans les textes applicables et non validées professionnellement restent à l'état `requires_tax_review`. Aucun code applicatif, aucune migration SQL et aucune donnée de production n'ont été modifiés dans le cadre de cette édition documentaire.
+
