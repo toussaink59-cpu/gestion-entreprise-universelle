@@ -16,9 +16,9 @@ Le module doit préserver l'historique des documents émis, empêcher la factura
 ### Inclus
 
 - Création, consultation et modification des devis à l'état brouillon.
-- Gestion des lignes : description libre, unité, quantité, prix unitaire, remise de ligne et taxe paramétrable.
+- Gestion des lignes : description libre, unité, quantité, prix unitaire, remise et traitement fiscal sélectionné dans le référentiel autorisé du profil entreprise.
 - Calcul des sous-totaux, remises, taxes et totaux avec une arithmétique décimale fiable.
-- Numérotation des devis et factures par entreprise et période.
+- Numérotation des devis par série commerciale et des factures par série légale validée ; aucune remise à zéro annuelle ou réattribution d'un numéro n'est supposée autorisée sans validation locale.
 - Enregistrement de l'envoi d'un devis et de la réponse du client.
 - Acceptation, refus, expiration calculée à partir de la date de validité et annulation d'un devis.
 - Génération d'une facture autonome ou depuis un devis accepté.
@@ -27,17 +27,19 @@ Le module doit préserver l'historique des documents émis, empêcher la factura
 - Calcul du montant déjà facturé et du reste à facturer pour chaque devis.
 - Aperçu et génération PDF à partir des données figées du document.
 - Journalisation des événements importants dans le journal d'audit existant.
+- Registre minimal des événements d'avance/acompte et des paiements reçus nécessaires à la détermination de l'exigibilité de la TVA ; ce registre ne remplace pas le module Trésorerie.
 - Contrôles de permissions et isolation multi-entreprises côté serveur et en base.
 
 ### Hors périmètre de la V1
 
-- Enregistrement et rapprochement des paiements, rapprochement bancaire et caisse : ils feront l'objet du module Encaissements / Trésorerie. Le modèle prévoit le lien futur avec les factures.
+- Gestion complète des paiements, rapprochement bancaire, caisse, comptes de trésorerie et lettrage : ils feront l'objet du module Encaissements / Trésorerie. En revanche, le registre fiscal minimal des événements de paiement (date, montant, moyen, justificatif, retenue éventuelle) est requis dès la V1 pour calculer correctement l'exigibilité de TVA sur certaines avances et prestations.
 - Catalogue de produits/services, stocks et mouvements de stock : les lignes sont saisies librement dans cette V1.
-- Avoirs, notes de crédit, remboursements et corrections comptables avancées.
+- Automatisation complète des avoirs, notes de crédit et remboursements. Une procédure contrôlée de correction des factures émises/certifiées reste toutefois obligatoire avant utilisation réelle ; une facture émise ne doit jamais être supprimée ou modifiée silencieusement.
 - Signature électronique ou portail client.
 - Relances automatiques, échéanciers automatisés et envoi d'e-mails transactionnels intégré. L'utilisateur peut marquer un document comme transmis après l'avoir envoyé par son canal habituel.
 - Facturation multi-devises et conversion de devises.
 - Comptabilité générale et déclarations fiscales.
+- Émission de FEC par PolyGest tant que le SFE n'a pas obtenu l'homologation requise et que les spécifications officielles d'intégration n'ont pas été validées.
 - Garantie de conformité fiscale ou légale sans validation par un professionnel compétent du pays et du régime concernés.
 
 ### Règle de TVA retenue pour le marché initial (Burkina Faso)
@@ -64,6 +66,24 @@ La DGI précise que seuls les contribuables relevant du RNI sont habilités à f
 - Les situations particulières (notamment les régimes CSE/RND, activités particulières ou décisions fiscales individuelles) ne sont pas déduites automatiquement du chiffre d'affaires : elles nécessitent une configuration vérifiée.
 
 Références officielles : [DGI — Régimes d'imposition](https://dgi.bf/regime_imposition/) et [DGI — FAQ Régimes d'imposition](https://dgi.bf/faq-regimes-dimposition/). Le paramétrage doit être revalidé en cas d'évolution de la législation.
+
+### Facture normalisée et FEC : exigences distinctes
+
+La facture normalisée est un document fiscal obligatoire pour les industriels, commerçants, prestataires de services, importateurs, producteurs et entrepreneurs de travaux immobiliers visés par les textes, quel que soit leur régime, sous réserve des dispenses légales. Une entreprise qui ne collecte pas la TVA n'est donc pas automatiquement dispensée d'émettre une facture normalisée.
+
+La facture électronique certifiée (FEC) relève d'un régime distinct. Les textes consultés prévoient l'obligation pour les entreprises relevant de la DGE et des DME, sous réserve des conditions et étapes d'application fixées par les textes et communiqués DGI. PolyGest doit enregistrer séparément le rattachement DGE/DME et le régime fiscal (RNI/RSI/CME/etc.).
+
+Un document PDF produit par PolyGest ne doit jamais être présenté comme une FEC sans émission et authentification par un système SECeF/SFE homologué. Le chantier FEC est bloqué jusqu'à obtention de la documentation technique officielle, de l'homologation pertinente et des tests requis. Référentiel détaillé : [Conformité fiscale — Facturation au Burkina Faso](CONFORMITE_FISCALE_BURKINA_FACTURATION.md).
+
+### Exigibilité de TVA et facturation fractionnée
+
+Les avances/acompte effectivement reçus peuvent rendre la TVA exigible avant l'achèvement d'une prestation de services ou de travaux immobiliers. La date d'émission de facture, la date de livraison/achèvement et la date réelle d'encaissement ne sont donc pas toujours interchangeables. Pour les entreprises autorisées à collecter la TVA, la V1 doit enregistrer les événements d'encaissement fiscalement pertinents, même si le rapprochement bancaire et la trésorerie complète restent hors périmètre.
+
+Le type d'opération (biens, services, travaux immobiliers, importation/service de non-résident ou autre catégorie validée) doit déterminer les règles de fait générateur et d'exigibilité. Ne pas appliquer une seule date de TVA à toutes les factures.
+
+### Règles de taux et de présentation
+
+Le taux normal de référence documenté est 18 %. Le taux réduit de 10 % ne s'applique qu'à des catégories et conditions spécifiques, notamment les prestations d'hébergement/restauration par des établissements agréés et le transport aérien domestique. Les taux, exonérations et dates d'effet doivent être versionnés, sourcés et autorisés par le profil fiscal et la nature de l'opération. Une facture émise par un fournisseur non autorisé à collecter la TVA doit être présentée sans ligne fictive de TVA à 0 %.
 
 ## 3. Acteurs et permissions proposées
 
@@ -305,3 +325,8 @@ Les éléments suivants ne sont pas déterminés par les migrations actuelles et
 7. **Devise et précision :** confirmer les paramètres de devise et d'arrondi par entreprise.
 
 Aucune migration SQL de production ne doit être préparée comme définitive tant que ces décisions ne sont pas validées. La présente spécification constitue le contrat fonctionnel proposé pour la conception technique.
+
+
+### Référentiel réglementaire burkinabè
+
+La spécification doit être lue avec [CONFORMITE_FISCALE_BURKINA_FACTURATION.md](CONFORMITE_FISCALE_BURKINA_FACTURATION.md), qui documente les régimes, la facture normalisée, la FEC, les taux, l'exigibilité, les retenues, les moyens de paiement et la conservation. Ce référentiel est daté du 3 novembre 2026 et demeure soumis à validation fiscale avant mise en production.
