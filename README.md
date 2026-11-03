@@ -35,6 +35,7 @@ Le détail des constats de l’audit, de leur état et des décisions attendues 
 - [Spécification fonctionnelle — Devis et factures](docs/SPECIFICATION_FONCTIONNELLE_DEVIS_FACTURES.md)
 - [Modèle de données — Devis et factures](docs/MODELE_DONNEES_DEVIS_FACTURES.md)
 - [Référentiel de conformité fiscale — Facturation au Burkina Faso](docs/CONFORMITE_FISCALE_BURKINA_FACTURATION.md)
+- [Matrice fiscale de référence — Burkina Faso 2026](docs/MATRICE_FISCALE_BURKINA_2026.md)
 - [Sécurité et confidentialité](SECURITY.md)
 - [Contribution au projet](CONTRIBUTING.md)
 
