@@ -34,6 +34,7 @@ Le détail des constats de l’audit, de leur état et des décisions attendues 
 - [Design system PolyGest](docs/POLYGEST_DESIGN_SYSTEM.md)
 - [Spécification fonctionnelle — Devis et factures](docs/SPECIFICATION_FONCTIONNELLE_DEVIS_FACTURES.md)
 - [Modèle de données — Devis et factures](docs/MODELE_DONNEES_DEVIS_FACTURES.md)
+- [Référentiel de conformité fiscale — Facturation au Burkina Faso](docs/CONFORMITE_FISCALE_BURKINA_FACTURATION.md)
 - [Sécurité et confidentialité](SECURITY.md)
 - [Contribution au projet](CONTRIBUTING.md)
 
