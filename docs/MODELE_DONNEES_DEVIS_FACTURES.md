@@ -443,6 +443,8 @@ Ne pas stocker des identifiants bancaires secrets, clés d'accès ou données d'
 
 Le dossier client doit pouvoir conserver, selon le type de client : nom/prénoms ou raison sociale/forme juridique, adresse, téléphone, IFU, RCCM ou registre professionnel. Les champs deviennent obligatoires à la validation/émission selon les dispositions applicables à la catégorie du client.
 
+Le profil fiscal client doit également pouvoir enregistrer sa catégorie administrative (notamment entité publique / RND lorsque ce statut est justifié) et un indicateur daté indiquant si le client exige une FEC de ses fournisseurs locaux. Cette exigence côté acheteur ne constitue pas une autorisation pour PolyGest de certifier lui-même une facture.
+
 ### 14.2 Historique fiscal à effet daté
 
 Ajouter company_tax_profile_history plutôt que de remplacer silencieusement le régime actuel. Champs conceptuels :
@@ -523,7 +525,7 @@ Créer invoice_fiscal_outputs pour séparer la facture commerciale de sa sortie 
 
 Ne jamais simuler les champs de sécurité d'une FEC. Les champs de certification ne peuvent être remplis que par une réponse authentifiée de la solution homologuée. Le schéma et le protocole réels ne seront fixés qu'à partir des spécifications DGI remises dans le cadre de l'homologation.
 
-Créer company_secef_profiles pour l'équipement ou SFE réellement utilisé, son fournisseur, son attestation, sa période de validité, les points de vente concernés et son statut de connexion.
+Créer company_secef_profiles pour l'équipement ou SFE réellement utilisé, son fournisseur, son attestation, sa période de validité, les points de vente concernés et son statut de connexion. Ajouter les champs customer_fiscal_profiles pour documenter les exigences FEC côté acheteur public/RND, avec dates et justificatifs.
 
 ### 14.7 Numérotation et correction
 
