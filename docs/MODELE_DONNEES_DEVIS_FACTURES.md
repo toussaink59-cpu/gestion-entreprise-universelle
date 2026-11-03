@@ -72,13 +72,15 @@ Compteur atomique par entreprise, type de document et période de numérotation.
 |---|---|---|
 | `company_id` | uuid | FK `companies.id` |
 | `document_type` | text | `quote` ou `invoice` |
-| `period_key` | text nullable | Segmentation uniquement si le format de série est validé ; ne signifie pas un redémarrage automatique à chaque année civile ou exercice |
+| `series_code` | text | Code de série commerciale/légale validé ; une série de devis est distincte de celle des factures |
+| `establishment_id` | uuid nullable | Point de vente/établissement, seulement si plusieurs séries sont juridiquement admises |
+| `period_key` | text nullable | Métadonnée de période ; ne provoque jamais à elle seule une remise à zéro du compteur |
 | `prefix` | text | Préfixe de série |
 | `next_number` | bigint | Prochain numéro strictement positif |
 | `padding` | smallint | Largeur minimale du compteur |
 | `updated_at` | timestamptz | Dernière réservation |
 
-Clé primaire : `(company_id, document_type, period_key)`.
+Clé/contrainte conceptuelle : `(company_id, document_type, establishment_id, series_code)`. La numérotation légale progresse continûment dans la série validée ; aucun redémarrage annuel n'est supposé autorisé. Le découpage par période est une métadonnée éventuelle et non la clé de remise à zéro.
 
 **Accès :** aucune lecture/écriture directe depuis le client authentifié. Une fonction dédiée réserve le numéro sous verrou transactionnel, puis retourne la valeur formatée. Un numéro utilisé ne doit jamais être réattribué ; les trous de séquence ne doivent pas provoquer de réutilisation. La série légale doit rester vérifiable et ininterrompue ; format, séries par établissement et périodicité doivent être validés localement avant tout redémarrage de compteur.
 
@@ -171,7 +173,7 @@ En-tête des factures autonomes ou issues d'un devis.
 | `customer_id` | uuid | Client de la même entreprise |
 | `source_quote_id` | uuid nullable | Devis source, si applicable |
 | `invoice_number` | text nullable | Null en brouillon ; unique par entreprise après émission |
-| `status` | text | `draft`, `issued`, `cancelled` |
+| `status` | text | `draft`, `issued`, `abandoned_draft` ; une correction après émission est enregistrée dans une entité séparée et ne supprime pas l'original |
 | `billing_kind` | text | `standalone`, `full`, `deposit`, `progress`, `final` |
 | `issue_date` | date | Date de facture |
 | `due_date` | date nullable | Échéance |
@@ -203,7 +205,7 @@ Contraintes proposées :
 - `quote_allocated_amount` est null pour une facture autonome. Pour une facture émise issue d'un devis, il est positif et égal au montant TTC imputé au devis pour cette tranche.
 - `full` n'est autorisé que si aucune autre facture émise non annulée n'existe pour le devis.
 - `final` consomme exactement le reste à facturer et interdit toute émission ultérieure sur ce devis.
-- Les factures émises sont immuables, hormis une procédure d'annulation contrôlée.
+- Les factures émises sont immuables. Une erreur après émission est corrigée par un document/dossier lié à l'original selon la procédure fiscale validée ; aucun statut d'annulation simple ne permet d'effacer une facture délivrée.
 
 Index : `(company_id, status, issue_date desc)`, `(company_id, customer_id, issue_date desc)`, `(company_id, source_quote_id, status)`, unicité du numéro.
 
@@ -258,7 +260,7 @@ La table contient déjà raison sociale, nom commercial, pays, devise par défau
 
 Réutiliser `app.log_event(company_id, action, entity_type, entity_id, metadata)`. Événements suggérés :
 - `quote.created`, `quote.updated`, `quote.sent`, `quote.accepted`, `quote.rejected`, `quote.cancelled`;
-- `invoice.created`, `invoice.issued`, `invoice.cancelled`;
+- `invoice.created`, `invoice.issued`, `invoice.draft_abandoned`, `invoice.correction_opened`, `invoice.correction_resolved`;
 - `invoice.quote_allocation_created` si une trace dédiée de l'imputation est souhaitée.
 
 Les métadonnées ne contiennent que les changements utiles, les montants de synthèse et les références nécessaires ; éviter les coordonnées client, notes privées, identifiants sensibles et données de paiement.
@@ -288,7 +290,8 @@ Les noms sont indicatifs ; les signatures exactes seront conçues dans l'implém
 2. `public.send_quote(quote_id)` : vérifie permission, entreprise, état, lignes, snapshots et numérotation ; passe le devis à `sent`.
 3. `public.record_quote_decision(quote_id, decision, method, reference)` : accepte ou refuse un devis transmis et encore valide.
 4. `public.issue_invoice(invoice_id)` : vérifie la facture brouillon, recalcule ses totaux, verrouille le devis source le cas échéant, valide le type de facturation, les quantités, le solde et la numérotation ; fige la facture et journalise.
-5. `public.cancel_invoice(invoice_id, reason)` : vérifie permission et conditions d'annulation ; conserve la trace et libère l'allocation du devis uniquement si la politique d'annulation validée le permet.
+5. `public.abandon_invoice_draft(invoice_id, reason)` : abandonne uniquement un brouillon non émis et conserve sa trace.
+6. `public.open_invoice_correction(invoice_id, reason)` : crée un dossier lié à une facture déjà émise, sans modifier l'original ni libérer son allocation ; la correction fiscale réelle attend la procédure validée.
 6. Fonctions de lecture du solde du devis et du cumul des quantités facturées, filtrées par entreprise et permission.
 
 **Concurrence :** lors de l'émission d'une facture issue d'un devis, verrouiller la ligne du devis avec `SELECT ... FOR UPDATE` ; recalculer le cumul dans la même transaction. Le numéro de document est réservé dans cette même transaction. Deux requêtes simultanées ne doivent jamais pouvoir franchir le plafond de facturation ou réutiliser un numéro.
@@ -423,7 +426,7 @@ Les fonctions et privilèges doivent être déployés dans le même changement c
 Aucune de ces questions ne doit être résolue par une valeur arbitraire dans une migration. Documenter la décision et sa source avant l'implémentation.
 
 
-## 14. Extension du modèle — conformité fiscale burkinabè
+## 15. Extension du modèle — conformité fiscale burkinabè
 
 Cette section complète les tables conceptuelles précédentes. Elle ne constitue pas une migration SQL. Les règles doivent être revues avec un professionnel fiscal avant leur codage.
 
@@ -547,7 +550,7 @@ La série légale de factures doit être ininterrompue. Le modèle actuel de sé
 - séparer série de devis et série de factures ;
 - gérer une série par établissement/point de vente uniquement si elle est juridiquement validée.
 
-Une facture émise ne peut pas être supprimée ni simplement passée à cancelled pour effacer ses effets. Les corrections/avoirs doivent être représentés par un document lié à l'original ou par la procédure officielle du SECeF/SFE homologué. Le modèle de correction précis attend la validation juridique et technique.
+Une facture émise ne peut pas être supprimée ni simplement passée à cancelled pour effacer ses effets. En attendant la procédure fiscale validée, le statut `issued` de l'original est conservé et une correction n'ajuste pas automatiquement l'allocation du devis. Les corrections/avoirs doivent être représentés par un document lié à l'original ou par la procédure officielle du SECeF/SFE homologué. Le modèle de correction précis attend la validation juridique et technique.
 
 ### 14.8 Archivage
 
@@ -560,7 +563,7 @@ Conserver, dans un stockage privé :
 
 La durée cible minimale est de dix ans pour les pièces visées par les textes consultés, à revalider selon la nature du document et le point de départ légal du délai. La suppression automatique ne doit pas être autorisée en présence d'une obligation de conservation ou d'un contentieux.
 
-## 15. Contraintes et tests supplémentaires
+## 16. Contraintes et tests supplémentaires
 
 - Impossible d'émettre une facture avec TVA sans statut de collecte autorisé et effectif à la date du document.
 - Impossible de simuler une facture sans TVA avec une taxe à 0 %.
