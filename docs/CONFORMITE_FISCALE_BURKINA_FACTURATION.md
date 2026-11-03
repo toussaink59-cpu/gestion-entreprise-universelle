@@ -123,9 +123,19 @@ Des dispenses existent dans les textes pour certaines catégories d'opérations 
 
 L'article 564 du CGI modifié par la loi de finances 2025 prévoit un dispositif spécifique de FEC pour les contribuables relevant de la DGE et des DME. L'arrêté n°2025-0049/MEF/SG/DGI du 5 février 2025 définit la FEC, les SECeF physiques (UF/MCF), le système de facturation d'entreprise (SFE) et l'homologation.
 
-L'arrêté indique que toute entreprise relevant de la DGE ou d'une DME qui livre un bien ou fournit un service doit délivrer une FEC lors de chaque transaction, dans les conditions réglementaires. Il décrit notamment les obligations des utilisateurs de dispositifs physiques : équipement des lieux de vente, affichage destiné aux clients, émission systématique, accès aux contrôles, dispositif de remplacement et régularisation des ventes non facturées lors d'un dysfonctionnement.
+L'arrêté indique que toute entreprise relevant de la DGE ou d'une DME qui livre un bien ou fournit un service doit délivrer une FEC lors de chaque transaction, dans les conditions réglementaires. L'arrêté prévoit également que les acteurs de la chaîne d'exécution des dépenses publiques et les personnes relevant du RND n'acceptent que des FEC provenant des fournisseurs locaux, sous réserve des exemptions prévues. Cette règle crée une exigence côté client : un fournisseur peut avoir besoin de vérifier que son client public ou RND exige un document certifié. Elle ne confère toutefois pas à PolyGest le droit de produire une FEC sans passer par un système homologué. Il décrit notamment les obligations des utilisateurs de dispositifs physiques : équipement des lieux de vente, affichage destiné aux clients, émission systématique, accès aux contrôles, dispositif de remplacement et régularisation des ventes non facturées lors d'un dysfonctionnement.
 
-La DGI a publié en 2026 des notes sur les spécifications techniques et la procédure d'homologation des SFE/SECeF, ainsi qu'un communiqué lançant la procédure d'homologation des systèmes de facturation d'entreprise. La DGI a également inscrit un communiqué daté du 29 octobre 2026 intitulé « Utilisation obligatoire des SECeF par les grandes entreprises ». La page de communiqué consultée établit l'existence et la date du communiqué, mais le texte intégral et son calendrier détaillé n'ont pas pu être vérifiés dans le cadre de cette recherche. Il ne faut donc pas extrapoler une échéance à toutes les catégories de contribuables.
+La DGI a publié en 2026 des notes sur les spécifications techniques et la procédure d'homologation des SFE/SECeF, ainsi qu'un communiqué lançant la procédure d'homologation des systèmes de facturation d'entreprise.
+
+Le calendrier opérationnel annoncé par le communiqué conjoint DGI/CCI-BF du 28 août 2026 prévoit la mise à disposition des systèmes physiques :
+- 7 septembre 2026 pour les contribuables de la DGE et les éditeurs de logiciels ;
+- 2 novembre 2026 pour les contribuables relevant du RNI dans les DME ;
+- 1er décembre 2026 pour les contribuables relevant du RND dans les DME.
+Le communiqué accorde un délai de 30 jours suivant chacune de ces dates pour la mise en conformité. Au 3 novembre 2026, la période de mise à disposition destinée aux contribuables RNI des DME vient donc de commencer. Le texte de ce communiqué est reproduit par la presse locale et attribué aux signatures DGI/CCI-BF ; sa copie PDF officielle doit être conservée dans le dossier réglementaire du projet.
+
+La DGI a ensuite inscrit, le 29 octobre 2026, un communiqué intitulé « Utilisation obligatoire des SECeF par les grandes entreprises ». Son contenu communiqué à la presse précise une utilisation effectivement exigée pour les contribuables de la DGE à compter du 1er janvier 2027. Le site officiel confirme la publication et la date ; le texte intégral n'ayant pas été téléchargé directement depuis le site DGI dans cette recherche, la date du 1er janvier 2027 est consignée comme échéance opérationnelle fortement recoupée mais à joindre au dossier officiel avant implémentation.
+
+Le calendrier cité ne permet pas de déduire une date pour tous les contribuables relevant des DME, notamment les DME/RSI ou d'autres sous-catégories qui ne sont pas explicitement listées dans le communiqué de mise à disposition. Ne pas extrapoler ces dates à l'ensemble des entreprises.
 
 ### 4.2 Informations à faire figurer sur la FEC
 
@@ -339,7 +349,9 @@ Sources institutionnelles prioritaires. Les pages et documents doivent être rec
 - DGI — [FAQ fiscale](https://dgi.bf/faq/)
 - DGI — [Instruction administrative relative à la facture normalisée, 7 octobre 2020](https://dgi.bf/wp-content/uploads/2023/10/INSTRUCTION-ADMINISTRATIVE-PORTANT-SUR-LA-FACTURE-NORMALISEE.pdf)
 - DGI — [Arrêté n°2025-0049/MEF/SG/DGI du 5 février 2025 relatif aux FEC](https://dgi.bf/wp-content/uploads/2026/01/arrete-portant-Conditions-et-Modalites-demission-de-la-FEC.pdf)
-- DGI — [Communiqués](https://dgi.bf/communiques/) (dont le communiqué du 29 octobre 2026 sur l'utilisation obligatoire des SECeF par les grandes entreprises)
+- DGI — [Communiqués](https://dgi.bf/communiques/) (communiqué du 29 octobre 2026 sur l'utilisation obligatoire des SECeF par les grandes entreprises)
+- [Reproduction du communiqué conjoint DGI/CCI-BF du 28 août 2026 sur le calendrier de mise à disposition des SECeF](https://www.actualite.bf/communique-conjoint-mise-en-vente-des-systemes-electroniques-certifies-de-facturation/)
+- [Reproduction du communiqué DGI sur l'utilisation obligatoire des SECeF par les contribuables de la DGE dès le 1er janvier 2027](https://www.minute.bf/burkina-la-facture-electronique-certifiee-obligatoire-pour-les-grandes-entreprises-des-le-1er-janvier-2027/)
 - DGI — [Documentation FEC](https://dgi.bf/facture-electronique-certifie/) et [notes FEC / homologation](https://dgi.bf/note-fec/)
 - DGI — [Code général des impôts — version en ligne](https://dgi.bf/verification/CGI)
 - Burkina Faso — [Loi de finances 2025](https://douanes.bf/sydoniabf/files/Loi_Finances_2025.pdf)
@@ -347,4 +359,4 @@ Sources institutionnelles prioritaires. Les pages et documents doivent être rec
 
 ### Limites documentaires de la recherche
 
-La page publique DGI consultée confirme l'existence des notes techniques et de la procédure d'homologation publiées en janvier 2026, mais les documents techniques complets n'ont pas tous été lisibles dans la consultation. Le communiqué du 29 octobre 2026 est listé par la DGI, mais son contenu intégral et son calendrier détaillé doivent encore être obtenus. La version complète et consolidée du CGI applicable au 3 novembre 2026 doit être relue par le conseil fiscal avant que PolyGest ne présente une règle comme légalement exhaustive.
+La page publique DGI consultée confirme l'existence des notes techniques et de la procédure d'homologation publiées en janvier 2026, mais les documents techniques complets n'ont pas tous été lisibles dans la consultation. Le contenu du communiqué DGI du 29 octobre 2026 et le calendrier du communiqué conjoint du 28 août 2026 ont été recoupés dans des reproductions de presse ; leurs copies PDF officielles signées doivent être conservées avant de figer les échéances dans le moteur fiscal. La version complète et consolidée du CGI applicable au 3 novembre 2026 doit être relue par le conseil fiscal avant que PolyGest ne présente une règle comme légalement exhaustive.
