@@ -396,11 +396,29 @@ L'arrêté n°2025-0049/MEF/SG/DGI du 5 février 2025 définit notamment :
 
 Une FEC doit être produite dans le cadre du dispositif prévu, avec les mentions et éléments de sécurité requis. Un PDF standard, un QR code créé par PolyGest ou une facture électronique non certifiée ne constitue pas par lui-même une FEC.
 
-### 8.2 Assujettissement et rôle du client
+### 8.2 Assujettissement et articulation entre la loi et le déploiement opérationnel
 
-L'arrêté vise les entreprises relevant de la DGE et des DME pour l'émission d'une FEC sur les transactions de livraison de biens et de prestations de services, dans les conditions du texte.
+L'article 44 de la loi n°042-2024/ALT portant loi de finances pour l'exécution du budget de l'État, exercice 2025, modifie l'article 564 du CGI avec effet au **1er janvier 2025** :
+- le paragraphe 1 maintient l'obligation d'utiliser des factures normalisées, dont les conditions d'édition, de gestion et les éléments de sécurité sont fixés par arrêté ;
+- le paragraphe 2 prévoit que les contribuables relevant de la DGE et des DME délivrent exclusivement une FEC à leur client ou un document tenant lieu de FEC ;
+- la définition légale de la FEC renvoie à un système électronique certifié de facturation homologué par l'administration fiscale et prévoit notamment un numéro SECeF, un code d'authentification et un QR code.
 
-Il prévoit également, pour certains acteurs de la chaîne des dépenses publiques et les personnes relevant du RND, l'acceptation de FEC provenant de fournisseurs locaux, sous réserve des dispenses de FEC explicitement prévues.
+Il faut distinguer trois dates qui ne sont pas interchangeables :
+1. la date d'entrée en vigueur de la règle législative (1er janvier 2025, selon l'article 44) ;
+2. les dates de mise à disposition ou de commercialisation des équipements et systèmes par l'administration ;
+3. les échéances opérationnelles, périodes transitoires ou catégories précises fixées par les communications et actes d'application de la DGI.
+
+Les annonces de déploiement différenciées publiées en 2026 ne doivent donc pas être interprétées comme une modification implicite de la date législative. La portée concrète, les modalités transitoires et les sanctions ne peuvent être automatisées qu'après rapprochement de la loi, des arrêtés et des communiqués DGI applicables à la catégorie du contribuable.
+
+L'article 44 précise que les conditions d'émission, la commercialisation des systèmes et les documents tenant lieu de FEC sont déterminés par arrêté. L'arrêté n°2025-0049 du 5 février 2025 constitue le texte réglementaire de référence identifié pour les conditions d'émission.
+
+L'article 45 de la même loi de finances 2025 modifie l'article 566 :
+- le paragraphe 1 énumère les dispenses de facture normalisée ;
+- le paragraphe 2 établit une liste distincte de contribuables relevant de la DGE dispensés de FEC : État, collectivités et établissements publics sans activité industrielle ou commerciale ; entreprises sans établissement stable au Burkina Faso ; sociétés de navigation aérienne ; entreprises de transport urbain de personnes avec délivrance de tickets.
+
+La liste des dispenses de facture normalisée n'est donc pas la liste des dispenses de FEC. Il ne faut pas étendre automatiquement une dispense du paragraphe 1 au paragraphe 2.
+
+L'arrêté relatif aux documents tenant lieu de FEC traite d'une catégorie encore différente : des documents expressément admis comme justificatifs de transaction dans les cas prévus par l'arrêté. Ces documents ne sont pas des FEC certifiées, même s'ils peuvent en tenir lieu légalement.
 
 PolyGest doit donc gérer deux questions indépendantes :
 1. le fournisseur est-il obligé d'émettre une FEC ?
@@ -444,7 +462,25 @@ La DGI a publié des communiqués sur le déploiement des SECeF, et un communiqu
 
 Toutefois, la date d'annonce, la mise à disposition d'un matériel et la date d'obligation légale ne sont pas nécessairement la même chose. La copie intégrale des communiqués applicables, leur champ exact, les périodes transitoires et les catégories concernées doivent être archivés avant d'afficher une échéance ou un blocage automatique. La date du 1er janvier 2027 annoncée pour la DGE doit être vérifiée directement dans le communiqué officiel intégral.
 
-### 8.6 Position produit
+### 8.6 Sanctions liées à la normalisation et à la FEC
+
+La loi de finances 2025 introduit les articles 798-1 et 798-2 du CGI, avec effet au 1er janvier 2025.
+
+**Facture normalisée — article 798-1 :**
+- amende de 100 000 FCFA par facture normalisée non conforme au paragraphe 1 de l'article 564 ou comportant des mentions inexactes.
+
+**FEC — article 798-2 :**
+- défaut d'émission par une personne soumise à l'obligation : amende égale à cinq fois le montant de TVA compromis, avec un minimum de 500 000 FCFA ;
+- récidive : dix fois la TVA compromise, avec un minimum de 1 000 000 FCFA ;
+- possibilité de fermeture administrative de dix jours renouvelables ;
+- les sanctions s'appliquent aussi à une personne causant un dysfonctionnement du système électronique certifié ;
+- fournisseur d'un SFE non homologué : amende de 1 000 000 FCFA, portée à 2 000 000 FCFA en cas de récidive ;
+- même sanction pour une entreprise ayant développé son propre système sans homologation ;
+- modification du SFE ou usurpation d'identité destinée à émettre des FEC frauduleuses/falsifiées : amende de 2 000 000 FCFA par facture, sans préjudice des sanctions pénales.
+
+Ces montants sont reproduits à des fins de conception et d'information. Leur application à un cas concret, la qualification de la récidive, la base de calcul de la TVA compromise et les garanties procédurales exigent la lecture de l'article 798-2 complet et une validation professionnelle. PolyGest ne doit pas calculer automatiquement une amende fiscale comme créance certaine.
+
+### 8.7 Position produit
 
 Tant que PolyGest n'a pas reçu l'homologation/attestation correspondante :
 - ne jamais afficher « FEC certifiée », « homologuée DGI » ou équivalent ;
@@ -479,6 +515,15 @@ Les articles 315 et 316 doivent être lus ensemble. Ne pas déduire l'exigibilit
 | Services/biens immatériels de non-résident | Règles spécifiques liées à la facture/comptabilisation | Revue fiscale et potentielle autoliquidation/retenue selon la situation |
 | Livraison à soi-même | Première utilisation | Cas spécialisé ; validation nécessaire |
 | Opération avec entité publique | Règle spécifique possible de report ou de retenue | Contrôler visa/autorisation, qualité du client et texte applicable avant calcul |
+
+6) Pour les fournitures ou livraisons à l'État, aux collectivités territoriales ou à leurs démembrements n'ayant pas un caractère industriel ou commercial, l'article 316 prévoit qu'un différé de paiement de la TVA peut être accordé par le service des impôts jusqu'au paiement par les services du Trésor public. Le montant dû est alors retenu à la source par le service chargé du paiement, au taux indiqué par le service des impôts lors du visa des décomptes, du marché ou du contrat. À défaut de visa, le texte prévoit une pénalité de 25 % en cas de mauvaise foi et de 200 % en cas de manœuvres frauduleuses, sur les droits dus.
+
+Cette disposition doit être traitée séparément :
+- de la retenue sur commandes publiques prévue aux articles 226-1 et suivants ;
+- de la retenue de 30 % sur la TVA prévue à l'article 334, paragraphe 4, issue de la LFI 2026 ;
+- des retenues sur prestations ou bénéficiaires RND.
+
+La présence d'un marché public ne permet pas de cumuler automatiquement ces retenues. L'identité du payeur, le statut du fournisseur, la nature de la dépense, le visa fiscal du marché/décompte et la règle d'exigibilité doivent être vérifiés au cas par cas.
 
 Cette matrice est un guide de qualification, pas un calculateur exhaustif. Le champ exact des exceptions, notamment IBNC et opérations avec l'État/collectivités, doit être confirmé dans le CGI consolidé.
 
@@ -647,7 +692,13 @@ Un document émis doit être immuable. Une rectification produit un document et 
 
 ### 12.3 Conservation de dix ans
 
-L'article 567 dans la version du CGI 2023 consultée prévoit une conservation de dix ans pour certains doubles de factures, notes, bons de commande, bons de livraison et justificatifs des montants déclarés. Il faut vérifier le texte consolidé 2026 et les autres obligations d'archivage propres à chaque pièce.
+L'article 46 de la loi de finances 2025 réécrit l'article 567 du CGI avec effet au 1er janvier 2025. Les redevables doivent conserver pendant dix ans les doubles des factures, notes d'honoraires, bons de commande, bons de livraison et toute autre pièce justificative des éléments contenus dans les déclarations souscrites. Pour les sociétés liquidées, cette obligation incombe au syndic liquidateur. Les documents doivent être présentés à toute réquisition des agents des impôts.
+
+L'article 55 de la même loi modifie l'article 802 :
+- défaut de conservation avant l'expiration du délai ou défaut de présentation : amende fiscale de 100 000 FCFA par document manquant ;
+- destruction volontaire avant la fin du délai : amende fiscale de 5 000 000 FCFA.
+
+La conservation de dix ans est donc une obligation légale documentée pour les pièces visées ; les modalités précises d'archivage électronique, les extensions à des données techniques et les règles sectorielles complémentaires doivent être vérifiées séparément.
 
 Pour les données électroniques :
 - conserver le fichier original ;
@@ -837,7 +888,7 @@ Les liens suivants constituent le dossier de départ. Les fichiers téléchargé
 - [Arrêté n°2025-0049 — conditions et modalités d'émission de la FEC](https://dgi.bf/wp-content/uploads/2026/01/arrete-portant-Conditions-et-Modalites-demission-de-la-FEC.pdf)
 - [Arrêté sur les documents tenant lieu de FEC](https://dgi.bf/wp-content/uploads/2023/10/ARRETE-SUR-LES-DOCUMENTS-TENANT-LIEU-DE-LA-FEC.pdf)
 - [Loi de finances 2024 — texte DGI, notamment modification de l'article 568](https://dgi.bf/wp-content/uploads/2023/10/LOI-DE-FINANCES-2024.pdf)
-- [Loi de finances 2025 — répertoriée par la DGI ; copie et article 47 à archiver depuis le texte promulgué](https://dgi.bf/lois/)
+- [Loi n°042-2024/ALT portant loi de finances 2025 — copie institutionnelle diffusée par la Direction générale des douanes](https://douanes.bf/sydoniabf/files/Loi_Finances_2025.pdf) — articles 30-31, 44-47 et 53-55 ; confronter au fichier publié dans la rubrique Lois de la DGI.
 
 ### LFR 2026 — étapes institutionnelles
 - [Assemblée législative du Peuple — adoption de la LFR 2026 le 23 septembre 2026](https://www.assembleenationale.bf/945)
@@ -900,6 +951,17 @@ Cette édition 0.2 intègre une première confrontation de la matrice avec les p
 - Télécharger les communiqués DGI du 28 août et du 29 octobre 2026 relatifs aux SECeF et archiver leurs annexes et délais exacts.
 - Vérifier l'articulation entre article 566 §2, arrêté FEC et documents tenant lieu de FEC.
 
-### 20.4 Règle de non-activation
+
+
+### 20.5 Précisions complémentaires issues de la loi de finances 2025 et du CGI consulté
+
+- **Article 564 :** à compter du 1er janvier 2025, les contribuables DGE et DME doivent délivrer exclusivement une FEC ou un document tenant lieu de FEC, sous réserve des dispenses prévues à l'article 566 et des textes d'application. La date législative et le calendrier opérationnel de déploiement doivent être gérés comme deux données distinctes.
+- **Article 566 :** la loi distingue expressément les dispenses de facture normalisée (paragraphe 1) et les dispenses de FEC pour certains contribuables DGE (paragraphe 2).
+- **Articles 798-1 et 798-2 :** sanctions respectives relatives aux factures normalisées non conformes et au défaut de FEC ou à l'absence d'homologation d'un SFE.
+- **Article 567 :** conservation de dix ans, confirmé par sa nouvelle rédaction issue de la loi de finances 2025.
+- **Article 802 :** amende de 100 000 FCFA par document manquant et amende de 5 000 000 FCFA en cas de destruction volontaire avant le terme.
+- **Article 316, paragraphe 6 :** cas particulier de fourniture/livraison à l'État, aux collectivités et à leurs démembrements non industriels ou commerciaux, avec possibilité de différé de paiement jusqu'au règlement du Trésor et retenue au taux indiqué lors du visa fiscal.
+
+### 20.6 Règle de non-activation
 
 Toute règle dont le texte consolidé, l'entrée en vigueur, le champ, l'assiette, l'exception ou l'articulation n'est pas vérifié doit rester à l'état `requires_tax_review`. Aucune valeur par défaut ne doit transformer une lacune documentaire en décision fiscale.
