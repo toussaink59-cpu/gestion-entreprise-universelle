@@ -3,7 +3,7 @@
 **Produit :** PolyGest  
 **Juridiction :** Burkina Faso  
 **Date de cadrage :** 3 novembre 2026  
-**Version :** 0.3 — projet de consolidation documentaire, non validé professionnellement  
+**Version :** 0.4 — revue corrective documentaire, non validée professionnellement  
 **Périmètre :** régimes d'imposition, TVA, facturation normalisée, facture électronique certifiée (FEC), retenues, acomptes, situations de travaux, conservation et contrôles de cohérence  
 **Décision d'architecture :** aucun calcul fiscal irréversible ni aucune affirmation de conformité ne peut être activé sur la seule base de ce document.
 
@@ -272,9 +272,9 @@ Pour chaque période, conserver :
 - la date de début et, le cas échéant, la date de fin d'effet ;
 - la date de vérification et son auteur.
 
-Le chiffre d'affaires calculé par PolyGest sert à produire des alertes. Il ne constitue pas, à lui seul, une décision administrative de changement de régime.
+Le chiffre d'affaires calculé par PolyGest sert à produire des alertes et des éléments de contrôle. Il ne constitue pas, à lui seul, une décision administrative de changement de régime.
 
-En cas de dépassement d'un seuil, le logiciel doit créer une alerte, demander une vérification et conserver le statut enregistré jusqu'à la confirmation d'une décision ou d'une règle de changement juridiquement applicable.
+En cas de dépassement d'un seuil, le logiciel doit créer une alerte, dater l'événement, demander les pièces et appliquer le mécanisme prévu par le texte en vigueur. Il doit distinguer : (a) le régime historiquement enregistré ; (b) la règle légale de caducité ou de changement éventuellement déclenchée ; (c) le régime de remplacement juridiquement applicable ; (d) le statut de vérification du dossier. Lorsqu'un texte prévoit une caducité de plein droit, l'absence de décision administrative individuelle ne permet pas de maintenir artificiellement l'ancien régime comme actif. Si le texte, la date d'effet ou le régime de remplacement ne sont pas établis, le moteur suspend la décision automatisée et retourne `requires_tax_review`. Les factures antérieures ne sont jamais réécrites.
 
 Aucune période fiscale clôturée ne doit être réécrite silencieusement.
 
@@ -987,7 +987,7 @@ Aucun taux ou résultat fiscal n'est réputé valide tant que les scénarios ci-
 | WHT-02 | Travaux publics/travaux immobiliers | Vérifier catégorie et base avant taux réduit |
 | WHT-03 | Article 221, vacation | Vérifier statut du bénéficiaire et nature du paiement |
 | WHT-04 | Retenue TVA de 30 % | Vérifier qualité du payeur/fournisseur et commande éligible |
-| PAY-01 | Transaction TTC dépassant 1m payée en espèces | Déclencher alerte/contrôle selon articles 568 et sanctions en vigueur |
+| PAY-01 | Achat de 999 999 FCFA TTC réglé en espèces | Seuil de 1 000 000 FCFA non atteint ; conserver le calcul et la preuve |
 | DOC-01 | Attribution simultanée de factures | Numéros uniques et continus selon séquence approuvée |
 | DOC-02 | Facture émise puis corrigée | Original conservé, correction liée, audit complet |
 | DOC-03 | Document fiscal de 2025 relu en 2026 | Version de règle 2025 conservée |
@@ -1000,8 +1000,19 @@ Aucun taux ou résultat fiscal n'est réputé valide tant que les scénarios ci-
 | WHT-08 | Retenue déjà reversée | Interdiction du double reversement |
 | WHT-09 | Attestation de retenue reçue | Conservation et rapprochement avec le paiement initial |
 | PAY-02 | Paiements fractionnés ou règlements multiples liés à une opération | Contrôle selon la règle légale confirmée ; aucune règle anti-fractionnement inventée |
-
 | ARCH-01 | Export du dossier fiscal | Pièces, document original, règles et preuves réunis |
+| PAY-03 | Achat de 1 000 000 FCFA TTC exactement réglé en espèces | Seuil inclusif atteint ; déclencher le contrôle prévu par l'article 568 si les autres conditions sont remplies |
+| PAY-04 | Achat de 1 000 001 FCFA TTC réglé en espèces | Seuil dépassé ; déclencher le même contrôle, sans extrapoler les sanctions |
+| REG-11 | Dépassement du seuil RSI lorsque le texte prévoit une caducité en cours d'année | Distinguer date de caducité, régime de remplacement et statut de vérification ; pas de maintien artificiel du RSI |
+| REG-12 | Deux périodes de régime qui se chevauchent pour une même entreprise et catégorie | Rejeter la configuration ou exiger une résolution avant calcul |
+| TVA-07 | Droit de collecte suspendu à la date de l'opération | Bloquer la collecte et conserver la preuve du statut applicable |
+| TVA-08 | Fournisseur autorisé, opération exonérée | Ne pas calculer de TVA collectée ; conserver le fondement et la preuve d'exonération |
+| EVT-10 | Même acompte reçu deux fois via événements/imports concurrents | Idempotence : une seule prise en compte fiscale |
+| EVT-11 | Correction après clôture d'une période | Créer un événement correctif lié ; ne pas modifier l'événement initial |
+| WHT-10 | Plusieurs retenues potentiellement applicables au même paiement | Demander une revue ; aucun cumul ou ordre d'application implicite |
+| FEC-06 | Réponse positive du système certifié reçue et vérifiable | Statut certifié seulement après validation de l'authenticité, de la correspondance et de l'intégrité de la réponse |
+| FEC-07 | Délai dépassé, réponse absente ou ambiguë du système certifié | Ne jamais attribuer le statut certifié ; état en attente/échec/revue selon la preuve disponible |
+| SEC-01 | Utilisateur d'une entreprise tente d'accéder aux pièces fiscales d'une autre entreprise | Accès refusé côté serveur et par les politiques de données |
 
 ---
 
@@ -1099,7 +1110,7 @@ Les liens suivants constituent le dossier de départ. Les fichiers téléchargé
 
 ## 20. Journal de revue documentaire — 3 novembre 2026
 
-Cette édition 0.2 intègre une première confrontation de la matrice avec les pages et textes officiels retrouvés le 3 novembre 2026. Cette revue documentaire améliore la précision de la recherche ; elle ne constitue pas la validation par un fiscaliste.
+L'édition 0.2 avait intégré une première confrontation de la matrice avec les pages et textes officiels retrouvés le 3 novembre 2026. Cette revue documentaire a amélioré la précision de la recherche ; elle ne constituait pas une validation par un fiscaliste.
 
 ### 20.1 Sources officielles directement retrouvées
 
@@ -1167,3 +1178,18 @@ Ces ajouts sont des exigences de conception et des contrôles de prudence. Ils n
 
 Les règles fiscales non vérifiées dans les textes applicables et non validées professionnellement restent à l'état `requires_tax_review`. Aucun code applicatif, aucune migration SQL et aucune donnée de production n'ont été modifiés dans le cadre de cette édition documentaire.
 
+
+### 20.7 Revue corrective — édition 0.4
+
+L'édition 0.4 corrige des ambiguïtés de conception relevées lors de la revue du 3 novembre 2026 :
+
+- clarification du traitement d'un dépassement de seuil lorsqu'un texte prévoit une caducité de plein droit, sans confondre régime historique, régime juridiquement applicable et statut de vérification ;
+- couverture explicite du seuil de paiement scriptural à 1 000 000 FCFA TTC, avec tests en dessous, à égalité et au-dessus ;
+- ajout de tests pour les périodes de régime qui se chevauchent, la suspension du droit de collecte TVA, l'exonération, l'idempotence des acomptes, les corrections après clôture, les retenues concurrentes, les réponses SECeF/SFE et l'isolation interentreprises ;
+- correction de la formulation historique de la section 20.0 afin qu'elle décrive l'édition 0.2 au passé.
+
+La revue des sources institutionnelles effectuée le 3 novembre 2026 confirme que la page des lois de la DGI répertorie le CGI 2026 et le Journal officiel spécial de la LFI 2026, tandis que la page des actes réglementaires répertorie une note de service relative aux modalités d'application de la LFI 2026. Les sources consultées confirment l'adoption parlementaire du projet de LFR 2026 le 23 septembre 2026 et la communication ministérielle du 25 septembre 2026 sur les mesures prévues. Elles ne suffisent pas, à elles seules, à établir la publication de la LFR promulguée au Journal officiel. Le dossier conserve donc ce point en P0 jusqu'à obtention et archivage du texte promulgué et de sa publication officielle.
+
+La page JOBF consultée affiche des numéros ordinaires jusqu'au n°44 du 29 octobre 2026 ; cette observation ne prouve ni l'absence ni la publication de la LFR. Toute conclusion doit reposer sur le texte et le Journal officiel exacts, non sur une absence de résultat de recherche.
+
+Cette édition reste documentaire. Les règles de fond, les taux, les sanctions, les seuils, les échéances FEC et les interactions de retenues restent soumis à rapprochement des textes consolidés et validation professionnelle. Aucun code applicatif, aucune migration SQL et aucune donnée de production ne sont modifiés.
