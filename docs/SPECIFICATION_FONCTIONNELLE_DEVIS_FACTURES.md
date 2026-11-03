@@ -147,7 +147,7 @@ Exemple purement illustratif, hors taxe et sans portée réglementaire :
 
 ### 4.7 Émission, consultation et annulation d'une facture
 
-- Une facture brouillon est modifiable.
+- Une facture brouillon est modifiable ou annulable ; la suppression définitive n'est pas proposée en V1.
 - À l'émission, son numéro, ses dates, les coordonnées du client et de l'émetteur, les lignes, la devise, les taxes et les totaux sont figés.
 - Une facture émise n'est jamais modifiée silencieusement. Toute correction doit passer par une procédure tracée.
 - La V1 prévoit une action d'annulation avec motif, acteur, date et permission dédiée. La légitimité de l'annulation d'une facture émise et le besoin éventuel d'un avoir doivent être validés selon les règles du pays/régime ; les avoirs ne sont pas inclus dans cette V1.
