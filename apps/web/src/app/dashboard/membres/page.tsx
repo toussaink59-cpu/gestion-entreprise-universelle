@@ -8,11 +8,6 @@ import {
   invitationRolesForActor,
   type MemberInvitationRole,
 } from "@/lib/security/member-invitation-validation";
-import {
-  INVITATION_LINK_COOKIE,
-  parseInvitationLinkCookie,
-  resolveAppOrigin,
-} from "@/lib/email/invitation-link";
 import { activateCompanyMember, inviteCompanyMember, resendCompanyMemberInvitation } from "./actions";
 import { InvitationLinkReveal } from "./invitation-link-reveal";
 
