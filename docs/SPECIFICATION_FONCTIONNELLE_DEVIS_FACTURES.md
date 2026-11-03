@@ -78,7 +78,7 @@ Précisions :
 3. Chaque ligne comprend au minimum une description, une quantité positive, une unité et un prix unitaire.
 4. Il peut ajouter une remise de ligne et sélectionner une taxe parmi les paramètres autorisés pour l'entreprise.
 5. Le serveur valide et calcule les montants ; le navigateur peut afficher une prévisualisation mais ne fait pas autorité.
-6. Le devis est sauvegardé en brouillon. Un brouillon peut être modifié et supprimé tant qu'il n'a pas été transmis, sous réserve des permissions et des règles d'audit.
+6. Le devis est sauvegardé en brouillon. Un brouillon peut être modifié ou annulé. La suppression définitive des documents commerciaux n'est pas proposée en V1 afin de préserver la traçabilité.
 7. Le numéro définitif est attribué de façon atomique au moment de la transmission ; les brouillons non transmis ne consomment donc pas de numéro officiel.
 
 ### 4.3 Transmettre et traiter un devis
@@ -161,11 +161,11 @@ Exemple purement illustratif, hors taxe et sans portée réglementaire :
 |---|---|---|
 | `draft` | En préparation | `sent`, `cancelled` |
 | `sent` | Transmis au client | `accepted`, `rejected`, `cancelled` |
-| `accepted` | Accepté par le client | Aucun changement de contenu ; facturation permise |
+| `accepted` | Accepté par le client | Facturation permise ; annulation motivée du solde non facturé par procédure autorisée |
 | `rejected` | Refusé | Terminal |
-| `cancelled` | Annulé avant facturation complète | Terminal |
+| `cancelled` | Annulé ou clôturé pour le solde non facturé | Terminal ; les factures déjà émises restent inchangées |
 
-L'état `expired` est calculé à partir de `status = sent` et `valid_until < date de référence` ; il n'est pas nécessaire de modifier une ligne en tâche de fond. L'acceptation d'un devis expiré est refusée.
+L'état `expired` est calculé à partir de `status = sent` et `valid_until < date de référence` ; il n'est pas nécessaire de modifier une ligne en tâche de fond. L'acceptation d'un devis expiré est refusée. Un devis accepté peut être annulé pour fermer le solde non facturé, avec permission et motif ; les factures déjà émises restent inchangées et traçables.
 
 Le niveau de facturation (non facturé, partiellement facturé, totalement facturé) est un indicateur calculé à partir des factures émises et non annulées ; il ne remplace pas le statut commercial du devis.
 
