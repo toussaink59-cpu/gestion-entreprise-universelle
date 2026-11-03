@@ -277,9 +277,12 @@ La loi de finances 2025 a également complété l'article 334 pour les ventes et
 
 ### 7.3 Paiements scripturaux à partir de 1 000 000 FCFA
 
-La loi de finances 2025 a fixé un seuil de 1 000 000 FCFA TTC pour le règlement par moyens scripturaux de certaines acquisitions de biens, services et actifs. Le texte prévoit des conséquences fiscales et pénalités en cas de paiement en espèces non conforme. Cela concerne autant le contrôle des achats que la façon dont le fournisseur enregistre les encaissements concernés.
+La loi de finances 2025 a fixé un seuil de 1 000 000 FCFA TTC pour le règlement par moyens scripturaux de certaines acquisitions de biens, services et actifs. Le texte prévoit des conséquences spécifiques en cas de paiement en espèces non conforme :
+- côté acheteur, le coût d'acquisition ou l'amortissement ne peut pas être déduit du résultat imposable et la TVA correspondante ne peut pas être déduite ;
+- côté fournisseur, une amende de 25 % des sommes encaissées en espèces est prévue ;
+- pour un acheteur relevant du RND ou de la CME, une amende de 25 % des sommes payées en espèces est également prévue.
 
-PolyGest ne doit pas interpréter ce seuil comme une simple préférence commerciale. Le futur écran de réception de paiements doit connaître le moyen de paiement et pouvoir signaler les opérations dépassant le seuil. Le périmètre exact (opérations, fractionnement et sanctions) doit être revu avec un conseil fiscal avant d'en faire un blocage automatique.
+PolyGest ne doit pas interpréter ce seuil comme une simple préférence commerciale. Le futur écran de réception de paiements doit connaître le moyen de paiement, distinguer espèces et moyens scripturaux, et signaler les opérations dépassant le seuil. Le périmètre exact des achats concernés, le traitement du fractionnement, les exemptions et la mécanique des sanctions doivent être revus avec un conseil fiscal avant d'en faire un blocage automatique.
 
 ## 8. Numérotation, corrections et archivage
 
