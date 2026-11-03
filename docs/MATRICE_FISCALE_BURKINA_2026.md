@@ -504,7 +504,7 @@ Les articles 315 et 316 doivent être lus ensemble. Ne pas déduire l'exigibilit
 | Prestation de services | Accomplissement de la prestation | En principe à l'accomplissement ; avance/acompte encaissé peut rendre la TVA exigible sur la somme reçue |
 | Prestation relevant de certains redevables IBNC | Règle particulière | Exigibilité liée à l'encaissement du prix du service, selon la disposition applicable |
 | Travaux immobiliers | Exécution des travaux | Avances et acomptes reçus peuvent rendre la TVA exigible sur la portion encaissée avant achèvement |
-| Travaux donnant lieu à décomptes périodiques | Périodes/décomptes visés par les textes | Stocker les décomptes, dates d'exécution, événements d'avance et dates de paiement |
+| Travaux immobiliers donnant lieu à décomptes périodiques | Article 315 : expiration des périodes auxquelles les décomptes se rapportent | Conserver chaque période de travaux et son décompte ; distinguer fait générateur, exigibilité et versement d'avances/acompte |
 | Importation | Dédouanement/mise à la consommation | Règles douanières ; ne pas calculer à partir d'une facture commerciale seule |
 | Services/biens immatériels de non-résident | Règles spécifiques liées à la facture/comptabilisation | Revue fiscale et potentielle autoliquidation/retenue selon la situation |
 | Livraison à soi-même | Première utilisation | Cas spécialisé ; validation nécessaire |
