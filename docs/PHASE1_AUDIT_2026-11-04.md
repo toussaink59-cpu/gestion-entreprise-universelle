@@ -26,8 +26,9 @@ Aucune base hébergée, donnée réelle, donnée client ou donnée de paie n’a
 | PR #51 | Alignement de la configuration Supabase locale sur le parcours d’inscription | Fusionnée après CI, tests Supabase réel et restauration réussis |
 | PR #53 | Refus d’une restauration sur une base cible non vide | Fusionnée après CI, ShellCheck et test PostgreSQL de non-régression réussis |
 | PR #55 | Audit automatisé de toutes les dépendances (runtime et développement) | Fusionnée après CI réussie : 0 vulnérabilité signalée dans l’arbre complet |
+| PR #58 | Suppression du plafond fixe de cinq entreprises dans le MVP | Fusionnée après CI, migrations/tests sur Supabase local réel et test de restauration réussis |
 
-Les PR #49, #50 et #51 sont consultables dans l’historique GitHub du dépôt.
+Les PR #49, #50, #51, #53, #55 et #58 sont consultables dans l’historique GitHub du dépôt.
 
 ### 2.1 Contrôle d’accès des membres
 
@@ -64,6 +65,9 @@ Cela ne prouve pas que ces paramètres sont identiques sur un éventuel projet S
 | CI et ShellCheck | PR #53, run `41805269946` | Réussi |
 | Sauvegarde/restauration et refus d’une cible non vide | PR #53, run `41805269981` | Réussi ; la seconde restauration est refusée et les deux entreprises de test restent présentes |
 | CI et audit de toutes les dépendances | PR #55, run `41805636934` | Réussi : 12 fichiers de test, 159 tests, audit complet npm sans vulnérabilité signalée |
+| CI complète sur la suppression du plafond | PR #58, run `41807332656` | Réussi : lint, build, TypeScript, tests, audit de toutes les dépendances, ShellCheck et encodage UTF-8 |
+| Migrations, lint SQL et tests sur Supabase local réel | PR #58, run `41807332475` | Réussi |
+| Sauvegarde/restauration de bout en bout | PR #58, run `41807332620` | Réussi |
 
 Les tests PGlite et les tests sur la pile Supabase locale réelle sont deux couches distinctes. Les résultats ne doivent pas être additionnés comme s’il s’agissait d’une seule suite.
 
@@ -139,7 +143,6 @@ L’audit automatique couvre désormais l’arbre complet installé par `npm ci`
 | Sujet | État | Suite nécessaire |
 |---|---|---|
 | Projet Supabase hébergé | Non vérifié | Identifier l’environnement et vérifier Auth, RLS, Storage, clés, URLs, région et migrations sans toucher à la production |
-| Limite de création de cinq entreprises par propriétaire | Décision métier à confirmer | La migration `20261024090000_limite_creation_entreprises.sql` impose `c_max = 5`. Le cahier des charges indique que les limites des abonnements et du plan gratuit restent à définir ; cette limite n’est donc pas encore une règle produit validée. |
 | Région d’hébergement et résidence des données | À décider | Comparer coûts, disponibilité, traitement des données, exigences contractuelles et obligations locales |
 | Protection de la branche principale | Non vérifiée | L’API de protection de branche n’était pas accessible à l’intégration ; aucune règle de dépôt n’a été retournée par l’API rulesets. Ne pas en déduire que la branche est protégée |
 | RPO/RTO et rétention | À décider | Définir des objectifs réalistes selon le budget et les engagements de service |
@@ -159,11 +162,10 @@ La paie de base reste P0 dans le MVP, conformément au cahier des charges, mais 
 **La fondation multi-entreprises a nettement progressé et les contrôles automatisés passent sur les environnements de test. La Phase 1 n’est toutefois pas clôturée et le projet n’est pas prêt pour une utilisation avec des données réelles.**
 
 Ordre de travail recommandé :
-1. confirmer les règles produit encore codées comme hypothèses, notamment la limite de cinq entreprises par propriétaire ;
-2. terminer les protections opérationnelles restantes : règles de branche, vérifications d’en-têtes sur staging et validation des sauvegardes hébergées ;
-3. arrêter les décisions d’hébergement, de sauvegarde et de stockage privé avant toute gestion de documents réels ;
-4. terminer la validation de la configuration Supabase hébergée dans un environnement non productif ;
-5. clôturer la Phase 1 avec preuves, puis commencer les modules P0 de la Phase 2 ;
-6. développer la paie de base en Phase 3 avec règles locales datées et validées avant tout calcul réel.
+1. terminer les protections opérationnelles restantes : règles de branche, vérifications d’en-têtes sur staging et validation des sauvegardes hébergées ;
+2. arrêter les décisions d’hébergement, de sauvegarde et de stockage privé avant toute gestion de documents réels ;
+3. terminer la validation de la configuration Supabase hébergée dans un environnement non productif ;
+4. clôturer la Phase 1 avec preuves, puis commencer les modules P0 de la Phase 2 ;
+5. développer la paie de base en Phase 3 avec règles locales datées et validées avant tout calcul réel.
 
 **Aucune conformité fiscale, comptable, sociale ou de paie n’est certifiée par cet audit technique.**
