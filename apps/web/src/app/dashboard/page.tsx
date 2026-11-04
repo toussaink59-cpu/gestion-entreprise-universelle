@@ -155,7 +155,7 @@ async function DashboardContent() {
       {companiesError && (
         <p
           role="alert"
-          className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800"
+          className="mb-5 rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
         >
           Impossible de charger les informations des entreprises.
         </p>
@@ -194,7 +194,7 @@ async function DashboardContent() {
                     <h3 className="text-xl font-semibold text-slate-950">
                       {company.trade_name || company.legal_name}
                     </h3>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
                       Raison sociale : {company.legal_name}
                     </p>
                     <p className="mt-1 text-xs text-[var(--pg-text-muted)]">
@@ -260,7 +260,7 @@ function ContactDirectoryPreview({
     <section className="min-w-0 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h4 className="font-semibold text-[var(--pg-text)]">{title}</h4>
-        <span className="text-xs text-slate-500">5 fiches actives récentes max.</span>
+        <span className="text-xs text-[var(--pg-text-muted)]">5 fiches actives récentes max.</span>
       </div>
 
       {hasError ? (
