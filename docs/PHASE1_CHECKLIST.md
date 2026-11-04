@@ -2,9 +2,11 @@
 
 **Projet :** Gestion d’entreprise universelle
 **Dépôt :** `toussaink59-cpu/gestion-entreprise-universelle`
-**Date de mise à jour :** 23 octobre 2026
+**Date du relevé historique ci-dessous :** 23 octobre 2026
 **Branche de référence :** `main`
 **Objectif :** disposer d’un socle technique fiable, testable et sécurisé avant d’étendre les fonctionnalités métier.
+
+> **Mise à jour du 4 novembre 2026 :** le tableau ci-dessous conserve le relevé historique du 23 octobre 2026. Pour l'état vérifié le plus récent, consulter [l'audit Phase 1 du 4 novembre 2026](./PHASE1_AUDIT_2026-11-04.md). Les cases de cette checklist ne doivent pas être considérées comme validées sur la seule base de l'ancien relevé.
 
 ---
 
