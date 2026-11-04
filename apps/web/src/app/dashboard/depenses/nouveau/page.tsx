@@ -85,21 +85,17 @@ export default async function NewExpensePage({ searchParams }: Props) {
 
   if (supplierError) {
     console.error("Expense supplier options failed:", { code: supplierError.code });
-    return (
-      <Message
-        title="Nouvelle dépense"
-        message="Impossible de charger les fournisseurs de cette entreprise. Réessaie plus tard."
-      />
-    );
   }
 
-  const suppliers = ((supplierData ?? []) as Array<{
-    id: string;
-    name: string;
-    status: string;
-  }>)
-    .filter((supplier) => supplier.status === "active")
-    .map(({ id, name }) => ({ id, name }));
+  const suppliers = supplierError
+    ? []
+    : ((supplierData ?? []) as Array<{
+        id: string;
+        name: string;
+        status: string;
+      }>)
+        .filter((supplier) => supplier.status === "active")
+        .map(({ id, name }) => ({ id, name }));
 
   const cancelHref =
     "/dashboard/depenses?company=" + encodeURIComponent(workspace.company.id);
@@ -124,6 +120,11 @@ export default async function NewExpensePage({ searchParams }: Props) {
       />
 
       <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
+        {supplierError ? (
+          <p role="status" className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-3 text-sm text-[var(--pg-text-muted)]">
+            La liste des fournisseurs est momentanément indisponible. Tu peux continuer sans associer de fournisseur.
+          </p>
+        ) : null}
         <ExpenseDraftForm
           companyId={workspace.company.id}
           currencyCode={workspace.company.default_currency}
