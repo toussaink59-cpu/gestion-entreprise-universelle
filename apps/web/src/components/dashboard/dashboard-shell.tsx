@@ -10,6 +10,7 @@ const navigation = [
   { href: "/dashboard", label: "Vue d’ensemble", exact: true },
   { href: "/dashboard/clients", label: "Clients" },
   { href: "/dashboard/fournisseurs", label: "Fournisseurs" },
+  { href: "/dashboard/devis", label: "Devis" },
   { href: "/dashboard/membres", label: "Membres" },
 ];
 
