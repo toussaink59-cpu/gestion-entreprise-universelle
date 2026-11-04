@@ -1,11 +1,16 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { saveExpenseDraft } from "./actions";
 
-type SupplierOption = {
-  id: string;
-  name: string;
+type SupplierOption = { id: string; name: string };
+type ExpenseFormValues = {
+  expenseDate: string;
+  category: string;
+  description: string;
+  amount: string;
+  supplierId: string;
+  notes: string;
 };
 
 const INPUT_CLASS =
@@ -30,26 +35,35 @@ export function ExpenseDraftForm({
   const [state, formAction, pending] = useActionState(saveExpenseDraft, {
     error: null,
   });
+  const [values, setValues] = useState<ExpenseFormValues>({
+    expenseDate,
+    category: "",
+    description: "",
+    amount: "",
+    supplierId: "",
+    notes: "",
+  });
+
+  function update<K extends keyof ExpenseFormValues>(
+    key: K,
+    value: ExpenseFormValues[K],
+  ) {
+    setValues((current) => ({ ...current, [key]: value }));
+  }
 
   return (
     <form action={formAction} autoComplete="off" className="space-y-7">
       <input type="hidden" name="company_id" value={companyId} />
 
       {state.error ? (
-        <p
-          role="alert"
-          aria-live="polite"
-          className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]"
-        >
+        <p role="alert" aria-live="polite" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">
           {state.error}
         </p>
       ) : null}
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-            Informations sur la dépense
-          </h2>
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">Informations sur la dépense</h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
             Le brouillon est enregistré dans la devise de l’entreprise ({currencyCode}).
           </p>
@@ -63,7 +77,8 @@ export function ExpenseDraftForm({
               type="date"
               name="expense_date"
               required
-              defaultValue={expenseDate}
+              value={values.expenseDate}
+              onChange={(event) => update("expenseDate", event.target.value)}
               disabled={pending}
             />
           </label>
@@ -77,6 +92,8 @@ export function ExpenseDraftForm({
               minLength={2}
               maxLength={100}
               required
+              value={values.category}
+              onChange={(event) => update("category", event.target.value)}
               placeholder="Ex. : Transport, fournitures, maintenance"
               disabled={pending}
             />
@@ -91,6 +108,8 @@ export function ExpenseDraftForm({
               minLength={2}
               maxLength={500}
               required
+              value={values.description}
+              onChange={(event) => update("description", event.target.value)}
               placeholder="Décris l’objet de la dépense"
               disabled={pending}
             />
@@ -106,14 +125,13 @@ export function ExpenseDraftForm({
               pattern="[0-9]{1,16}([,.][0-9]{1,4})?"
               maxLength={21}
               required
+              value={values.amount}
+              onChange={(event) => update("amount", event.target.value)}
               aria-describedby="expense-amount-help"
               placeholder="0"
               disabled={pending}
             />
-            <span
-              id="expense-amount-help"
-              className="mt-1 block text-xs font-normal text-[var(--pg-text-muted)]"
-            >
+            <span id="expense-amount-help" className="mt-1 block text-xs font-normal text-[var(--pg-text-muted)]">
               Montant positif, jusqu’à quatre décimales. Les taxes ne sont pas calculées dans cette étape.
             </span>
           </label>
@@ -123,14 +141,13 @@ export function ExpenseDraftForm({
             <select
               className={INPUT_CLASS}
               name="supplier_id"
-              defaultValue=""
+              value={values.supplierId}
+              onChange={(event) => update("supplierId", event.target.value)}
               disabled={pending}
             >
               <option value="">Non renseigné</option>
               {suppliers.map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </option>
+                <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
               ))}
             </select>
           </label>
@@ -142,6 +159,8 @@ export function ExpenseDraftForm({
               name="notes"
               maxLength={2000}
               rows={4}
+              value={values.notes}
+              onChange={(event) => update("notes", event.target.value)}
               disabled={pending}
             />
           </label>
@@ -153,11 +172,7 @@ export function ExpenseDraftForm({
           L’enregistrement crée uniquement un brouillon. Aucun paiement, mouvement de caisse, calcul fiscal ou écriture comptable n’est déclenché.
         </p>
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            className={PRIMARY_BUTTON_CLASS}
-            disabled={pending}
-          >
+          <button type="submit" className={PRIMARY_BUTTON_CLASS} disabled={pending}>
             {pending ? "Enregistrement…" : "Enregistrer le brouillon"}
           </button>
           <a
