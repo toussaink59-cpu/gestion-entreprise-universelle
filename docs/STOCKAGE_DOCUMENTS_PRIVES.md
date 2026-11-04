@@ -2,6 +2,7 @@
 
 **Statut :** fondation technique implémentée en branche de fonctionnalité ; intégration antivirus et validation de l'environnement hébergé encore requises.  
 **Référence :** cahier des charges v0.1, exigences FR-DOC-01 et SEC-07.  
+**Édition :** 4 novembre 2026 — TTL de téléchargement approuvé : 120 secondes.  
 **Politique approuvée :** 4 novembre 2026.
 
 ## 1. Politique produit approuvée
