@@ -1,0 +1,94 @@
+name: Vercel Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branche ou SHA à déployer en Preview (ses contrôles CI doivent être verts)"
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+  checks: read
+
+concurrency:
+  group: polygest-vercel-deploy
+  cancel-in-progress: false
+
+jobs:
+  production:
+    if: >-
+      ${{ github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - name: Checkout du commit exact validé par CI
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Installer Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22
+
+      - name: Installer Vercel CLI (version figée)
+        run: npm install --global vercel@65.11.0
+
+      - name: Déployer en production
+        run: vercel deploy --prod --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+
+  preview:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: preview
+    steps:
+      - name: Checkout de la référence demandée
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Vérifier les contrôles CI du commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          checks_ok="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/check-runs" --jq '[.check_runs[] | select(.app.slug == "github-actions")] | if length == 0 then false else all(.[]; .status == "completed" and .conclusion == "success") end')"
+          if [[ "$checks_ok" != "true" ]]; then
+            echo "::error::Les contrôles GitHub Actions du commit ${sha} ne sont pas tous terminés avec succès."
+            exit 1
+          fi
+          echo "Tous les contrôles GitHub Actions sont verts pour ${sha}."
+
+      - name: Installer Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22
+
+      - name: Installer Vercel CLI (version figée)
+        run: npm install --global vercel@65.11.0
+
+      - name: Déployer une Preview
+        run: vercel deploy --yes
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
