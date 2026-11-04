@@ -14,7 +14,6 @@ type DocumentItem = {
 };
 
 type Props = {
-  canWrite?: boolean;
   companyId: string;
   moduleCode: "customers" | "suppliers";
   entityType: "customer" | "supplier";
@@ -231,8 +230,6 @@ export function DocumentAttachments({
           <p className="mt-1 text-xs leading-5 text-slate-600">
             Les documents sont privés. Seuls les membres ayant le droit de consulter ce module peuvent les ouvrir.
           </p>
-
-          {canWriteNotice()}
 
           {canUpload && scannerEnabled && (
             <form onSubmit={submitUpload} className="mt-4 space-y-3">
