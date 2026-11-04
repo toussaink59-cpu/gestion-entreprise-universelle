@@ -14,11 +14,13 @@ type DocumentItem = {
 };
 
 type Props = {
+  canWrite?: boolean;
   companyId: string;
   moduleCode: "customers" | "suppliers";
   entityType: "customer" | "supplier";
   entityId: string;
   canUpload: boolean;
+  scannerEnabled: boolean;
 };
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
@@ -44,6 +46,7 @@ export function DocumentAttachments({
   entityType,
   entityId,
   canUpload,
+  scannerEnabled,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
@@ -229,7 +232,9 @@ export function DocumentAttachments({
             Les documents sont privés. Seuls les membres ayant le droit de consulter ce module peuvent les ouvrir.
           </p>
 
-          {canUpload && (
+          {canWriteNotice()}
+
+          {canUpload && scannerEnabled && (
             <form onSubmit={submitUpload} className="mt-4 space-y-3">
               <label className="block text-xs font-medium text-slate-700">
                 Ajouter un fichier
@@ -256,6 +261,12 @@ export function DocumentAttachments({
                 PDF, JPEG, PNG ou WebP · 20 Mio maximum
               </p>
             </form>
+          )}
+
+          {!scannerEnabled && (
+            <p role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+              Le dépôt de fichiers est suspendu jusqu'à la configuration du moteur d'analyse antivirus. Les pièces jointes existantes restent soumises à leurs autorisations.
+            </p>
           )}
 
           {message && (
