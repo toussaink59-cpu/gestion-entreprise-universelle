@@ -108,7 +108,7 @@ La réponse HTTP réelle d’un déploiement n’a pas été contrôlée. Une CS
 
 La migration `20261104120000_stockage_prive_documents.sql` ajoute les métadonnées de documents, la RLS sur les enregistrements et la policy de lecture Storage fondée sur les permissions du module parent. La configuration locale déclare un bucket privé, limité à 20 Mio et aux PDF/JPEG/PNG/WebP.
 
-Le dépôt passe par une RPC authentifiée qui revalide la permission `create` et l'appartenance de la fiche parente à l'entreprise. Le serveur émet ensuite un jeton d'upload signé à chemin unique ; le navigateur transfère directement le fichier à Storage. Le téléchargement utilise un lien signé de **120 secondes**, après vérification de l'état du document et de la permission de lecture.
+Le dépôt passe par une RPC authentifiée qui revalide la permission `create` et l'appartenance de la fiche parente à l'entreprise. Le serveur émet ensuite un jeton d'upload signé à chemin unique ; le navigateur transfère directement le fichier à Storage. Le téléchargement utilise un lien signé de **120 secondes**, après vérification de l'état du document et de la permission de lecture. La variable `DOCUMENT_SCANNER_ENABLED=false` désactive par défaut les nouveaux dépôts tant que le scanner n'est pas configuré.
 
 Les tests couvrent les formats, les tailles, les permissions, l'isolation inter-entreprises, le refus de lecture avant analyse et après rejet, et la finalisation réservée au rôle serveur.
 
