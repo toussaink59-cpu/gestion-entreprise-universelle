@@ -213,10 +213,10 @@ export function QuoteDraftForm({
         <div className="divide-y divide-[var(--pg-border)]">
           {lines.map((line, index) => (
             <fieldset key={line.key} className="py-5">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <legend className="font-semibold text-[var(--pg-text)]">
-                  Ligne {index + 1}
-                </legend>
+              <legend className="mb-3 font-semibold text-[var(--pg-text)]">
+                Ligne {index + 1}
+              </legend>
+              <div className="mb-3 flex justify-end">
                 <button
                   type="button"
                   className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-[var(--pg-text-muted)] underline underline-offset-4 hover:text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)] disabled:cursor-not-allowed disabled:opacity-50"
@@ -393,7 +393,6 @@ export function QuoteDraftForm({
           <a
             href={cancelHref}
             className={SECONDARY_BUTTON_CLASS}
-            aria-disabled={pending}
           >
             Annuler
           </a>
