@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import { detectDocumentMime, DOCUMENT_BUCKET } from "@/lib/security/document-validation";
 
 type DocumentItem = {
   id: string;
@@ -103,31 +105,83 @@ export function DocumentAttachments({
 
     setUploading(true);
     setMessage(null);
-    const formData = new FormData();
-    formData.set("companyId", companyId);
-    formData.set("moduleCode", moduleCode);
-    formData.set("entityType", entityType);
-    formData.set("entityId", entityId);
-    formData.set("file", selectedFile);
+    let documentId: string | null = null;
 
     try {
+      // Contrôle de confort côté navigateur. Le serveur d'analyse devra
+      // recontrôler les octets réels avant de rendre le fichier disponible.
+      const signature = new Uint8Array(
+        await selectedFile.slice(0, 12).arrayBuffer(),
+      );
+      const detectedMime = detectDocumentMime(signature);
+      if (!detectedMime) {
+        setMessage("Format refusé. Le contenu doit être un PDF, JPEG, PNG ou WebP valide.");
+        setMessageIsError(true);
+        return;
+      }
+
       const response = await fetch("/api/documents", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyId,
+          moduleCode,
+          entityType,
+          entityId,
+          fileName: selectedFile.name,
+          mimeType: detectedMime,
+          byteSize: selectedFile.size,
+        }),
       });
       const payload = await response.json().catch(() => null);
-      if (!response.ok) {
+      if (!response.ok || !payload?.document?.id || !payload?.upload?.path || !payload?.upload?.token) {
         const code = typeof payload?.error === "string" ? payload.error : "upload_failed";
-        const text = code === "unsupported_file"
-          ? "Format refusé. Utilise un PDF, JPEG, PNG ou WebP."
-          : code === "file_too_large"
-            ? "Le fichier dépasse la limite de 20 Mio."
-            : code === "permission_denied"
-              ? "Ton rôle ne permet pas d'ajouter un document à cette fiche."
-              : code === "storage_not_configured"
-                ? "Le stockage privé n'est pas encore configuré sur cet environnement."
-                : "Le fichier n'a pas pu être déposé. Réessaie.";
+        const text = code === "permission_denied"
+          ? "Ton rôle ne permet pas d'ajouter un document à cette fiche."
+          : code === "storage_not_configured"
+            ? "Le stockage privé n'est pas encore configuré sur cet environnement."
+            : code === "file_too_large"
+              ? "Le fichier dépasse la limite de 20 Mio."
+              : "La session de dépôt n'a pas pu être créée. Réessaie.";
         setMessage(text);
+        setMessageIsError(true);
+        return;
+      }
+
+      documentId = String(payload.document.id);
+      const browserSupabase = createBrowserClient();
+      const { error: uploadError } = await browserSupabase.storage
+        .from(DOCUMENT_BUCKET)
+        .uploadToSignedUrl(
+          String(payload.upload.path),
+          String(payload.upload.token),
+          selectedFile,
+          { contentType: detectedMime, cacheControl: "0", upsert: false },
+        );
+
+      if (uploadError) {
+        await fetch("/api/documents", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentId, action: "cancel" }),
+        });
+        setMessage("Le stockage a refusé le fichier. Vérifie le réseau et réessaie.");
+        setMessageIsError(true);
+        return;
+      }
+
+      const completed = await fetch("/api/documents", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId, action: "complete" }),
+      });
+      if (!completed.ok) {
+        await fetch("/api/documents", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentId, action: "cancel" }),
+        });
+        setMessage("Le fichier a été transféré mais sa session n'a pas pu être finalisée.");
         setMessageIsError(true);
         return;
       }
@@ -138,6 +192,13 @@ export function DocumentAttachments({
       setMessage("Le fichier est déposé. Il restera inaccessible jusqu'à la fin de son analyse de sécurité.");
       setMessageIsError(false);
     } catch {
+      if (documentId) {
+        await fetch("/api/documents", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentId, action: "cancel" }),
+        }).catch(() => undefined);
+      }
       setMessage("Le service de documents est momentanément indisponible.");
       setMessageIsError(true);
     } finally {
