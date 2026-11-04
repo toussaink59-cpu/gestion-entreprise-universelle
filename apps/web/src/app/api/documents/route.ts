@@ -95,6 +95,14 @@ export async function GET(request: NextRequest) {
  * l'ordinateur de l'utilisateur à Storage à l'aide du jeton signé à usage unique.
  */
 export async function POST(request: NextRequest) {
+  if (process.env.DOCUMENT_SCANNER_ENABLED !== "true") {
+    return jsonError(
+      503,
+      "scanner_not_configured",
+      "Le dépôt de fichiers sera activé après la configuration du moteur d'analyse de sécurité.",
+    );
+  }
+
   if (!sameOrigin(request)) {
     return jsonError(403, "origin_denied", "Origine de requête non autorisée.");
   }
