@@ -1,0 +1,468 @@
+import Link from "next/link";
+import { connection } from "next/server";
+import { PageHeader } from "@/components/ui/page-header";
+import { QuoteDraftForm } from "../quote-draft-form";
+import {
+  formatQuoteCurrency,
+  formatQuoteDate,
+  formatQuoteQuantity,
+} from "../formatting";
+import { QuoteCompanyChooser } from "../company-chooser";
+import { getQuoteWorkspace, isQuoteUuid } from "../workspace";
+import type {
+  QuoteCustomerOption,
+  QuoteDraftInitialValues,
+} from "../types";
+
+export const instant = false;
+
+type Props = {
+  params: Promise<{ quoteId: string }>;
+  searchParams: Promise<{ company?: string; success?: string }>;
+};
+
+type QuoteRecord = {
+  id: string;
+  company_id: string;
+  customer_id: string;
+  quote_number: string | null;
+  status: string;
+  issue_date: string;
+  valid_until: string;
+  currency_code: string;
+  subject: string | null;
+  terms: string | null;
+  notes: string | null;
+  subtotal_amount: string;
+  discount_amount: string;
+  total_amount: string;
+};
+
+type QuoteLineRecord = {
+  id: string;
+  position: number;
+  description: string;
+  quantity: string;
+  unit_label: string;
+  unit_price: string;
+  discount_type: "none" | "percentage" | "fixed";
+  discount_value: string;
+  base_amount: string;
+  discount_amount: string;
+  total_amount: string;
+};
+
+const SECONDARY_BUTTON =
+  "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+
+function Notice({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  return (
+    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <PageHeader eyebrow="PolyGest · Commercial" title={title} />
+      <p
+        role="alert"
+        className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
+      >
+        {message}
+      </p>
+      <p className="mt-4 text-sm">
+        <Link
+          href="/dashboard/devis"
+          className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
+        >
+          Retour aux devis
+        </Link>
+      </p>
+    </main>
+  );
+}
+
+function discountLabel(
+  type: QuoteLineRecord["discount_type"],
+  value: string,
+  currencyCode: string,
+): string {
+  if (type === "percentage") {
+    return formatQuoteQuantity(value) + " %";
+  }
+  if (type === "fixed") {
+    return formatQuoteCurrency(value, currencyCode);
+  }
+  return "Aucune";
+}
+
+export default async function QuoteDetailPage({
+  params,
+  searchParams,
+}: Props) {
+  await connection();
+  const [routeParams, queryParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const workspace = await getQuoteWorkspace(queryParams.company);
+
+  if (workspace.status === "error") {
+    return <Notice title="Devis" message={workspace.message} />;
+  }
+  if (workspace.status === "denied") {
+    return (
+      <Notice
+        title="Devis"
+        message="Cette entreprise n’est pas accessible avec ton compte."
+      />
+    );
+  }
+  if (workspace.status === "choose") {
+    return <QuoteCompanyChooser companies={workspace.companies} />;
+  }
+  if (!workspace.canRead) {
+    return (
+      <Notice
+        title="Devis"
+        message="Ton rôle ne permet pas de consulter les devis de cette entreprise."
+      />
+    );
+  }
+  if (!isQuoteUuid(routeParams.quoteId)) {
+    return (
+      <Notice
+        title="Devis introuvable"
+        message="Ce brouillon n’est pas accessible dans l’entreprise sélectionnée."
+      />
+    );
+  }
+
+  const { data: quoteData, error: quoteError } = await workspace.supabase
+    .from("quotes")
+    .select(
+      "id, company_id, customer_id, quote_number, status, issue_date, valid_until, currency_code, subject, terms, notes, subtotal_amount, discount_amount, total_amount",
+    )
+    .eq("id", routeParams.quoteId)
+    .eq("company_id", workspace.company.id)
+    .maybeSingle();
+
+  if (quoteError) {
+    console.error("Quote detail load failed:", { code: quoteError.code });
+    return (
+      <Notice
+        title="Devis indisponible"
+        message="Impossible de charger ce brouillon. Vérifie tes permissions et réessaie."
+      />
+    );
+  }
+  if (!quoteData) {
+    return (
+      <Notice
+        title="Devis introuvable"
+        message="Ce brouillon n’est pas accessible dans l’entreprise sélectionnée."
+      />
+    );
+  }
+
+  const quote = quoteData as QuoteRecord;
+  const { data: lineData, error: lineError } = await workspace.supabase
+    .from("quote_lines")
+    .select(
+      "id, position, description, quantity, unit_label, unit_price, discount_type, discount_value, base_amount, discount_amount, total_amount",
+    )
+    .eq("company_id", workspace.company.id)
+    .eq("quote_id", quote.id)
+    .order("position");
+
+  if (lineError) {
+    console.error("Quote line detail load failed:", { code: lineError.code });
+    return (
+      <Notice
+        title="Lignes indisponibles"
+        message="Les informations des lignes de ce brouillon ne peuvent pas être chargées."
+      />
+    );
+  }
+
+  const lines = (lineData ?? []) as QuoteLineRecord[];
+  const { data: customerData, error: customerError } = await workspace.supabase
+    .from("customers")
+    .select("id, name, status")
+    .eq("company_id", workspace.company.id)
+    .order("name")
+    .limit(500);
+
+  if (customerError) {
+    console.error("Quote customer detail failed:", {
+      code: customerError.code,
+    });
+  }
+
+  const allCustomers = (customerData ?? []) as Array<{
+    id: string;
+    name: string;
+    status: string;
+  }>;
+  const selectedCustomer = allCustomers.find(
+    (customer) => customer.id === quote.customer_id,
+  );
+  const customerName = selectedCustomer?.name ?? "Client non consultable";
+  const customers: QuoteCustomerOption[] = allCustomers.map((customer) => ({
+    id: customer.id,
+    name: customer.name,
+    active: customer.status === "active",
+  }));
+
+  if (
+    workspace.canWrite &&
+    quote.status === "draft" &&
+    selectedCustomer === undefined
+  ) {
+    const { data: currentCustomer } = await workspace.supabase
+      .from("customers")
+      .select("id, name, status")
+      .eq("company_id", workspace.company.id)
+      .eq("id", quote.customer_id)
+      .maybeSingle();
+
+    if (currentCustomer) {
+      customers.push({
+        id: currentCustomer.id,
+        name: currentCustomer.name,
+        active: currentCustomer.status === "active",
+      });
+    }
+  }
+
+  const companyQuery =
+    "?company=" + encodeURIComponent(workspace.company.id);
+  const successMessage =
+    queryParams.success === "saved"
+      ? "Le brouillon a été enregistré."
+      : null;
+
+  const initial: QuoteDraftInitialValues = {
+    quoteId: quote.id,
+    customerId: quote.customer_id,
+    issueDate: quote.issue_date,
+    validUntil: quote.valid_until,
+    subject: quote.subject ?? "",
+    terms: quote.terms ?? "",
+    notes: quote.notes ?? "",
+    lines: lines.map((line) => ({
+      description: line.description,
+      quantity: line.quantity,
+      unit_label: line.unit_label,
+      unit_price: line.unit_price,
+      discount_type: line.discount_type,
+      discount_value: line.discount_value,
+    })),
+  };
+
+  const cancelHref = "/dashboard/devis" + companyQuery;
+  const canEditDraft = workspace.canWrite && quote.status === "draft";
+
+  return (
+    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        eyebrow="PolyGest · Commercial"
+        title="Devis brouillon"
+        description={
+          (workspace.company.trade_name || workspace.company.legal_name) +
+          " · ID interne " +
+          quote.id.slice(0, 8).toUpperCase() +
+          " · Aucun numéro commercial attribué."
+        }
+        actions={
+          <Link href={cancelHref} className={SECONDARY_BUTTON}>
+            Retour aux devis
+          </Link>
+        }
+      />
+
+      {successMessage ? (
+        <p
+          role="status"
+          className="mb-5 rounded-md border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-sm text-[#285C45]"
+        >
+          {successMessage}
+        </p>
+      ) : null}
+
+      <section className="mb-7 border-y border-[var(--pg-border)] py-5">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <p className="text-xs font-medium text-[var(--pg-text-muted)]">
+              Client
+            </p>
+            <p className="mt-1 font-semibold text-[var(--pg-text)]">
+              {customerName}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-[var(--pg-text-muted)]">
+              Date du devis
+            </p>
+            <p className="mt-1 font-medium text-[var(--pg-text)]">
+              {formatQuoteDate(quote.issue_date)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-[var(--pg-text-muted)]">
+              Valable jusqu’au
+            </p>
+            <p className="mt-1 font-medium text-[var(--pg-text)]">
+              {formatQuoteDate(quote.valid_until)}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-[var(--pg-text-muted)]">
+              Total du brouillon
+            </p>
+            <p className="mt-1 text-lg font-semibold tabular-nums text-[var(--pg-text)]">
+              {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 text-sm text-[var(--pg-text-muted)]">
+          Ce document est encore en préparation. Il n’est ni numéroté, ni transmis,
+          ni utilisable comme facture.
+        </p>
+      </section>
+
+      {canEditDraft && customerError ? (
+        <p
+          role="alert"
+          className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
+        >
+          Impossible de charger la liste des clients nécessaire à la modification.
+        </p>
+      ) : null}
+
+      {canEditDraft && !customerError ? (
+        <>
+          {customers.filter((customer) => customer.active).length === 0 ? (
+            <p
+              role="status"
+              className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
+            >
+              Aucun client actif n’est disponible. Réactive une fiche client avant
+              de modifier ce devis.
+            </p>
+          ) : null}
+          <QuoteDraftForm
+            companyId={workspace.company.id}
+            currencyCode={workspace.company.default_currency}
+            customers={customers}
+            initial={initial}
+            cancelHref={cancelHref}
+          />
+        </>
+      ) : (
+        <section className="space-y-5">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--pg-text)]">
+              Lignes du devis
+            </h2>
+            <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
+              Consultation en lecture seule.
+            </p>
+          </div>
+
+          {lines.length === 0 ? (
+            <p className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
+              Aucune ligne disponible pour ce brouillon.
+            </p>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)]">
+              <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Description</th>
+                    <th className="px-4 py-3 text-right font-semibold">Quantité</th>
+                    <th className="px-4 py-3 font-semibold">Unité</th>
+                    <th className="px-4 py-3 text-right font-semibold">Prix unitaire</th>
+                    <th className="px-4 py-3 font-semibold">Remise</th>
+                    <th className="px-4 py-3 text-right font-semibold">Total ligne</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lines.map((line) => (
+                    <tr
+                      key={line.id}
+                      className="border-t border-[var(--pg-border)] align-top"
+                    >
+                      <td className="px-4 py-4 text-[var(--pg-text)]">
+                        {line.description}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">
+                        {formatQuoteQuantity(line.quantity)}
+                      </td>
+                      <td className="px-4 py-4 text-[var(--pg-text)]">
+                        {line.unit_label}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">
+                        {formatQuoteCurrency(line.unit_price, quote.currency_code)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-[var(--pg-text)]">
+                        {discountLabel(
+                          line.discount_type,
+                          line.discount_value,
+                          quote.currency_code,
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">
+                        {formatQuoteCurrency(line.total_amount, quote.currency_code)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <dl className="ml-auto grid max-w-md grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--pg-border)] pt-4 text-sm">
+            <dt className="text-[var(--pg-text-muted)]">Sous-total</dt>
+            <dd className="text-right tabular-nums text-[var(--pg-text)]">
+              {formatQuoteCurrency(quote.subtotal_amount, quote.currency_code)}
+            </dd>
+            <dt className="text-[var(--pg-text-muted)]">Remises</dt>
+            <dd className="text-right tabular-nums text-[var(--pg-text)]">
+              {formatQuoteCurrency(quote.discount_amount, quote.currency_code)}
+            </dd>
+            <dt className="font-semibold text-[var(--pg-text)]">
+              Total du brouillon
+            </dt>
+            <dd className="text-right font-semibold tabular-nums text-[var(--pg-text)]">
+              {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
+            </dd>
+          </dl>
+
+          {quote.terms ? (
+            <section className="border-t border-[var(--pg-border)] pt-4">
+              <h3 className="font-semibold text-[var(--pg-text)]">
+                Conditions commerciales
+              </h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">
+                {quote.terms}
+              </p>
+            </section>
+          ) : null}
+
+          {quote.notes ? (
+            <section className="border-t border-[var(--pg-border)] pt-4">
+              <h3 className="font-semibold text-[var(--pg-text)]">
+                Notes internes
+              </h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">
+                {quote.notes}
+              </p>
+            </section>
+          ) : null}
+        </section>
+      )}
+    </main>
+  );
+}
