@@ -5,6 +5,7 @@ import {
   asServiceRole,
   asUser,
   createMigratedDb,
+  ids,
   seed,
   type TestDb,
 } from "./helpers";
@@ -49,11 +50,7 @@ async function createPendingDocument(companyId = t.companyA): Promise<string> {
        values ($1, $2, 'customers', 'customer', $3, $4,
                'facture-test.pdf', 'application/pdf', 128, repeat('a', 64),
                'pending_upload', $5)`,
-      [id, companyId, customerId, path, (await q<{ id: string }>(
-        "select id from public.users where id = auth.uid()",
-      )).rows[0]?.id ?? (await q<{ id: string }>(
-        "select id from public.users order by created_at limit 1",
-      )).rows[0].id],
+      [id, companyId, customerId, path, ids.alice],
     );
     await q(
       `insert into storage.objects (bucket_id, name, metadata)
