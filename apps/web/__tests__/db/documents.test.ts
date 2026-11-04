@@ -217,7 +217,7 @@ describe("Stockage privé des documents — accès aux métadonnées et objets",
     ).rejects.toThrow(/permission denied/i);
 
     await asServiceRole(t.db, () =>
-      q("select public.complete_document_scan($1, true, 'test-scanner')", [id]),
+      q("select public.complete_document_scan($1, true, 'application/pdf', 128, repeat('a', 64), 'test-scanner')", [id]),
     );
 
     const doc = await asUser(t.db, "alice", () =>
@@ -232,7 +232,7 @@ describe("Stockage privé des documents — accès aux métadonnées et objets",
   it("un objet analysé reste lisible uniquement aux membres autorisés du module", async () => {
     const id = await createPendingDocument();
     await asServiceRole(t.db, () =>
-      q("select public.complete_document_scan($1, true, 'test-scanner')", [id]),
+      q("select public.complete_document_scan($1, true, 'application/pdf', 128, repeat('a', 64), 'test-scanner')", [id]),
     );
 
     const own = await asUser(t.db, "alice", () =>
