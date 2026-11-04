@@ -25,6 +25,7 @@ Aucune base hébergée, donnée réelle, donnée client ou donnée de paie n’a
 | PR #50 | Sécurisation de la création et de l’activation des membres | Fusionnée après CI, tests Supabase réel et restauration réussis |
 | PR #51 | Alignement de la configuration Supabase locale sur le parcours d’inscription | Fusionnée après CI, tests Supabase réel et restauration réussis |
 | PR #53 | Refus d’une restauration sur une base cible non vide | Fusionnée après CI, ShellCheck et test PostgreSQL de non-régression réussis |
+| PR #55 | Audit automatisé de toutes les dépendances (runtime et développement) | Fusionnée après CI réussie : 0 vulnérabilité signalée dans l’arbre complet |
 
 Les PR #49, #50 et #51 sont consultables dans l’historique GitHub du dépôt.
 
@@ -62,6 +63,7 @@ Cela ne prouve pas que ces paramètres sont identiques sur un éventuel projet S
 | Sauvegarde/restauration | PR #51, run `41804520416` | Réussi |
 | CI et ShellCheck | PR #53, run `41805269946` | Réussi |
 | Sauvegarde/restauration et refus d’une cible non vide | PR #53, run `41805269981` | Réussi ; la seconde restauration est refusée et les deux entreprises de test restent présentes |
+| CI et audit de toutes les dépendances | PR #55, run `41805636934` | Réussi : 12 fichiers de test, 159 tests, audit complet npm sans vulnérabilité signalée |
 
 Les tests PGlite et les tests sur la pile Supabase locale réelle sont deux couches distinctes. Les résultats ne doivent pas être additionnés comme s’il s’agissait d’une seule suite.
 
@@ -130,9 +132,7 @@ Aucune restauration de production n’a été exécutée ni ne doit l’être pe
 
 ## 6. Dépendances et CI
 
-L’audit automatique des dépendances de production a signalé zéro vulnérabilité dans l’exécution vérifiée. La CI n’exécute toutefois que `npm audit --omit=dev --audit-level=high` : l’arbre complet des dépendances de développement n’est donc pas couvert par ce contrôle bloquant.
-
-Les versions de développement doivent continuer à être examinées lors des mises à jour Dependabot, sans appliquer de mise à niveau majeure forcée. ShellCheck, le contrôle UTF-8, lint, TypeScript, build et tests sont intégrés à la CI.
+L’audit automatique couvre désormais l’arbre complet installé par `npm ci`, dépendances runtime et développement, avec `npm audit --audit-level=high`. L’exécution PR #55 a signalé zéro vulnérabilité. Dependabot reste activé pour les mises à jour hebdomadaires ; les mises à niveau majeures ne sont pas forcées. ShellCheck, le contrôle UTF-8, lint, TypeScript, build et tests sont intégrés à la CI.
 
 ## 7. Éléments non vérifiés ou décisions ouvertes
 
@@ -158,7 +158,7 @@ La paie de base reste P0 dans le MVP, conformément au cahier des charges, mais 
 **La fondation multi-entreprises a nettement progressé et les contrôles automatisés passent sur les environnements de test. La Phase 1 n’est toutefois pas clôturée et le projet n’est pas prêt pour une utilisation avec des données réelles.**
 
 Ordre de travail recommandé :
-1. terminer les protections opérationnelles restantes : règles de branche, audit complet des dépendances et vérifications d’en-têtes sur staging ;
+1. terminer les protections opérationnelles restantes : règles de branche, vérifications d’en-têtes sur staging et validation des sauvegardes hébergées ;
 2. arrêter les décisions d’hébergement, de sauvegarde et de stockage privé avant toute gestion de documents réels ;
 3. terminer la validation de la configuration Supabase hébergée dans un environnement non productif ;
 4. clôturer la Phase 1 avec preuves, puis commencer les modules P0 de la Phase 2 ;
