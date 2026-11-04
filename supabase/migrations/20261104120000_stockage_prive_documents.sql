@@ -212,7 +212,8 @@ begin
      or p_original_name ~ '[[:cntrl:]]' then
     raise exception 'nom de fichier invalide' using errcode = '22023';
   end if;
-  if p_mime_type not in ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
+  if p_mime_type is null
+     or p_mime_type not in ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
      or p_byte_size is null
      or p_byte_size not between 1 and 20971520 then
     raise exception 'type ou taille de fichier non autorisé' using errcode = '22023';
