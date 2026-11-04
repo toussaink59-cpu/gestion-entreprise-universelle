@@ -301,7 +301,7 @@ describe('Sécurité des appartenances — invitant et activation', () => {
           values ($1, $2, 'employee', 'active')
         `, [t.companyA, ids.mallory]),
       ),
-    ).rejects.toThrow(/seul un propriétaire/);
+    ).rejects.toThrow(DENIED);
   });
 
   it('un propriétaire ne peut pas contourner l’invitation par une insertion active directe', async () => {
@@ -313,7 +313,7 @@ describe('Sécurité des appartenances — invitant et activation', () => {
           values ($1, $2, 'employee', 'active')
         `, [t.companyA, ids.mallory]),
       ),
-    ).rejects.toThrow(/invitation et la confirmation d’adresse e-mail/);
+    ).rejects.toThrow(DENIED);
 
     const membership = await q(
       `select 1 from public.company_memberships where company_id = $1 and user_id = $2`,
@@ -334,12 +334,16 @@ describe('Sécurité des appartenances — invitant et activation', () => {
   });
 
   it('l invitant est défini par la session authentifiée', async () => {
+    const target = await q<{ email: string }>(
+      'select email::text as email from auth.users where id = $1',
+      [ids.mallory],
+    );
+    const tokenHash = randomBytes(32).toString('hex');
     await asUser(t.db, 'alice', () =>
-      q(`
-        insert into public.company_memberships
-          (company_id, user_id, role_code, status)
-        values ($1, $2, 'employee', 'invited')
-      `, [t.companyA, ids.mallory]),
+      q(
+        `select public.create_company_member_invitation($1, $2, $3, $4)`,
+        [t.companyA, target.rows[0].email, 'employee', tokenHash],
+      ),
     );
 
     const result = await q<{ invited_by: string; status: string }>(`
@@ -593,7 +597,7 @@ describe('Sécurité des appartenances — invitant et activation', () => {
       }
     })
 
-    it('un administrateur ne peut pas créer directement une invitation company_admin', async () => {
+    it('une invitation ne peut pas être créée directement dans la table des appartenances', async () => {
       const target = await createTemporaryUser()
 
       try {
@@ -602,11 +606,11 @@ describe('Sécurité des appartenances — invitant et activation', () => {
             q(
               `insert into public.company_memberships
                  (company_id, user_id, role_code, status)
-               values ($1, $2, 'company_admin', 'invited')`,
+               values ($1, $2, 'employee', 'invited')`,
               [t.companyA, target.id],
             ),
           ),
-        ).rejects.toThrow(/seul le propriétaire/)
+        ).rejects.toThrow(DENIED)
       } finally {
         await q('delete from auth.users where id = $1', [target.id])
       }
@@ -618,10 +622,8 @@ describe('Sécurité des appartenances — invitant et activation', () => {
       try {
         await asUser(t.db, 'alice', () =>
           q(
-            `insert into public.company_memberships
-               (company_id, user_id, role_code, status)
-             values ($1, $2, 'employee', 'invited')`,
-            [t.companyA, target.id],
+            `select public.create_company_member_invitation($1, $2, $3, $4)`,
+            [t.companyA, target.email, 'employee', randomBytes(32).toString('hex')],
           ),
         )
 
@@ -652,12 +654,14 @@ describe('Sécurité des appartenances — invitant et activation', () => {
   })
 
   it('la suppression du compte invitant conserve l’invitation', async () => {
+    const target = await q<{ email: string }>(
+      'select email::text as email from auth.users where id = $1',
+      [ids.bob],
+    );
     await asUser(t.db, 'frank', () =>
       q(
-        `insert into public.company_memberships
-          (company_id, user_id, role_code, status)
-         values ($1, $2, 'employee', 'invited')`,
-        [t.companyA, ids.bob],
+        `select public.create_company_member_invitation($1, $2, $3, $4)`,
+        [t.companyA, target.rows[0].email, 'employee', randomBytes(32).toString('hex')],
       ),
     )
 
