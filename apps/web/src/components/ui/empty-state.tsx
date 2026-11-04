@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 type EmptyStateProps = {
   title: string;
@@ -11,13 +11,15 @@ export function EmptyState({
   description,
   action,
 }: EmptyStateProps) {
+  const titleId = useId();
+
   return (
     <section
-      aria-labelledby="empty-state-title"
+      aria-labelledby={titleId}
       className="rounded-lg border border-dashed border-[var(--pg-border)] bg-[var(--pg-surface)] px-5 py-10 text-center sm:px-8"
     >
       <h2
-        id="empty-state-title"
+        id={titleId}
         className="text-base font-semibold text-[var(--pg-text)]"
       >
         {title}
