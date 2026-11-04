@@ -8,21 +8,23 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 
 ## Statut réel du projet
 
-**Phase actuelle : audit complet de la Phase 1 (fondation technique).** La Phase 1 n’est pas considérée comme terminée : l’ensemble du dépôt est audité avant d’avancer. Le dépôt ne doit pas être considéré comme un logiciel prêt pour la production.
+**Phase actuelle : consolidation finale de la Phase 1 (fondation technique).** Le socle d’authentification, de gestion multi-entreprises, d’administration des membres et d’isolation des données a été renforcé et contrôlé sur les environnements de test. La Phase 1 reste toutefois ouverte : le dépôt ne doit pas être considéré comme un logiciel prêt pour la production.
 
 Éléments présents dans le dépôt :
 
 - une application Next.js / React / TypeScript avec inscription, connexion, déconnexion et création d’une première entreprise (authentification Supabase) ;
 - un tableau de bord qui liste les entreprises de l’utilisateur connecté, avec accès aux répertoires clients et fournisseurs ;
+- la gestion des membres par entreprise, avec invitations par e-mail sécurisées, jetons à usage unique et confirmation de l’adresse avant activation par le propriétaire ;
 - un premier module métier : répertoires clients et fournisseurs, avec archivage, sans suppression définitive ;
-- des migrations PostgreSQL : entreprises, profils, appartenances, rôles, permissions, journal d’audit en ajout seul, clients et fournisseurs, avec RLS ;
+- des migrations PostgreSQL : entreprises, profils, appartenances, rôles, permissions, invitations sécurisées, journal d’audit en ajout seul, clients et fournisseurs, avec RLS ;
+- aucune limite fixe de cinq entreprises par propriétaire dans le MVP ; les quotas éventuels seront définis dans les futures formules d’abonnement ;
 - des tests automatisés d’isolation entre entreprises, de permissions par rôle, de révocation et d’audit, exécutés sur les migrations ;
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
-- une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit des dépendances de production, ShellCheck.
+- une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit de toutes les dépendances (runtime et développement), ShellCheck, lint SQL et tests sur une pile Supabase locale réelle.
 
 **Limites actuelles :** les modules devis, facturation, paiements, dépenses, trésorerie, budgets, stocks et paie n’existent pas encore. Les migrations n’ont pas encore été validées sur le projet Supabase hébergé, la matrice des rôles n’est pas validée par le porteur du projet, et l’hébergement, la région et la politique de sauvegarde ne sont pas décidés. Les scripts de sauvegarde ne remplacent pas un dispositif de sauvegarde opérationnel pour la production.
 
-Le détail des constats de l’audit, de leur état et des décisions attendues se trouve dans [l’audit de la Phase 1](docs/PHASE1_CHECKLIST.md).
+Le détail des constats vérifiés et des risques restants se trouve dans [l’audit Phase 1 du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md). La [checklist historique](docs/PHASE1_CHECKLIST.md) conserve le relevé du 23 octobre et n’est pas la source de statut actuelle.
 
 ## Documents du projet
 
@@ -30,7 +32,8 @@ Le détail des constats de l’audit, de leur état et des décisions attendues 
 - [Feuille de route](docs/ROADMAP.md)
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
-- [Audit de la Phase 1](docs/PHASE1_CHECKLIST.md)
+- [Audit de la Phase 1 — état vérifié du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md)
+- [Checklist historique de la Phase 1](docs/PHASE1_CHECKLIST.md)
 - [Design system PolyGest](docs/POLYGEST_DESIGN_SYSTEM.md)
 - [Spécification fonctionnelle — Devis et factures](docs/SPECIFICATION_FONCTIONNELLE_DEVIS_FACTURES.md)
 - [Modèle de données — Devis et factures](docs/MODELE_DONNEES_DEVIS_FACTURES.md)
@@ -118,7 +121,7 @@ Le premier incrément vise à permettre à une entreprise de :
 - suivre quelques comptes de trésorerie et budgets ;
 - consulter un tableau de bord réel et exporter des rapports de base.
 
-Le module de paie réelle, la comptabilité complète, les intégrations de paiement et les fonctions multi-pays devront être validés spécifiquement avant d’être annoncés comme disponibles.
+La paie de base fait partie du MVP P0, mais sera développée après la fondation commerciale et financière et restera en simulation tant que les règles locales ne seront pas validées par un professionnel compétent. La comptabilité complète, les intégrations de paiement et les fonctions multi-pays sont des évolutions ultérieures.
 
 ## Sécurité et conformité
 
@@ -128,7 +131,7 @@ Le système devra respecter le cadre applicable au Burkina Faso, notamment les o
 
 ## Démarrage du développement
 
-1. Terminer l’audit de la Phase 1 ([constats et décisions](docs/PHASE1_CHECKLIST.md)).
+1. Terminer la consolidation de la Phase 1 ([audit vérifié](docs/PHASE1_AUDIT_2026-11-04.md)).
 2. Valider le cahier des charges, le périmètre MVP et la matrice des rôles.
 3. Finaliser l’authentification et l’intégration à la base dans un environnement de test.
 4. Développer un premier flux métier complet, avec permissions et tests.
