@@ -46,8 +46,8 @@ jobs:
       - name: Tests
         run: npm test
 
-      - name: Audit des dépendances de production
-        run: npm audit --omit=dev --audit-level=high
+      - name: Audit de toutes les dépendances (runtime et développement)
+        run: npm audit --audit-level=high
 
   scripts:
     name: Scripts shell — shellcheck
