@@ -356,7 +356,7 @@ describe("Stockage privé des documents — accès aux métadonnées et objets",
   });
 
   it("les visiteurs anonymes ne peuvent ni consulter les métadonnées ni les objets", async () => {
-    const id = await createPendingDocument();
+    await createPendingDocument();
     await expect(
       asAnon(t.db, () => q("select * from public.documents")),
     ).rejects.toThrow(DENIED);
