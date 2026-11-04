@@ -290,7 +290,8 @@ begin
   end if;
 
   if p_is_clean and (
-    p_detected_mime not in ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
+    p_detected_mime is null
+    or p_detected_mime not in ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
     or p_actual_byte_size is null
     or p_actual_byte_size not between 1 and 20971520
     or p_sha256 is null
