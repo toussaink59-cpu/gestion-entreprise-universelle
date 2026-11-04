@@ -89,43 +89,43 @@ function successMessage(code: string | undefined): string | null {
 function ContactFields({ contact }: { contact?: ContactRow }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Nom / raison sociale *
         <input className={INPUT_CLASS} name="name" required minLength={2} maxLength={200} defaultValue={contact?.name ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Personne à contacter
         <input className={INPUT_CLASS} name="contact_name" maxLength={150} defaultValue={contact?.contact_name ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Adresse e-mail
         <input className={INPUT_CLASS} name="email" type="email" maxLength={254} defaultValue={contact?.email ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Téléphone
         <input className={INPUT_CLASS} name="phone" type="tel" maxLength={40} defaultValue={contact?.phone ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Identifiant fiscal
         <input className={INPUT_CLASS} name="tax_identifier" maxLength={100} defaultValue={contact?.tax_identifier ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Ville
         <input className={INPUT_CLASS} name="city" maxLength={120} defaultValue={contact?.city ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+      <label className="text-sm font-medium text-[var(--pg-text)] sm:col-span-2">
         Adresse
         <input className={INPUT_CLASS} name="address" maxLength={250} defaultValue={contact?.address ?? ""} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Code pays (ISO)
         <input className={INPUT_CLASS} name="country_code" required minLength={2} maxLength={2} defaultValue={contact?.country_code ?? "BF"} />
       </label>
-      <label className="text-sm font-medium text-slate-700">
+      <label className="text-sm font-medium text-[var(--pg-text)]">
         Délai de paiement (jours)
         <input className={INPUT_CLASS} name="payment_terms_days" type="number" min={0} max={365} step={1} defaultValue={contact?.payment_terms_days ?? 0} />
       </label>
-      <label className="text-sm font-medium text-slate-700 sm:col-span-2 lg:col-span-3">
+      <label className="text-sm font-medium text-[var(--pg-text)] sm:col-span-2 lg:col-span-3">
         Notes internes
         <textarea className={INPUT_CLASS} name="notes" rows={3} maxLength={2000} defaultValue={contact?.notes ?? ""} />
       </label>
@@ -136,7 +136,7 @@ function ContactFields({ contact }: { contact?: ContactRow }) {
 function CompanyChooser({ companies, kind }: { companies: CompanyRow[]; kind: BusinessContactKind }) {
   return (
     <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
-      <h2 className="text-lg font-semibold text-slate-900">Choisir une entreprise</h2>
+      <h2 className="text-lg font-semibold text-[var(--pg-text)]">Choisir une entreprise</h2>
       <p className="mt-1 text-sm text-[var(--pg-text-muted)]">Les répertoires sont séparés pour chaque entreprise.</p>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {companies.map((company) => (
@@ -166,7 +166,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     .eq("status", "active");
 
   if (membershipError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.</p><p className="mt-4"><a href="/dashboard" className="text-blue-700 hover:underline">Retour au tableau de bord</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.</p><p className="mt-4"><a href="/dashboard" className="text-[var(--pg-accent)] hover:underline">Retour au tableau de bord</a></p></main>;
   }
 
   const membershipRows = memberships ?? [];
@@ -207,9 +207,9 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
           description="Sélectionne l’entreprise concernée pour continuer."
           actions={<a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>}
         />
-        {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p>}
-        {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
-        {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+        {params.company && <p role="alert" className="mb-5 rounded-xl border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">Cette entreprise n’est pas accessible avec ton compte.</p>}
+        {currentError && <p role="alert" className="mb-5 rounded-xl border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{currentError}</p>}
+        {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-[#285C45]">{currentSuccess}</p>}
         <CompanyChooser companies={companies} kind={kind} />
       </main>
     );
@@ -218,7 +218,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
   const selectedCompany = companies.find((company) => company.id === selectedCompanyId);
   const membership = membershipRows.find((row) => row.company_id === selectedCompanyId);
   if (!selectedCompany || !membership) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-blue-700 hover:underline">Choisir une autre entreprise</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-[var(--pg-accent)] hover:underline">Choisir une autre entreprise</a></p></main>;
   }
 
   const roleCode = String(membership.role_code);
@@ -268,8 +268,8 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
         }
       />
 
-      {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
-      {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+      {currentError && <p role="alert" className="mb-5 rounded-xl border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{currentError}</p>}
+      {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-[#285C45]">{currentSuccess}</p>}
 
       {!canRead ? (
         <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-5 text-[var(--pg-text)]">
