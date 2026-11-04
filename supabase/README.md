@@ -51,7 +51,7 @@ La table `public.documents` contient les métadonnées et applique les permissio
 
 Les liens de téléchargement sont signés pour 120 secondes et ne sont créés que si l'utilisateur a le droit `read` sur le module parent et si le statut du document est `available`. Les fichiers `pending_upload`, `pending_scan` ou `rejected` restent inaccessibles.
 
-**Limite importante : le scanner antivirus n'est pas encore intégré.** Les fichiers finalisés restent donc en `pending_scan` et ne peuvent pas être téléchargés. Le TTL d'upload signé défini par Supabase (deux heures) est distinct du TTL de téléchargement approuvé de 120 secondes. Voir [la spécification du stockage documentaire](../docs/STOCKAGE_DOCUMENTS_PRIVES.md).
+**Limite importante : le scanner antivirus n'est pas encore intégré.** `DOCUMENT_SCANNER_ENABLED=false` par défaut ferme le dépôt côté interface et API. Les fichiers finalisés restent `pending_scan` et ne peuvent pas être téléchargés ; ne passer la variable à `true` qu'après installation et test du scanner. Le TTL d'upload signé défini par Supabase (deux heures) est distinct du TTL de téléchargement approuvé de 120 secondes. Voir [la spécification du stockage documentaire](../docs/STOCKAGE_DOCUMENTS_PRIVES.md).
 
 ## Invitations et activation des membres
 
