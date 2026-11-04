@@ -414,7 +414,8 @@ grant execute on function public.complete_document_scan(uuid, boolean, text, big
 -- L'upload utilise un jeton signé à usage unique généré côté serveur ; le binaire
 -- ne transite pas par une fonction Vercel. Le bucket reste privé et seul un scanner
 -- peut faire passer un document à l'état disponible.
-alter table storage.objects enable row level security;
+-- Supabase Storage active déjà la RLS sur storage.objects ; ne pas modifier
+-- les paramètres de sécurité de sa table interne depuis une migration métier.
 
 drop policy if exists company_private_documents_read on storage.objects;
 create policy company_private_documents_read
