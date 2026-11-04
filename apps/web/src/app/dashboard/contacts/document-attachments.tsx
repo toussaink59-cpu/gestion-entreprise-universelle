@@ -212,7 +212,7 @@ export function DocumentAttachments({
     <div className="min-w-48">
       <button
         type="button"
-        className="text-sm font-semibold text-blue-700 underline decoration-blue-200 underline-offset-4 hover:text-blue-900"
+        className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
         aria-expanded={open}
         aria-controls={`documents-${entityId}`}
         onClick={togglePanel}
@@ -250,7 +250,7 @@ export function DocumentAttachments({
               <button
                 type="submit"
                 disabled={!selectedFile || uploading}
-                className="inline-flex min-h-10 items-center rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-10 items-center rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {uploading ? "Envoi en cours…" : "Déposer le fichier"}
               </button>
@@ -262,7 +262,7 @@ export function DocumentAttachments({
 
           {!scannerEnabled && (
             <p role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Le dépôt de fichiers est suspendu jusqu'à la configuration du moteur d'analyse antivirus. Les pièces jointes existantes restent soumises à leurs autorisations.
+              Le dépôt de fichiers est suspendu jusqu&apos;à la configuration du moteur d&apos;analyse antivirus. Les pièces jointes existantes restent soumises à leurs autorisations.
             </p>
           )}
 
