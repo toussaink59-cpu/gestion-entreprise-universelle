@@ -197,6 +197,73 @@ revoke all on function public.can_upload_document(uuid, text, text, uuid)
 grant execute on function public.can_upload_document(uuid, text, text, uuid)
   to authenticated;
 
+-- Création atomique de la métadonnée dans le contexte JWT du membre.
+-- Le serveur ne peut donc pas créer un document si le rôle est révoqué
+-- ou si la fiche parent ne relève pas de la même entreprise.
+create or replace function public.create_document_upload(
+  p_company_id uuid,
+  p_module_code text,
+  p_entity_type text,
+  p_entity_id uuid,
+  p_original_name text,
+  p_mime_type text,
+  p_byte_size bigint
+)
+returns table (document_id uuid, storage_path text)
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_actor uuid := (select auth.uid());
+  v_document_id uuid;
+  v_storage_path text;
+begin
+  if v_actor is null then
+    raise exception 'authentification requise' using errcode = '28000';
+  end if;
+  if p_original_name is null
+     or p_original_name <> btrim(p_original_name)
+     or char_length(p_original_name) not between 1 and 180
+     or p_original_name ~ '[[:cntrl:]]' then
+    raise exception 'nom de fichier invalide' using errcode = '22023';
+  end if;
+  if p_mime_type not in ('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
+     or p_byte_size is null
+     or p_byte_size not between 1 and 20971520 then
+    raise exception 'type ou taille de fichier non autorisé' using errcode = '22023';
+  end if;
+  if not app.has_permission(p_company_id, p_module_code, 'create') then
+    raise exception 'permission de dépôt requise' using errcode = '42501';
+  end if;
+  if not app.document_entity_belongs_to_company(
+    p_company_id, p_module_code, p_entity_type, p_entity_id
+  ) then
+    raise exception 'fiche parent introuvable dans cette entreprise' using errcode = '42501';
+  end if;
+
+  v_document_id := gen_random_uuid();
+  v_storage_path := p_company_id::text || '/' || v_document_id::text;
+
+  insert into public.documents (
+    id, company_id, module_code, entity_type, entity_id, storage_path,
+    original_name, mime_type, byte_size, sha256, scan_status, created_by
+  )
+  values (
+    v_document_id, p_company_id, p_module_code, p_entity_type, p_entity_id,
+    v_storage_path, p_original_name, p_mime_type, p_byte_size, null,
+    'pending_upload', v_actor
+  );
+
+  return query select v_document_id, v_storage_path;
+end;
+$;
+
+revoke all on function public.create_document_upload(uuid, text, text, uuid, text, text, bigint)
+  from public, anon, authenticated;
+grant execute on function public.create_document_upload(uuid, text, text, uuid, text, text, bigint)
+  to authenticated;
+
 -- Finalisation réservée au serveur après que le binaire a été écrit et vérifié.
 create or replace function public.complete_document_upload(p_document_id uuid)
 returns void
