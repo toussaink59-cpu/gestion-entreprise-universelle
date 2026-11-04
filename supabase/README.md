@@ -18,6 +18,7 @@ Les migrations sont appliquées dans l'ordre chronologique de leur nom. Les migr
 | `20261026093000_securiser_les_invitations.sql` | Renforcement du parcours d'invitation et des conditions d'activation |
 | `20261104100000_confirmation_avant_activation_membre.sql` | Blocage des créations directes de membres actifs hors du parcours sécurisé confirmé |
 | `20261104110000_supprimer_plafond_fixe_entreprises_mvp.sql` | Suppression du plafond fixe de cinq entreprises dans le MVP, sans réécriture de la migration historique |
+| `20261104120000_stockage_prive_documents.sql` | Métadonnées des documents privés, RLS du module parent, autorisation atomique du dépôt et finalisation sécurisée après analyse |
 
 **Règle actuelle de création d'entreprise :** aucun plafond fixe de nombre d'entreprises par propriétaire n'est appliqué au MVP. La migration du 24 octobre est conservée pour l'historique, mais la migration du 4 novembre remplace la fonction `public.create_company()` et retire ce plafond. Les quotas éventuels seront conçus ultérieurement dans le cadre des formules d'abonnement.
 
@@ -42,6 +43,16 @@ npm test
 
 La CI comprend aussi un workflow distinct qui démarre la pile Supabase locale réelle, applique les migrations, exécute le lint SQL avec `plpgsql_check` puis les tests contre cette pile. Ces tests sont complémentaires aux tests PGlite.
 
+## Stockage privé des documents
+
+Le bucket local `company-private-documents` est déclaré dans `supabase/config.toml` (privé, 20 Mio, PDF/JPEG/PNG/WebP). Sur un projet hébergé, il doit être provisionné par l'API Storage ou le Dashboard ; les migrations ne modifient pas directement les tables internes `storage.*`.
+
+La table `public.documents` contient les métadonnées et applique les permissions du module parent. Les utilisateurs n'ont aucun droit INSERT direct sur les métadonnées ou les objets Storage. Le dépôt passe par la RPC `create_document_upload`, qui revalide l'identité, la permission `create` et le rattachement de la fiche à la même entreprise, puis le serveur crée un jeton d'upload signé. Le binaire est envoyé directement à Storage.
+
+Les liens de téléchargement sont signés pour 120 secondes et ne sont créés que si l'utilisateur a le droit `read` sur le module parent et si le statut du document est `available`. Les fichiers `pending_upload`, `pending_scan` ou `rejected` restent inaccessibles.
+
+**Limite importante : le scanner antivirus n'est pas encore intégré.** Les fichiers finalisés restent donc en `pending_scan` et ne peuvent pas être téléchargés. Le TTL d'upload signé défini par Supabase (deux heures) est distinct du TTL de téléchargement approuvé de 120 secondes. Voir [la spécification du stockage documentaire](../docs/STOCKAGE_DOCUMENTS_PRIVES.md).
+
 ## Invitations et activation des membres
 
 Le parcours actuel d'invitation :
@@ -57,7 +68,7 @@ Le destinataire doit déjà disposer d'un compte actif associé à l'adresse inv
 
 - La matrice rôles/permissions est un point de départ **à valider** avec le porteur du projet.
 - La configuration Supabase hébergée (Auth, SMTP/fournisseur e-mail, URLs de redirection, secrets, RLS, Storage et migrations) n'a pas encore été vérifiée.
-- Le stockage privé des justificatifs/documents, ses règles d'accès par entreprise et la stratégie d'analyse/quarantaine des fichiers ne sont pas encore implémentés.
+- Le socle de stockage privé est en cours d'intégration : bucket local, métadonnées, permissions héritées et liens signés sont définis ; le scanner antivirus/quarantaine, le nettoyage des sessions abandonnées et la validation du bucket sur Supabase hébergé restent à achever.
 - L'accès exceptionnel de l'équipe plateforme aux données clients reste à concevoir (§4 du cahier des charges).
 - Les objectifs RPO/RTO, la rétention et le stockage hors site des sauvegardes restent à définir.
 
