@@ -197,7 +197,7 @@ returns table (document_id uuid, storage_path text)
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_actor uuid := (select auth.uid());
   v_document_id uuid;
@@ -242,7 +242,7 @@ begin
 
   return query select v_document_id, v_storage_path;
 end;
-$;
+$$;
 
 revoke all on function public.create_document_upload(uuid, text, text, uuid, text, text, bigint)
   from public, anon, authenticated;
