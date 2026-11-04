@@ -120,7 +120,12 @@ export default async function QuoteDetailPage({
     );
   }
   if (workspace.status === "choose") {
-    return <QuoteCompanyChooser companies={workspace.companies} />;
+    return (
+      <QuoteCompanyChooser
+        companies={workspace.companies}
+        destinationPath={"/dashboard/devis/" + routeParams.quoteId}
+      />
+    );
   }
   if (!workspace.canRead) {
     return (
