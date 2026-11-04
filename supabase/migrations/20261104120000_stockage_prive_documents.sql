@@ -1,26 +1,10 @@
 -- Stockage privé des documents métier.
--- Les fichiers sont écrits uniquement par le serveur avec la clé service_role.
+-- Le bucket est déclaré dans supabase/config.toml pour le local et doit être
+-- provisionné via l'API Storage ou le Dashboard sur les environnements hébergés.
 -- Les utilisateurs authentifiés ne peuvent lire que les objets disponibles
 -- et autorisés par le module métier auquel le document est rattaché.
 
 begin;
-
-insert into storage.buckets (
-  id, name, public, file_size_limit, allowed_mime_types
-)
-values (
-  'company-private-documents',
-  'company-private-documents',
-  false,
-  20971520,
-  array['application/pdf', 'image/jpeg', 'image/png', 'image/webp']::text[]
-)
-on conflict (id) do update
-set
-  name = excluded.name,
-  public = false,
-  file_size_limit = excluded.file_size_limit,
-  allowed_mime_types = excluded.allowed_mime_types;
 
 create table public.documents (
   id uuid primary key default gen_random_uuid(),
