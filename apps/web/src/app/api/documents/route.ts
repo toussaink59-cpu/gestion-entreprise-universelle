@@ -1,11 +1,10 @@
-import { randomUUID, createHash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import {
-  detectDocumentMime,
+  ALLOWED_DOCUMENT_MIME_TYPES,
   DOCUMENT_BUCKET,
-  DOCUMENT_MAX_SIZE_BYTES,
   isDocumentSizeAllowed,
   sanitizeDocumentFilename,
 } from "@/lib/security/document-validation";
@@ -35,11 +34,11 @@ function sameOrigin(request: NextRequest): boolean {
   return origin !== null && origin === request.nextUrl.origin;
 }
 
-function validUuid(value: string | null): value is string {
+function validUuid(value: unknown): value is string {
   return typeof value === "string" && UUID_PATTERN.test(value);
 }
 
-function validCode(value: string | null): value is string {
+function validCode(value: unknown): value is string {
   return typeof value === "string" && CODE_PATTERN.test(value);
 }
 
@@ -92,55 +91,47 @@ export async function GET(request: NextRequest) {
   );
 }
 
+/**
+ * Ouvre une session d'upload. Le binaire est ensuite envoyé directement de
+ * l'ordinateur de l'utilisateur à Storage à l'aide du jeton signé à usage unique.
+ */
 export async function POST(request: NextRequest) {
   if (!sameOrigin(request)) {
     return jsonError(403, "origin_denied", "Origine de requête non autorisée.");
   }
 
-  const contentLength = Number(request.headers.get("content-length") ?? 0);
-  if (Number.isFinite(contentLength) && contentLength > DOCUMENT_MAX_SIZE_BYTES + 256 * 1024) {
-    return jsonError(413, "file_too_large", "La taille maximale est de 20 Mio.");
-  }
-
-  let formData: FormData;
+  let body: unknown;
   try {
-    formData = await request.formData();
+    body = await request.json();
   } catch {
-    return jsonError(400, "invalid_form", "Le formulaire de téléversement est invalide.");
+    return jsonError(400, "invalid_request", "La demande d'envoi est invalide.");
   }
 
-  const companyId = formData.get("companyId");
-  const moduleCode = formData.get("moduleCode");
-  const entityType = formData.get("entityType");
-  const entityId = formData.get("entityId");
-  const file = formData.get("file");
+  if (!body || typeof body !== "object") {
+    return jsonError(400, "invalid_request", "La demande d'envoi est invalide.");
+  }
+
+  const input = body as Record<string, unknown>;
+  const companyId = input.companyId;
+  const moduleCode = input.moduleCode;
+  const entityType = input.entityType;
+  const entityId = input.entityId;
+  const fileName = input.fileName;
+  const mimeType = input.mimeType;
+  const byteSize = input.byteSize;
 
   if (
-    typeof companyId !== "string" ||
-    !UUID_PATTERN.test(companyId) ||
-    typeof moduleCode !== "string" ||
-    !CODE_PATTERN.test(moduleCode) ||
-    typeof entityType !== "string" ||
-    !CODE_PATTERN.test(entityType) ||
-    typeof entityId !== "string" ||
-    !UUID_PATTERN.test(entityId) ||
-    !(file instanceof File)
+    !validUuid(companyId) ||
+    !validCode(moduleCode) ||
+    !validCode(entityType) ||
+    !validUuid(entityId) ||
+    typeof fileName !== "string" ||
+    typeof mimeType !== "string" ||
+    !ALLOWED_DOCUMENT_MIME_TYPES.includes(mimeType as (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number]) ||
+    typeof byteSize !== "number" ||
+    !isDocumentSizeAllowed(byteSize)
   ) {
-    return jsonError(400, "invalid_request", "Entreprise, fiche ou fichier invalide.");
-  }
-
-  if (!isDocumentSizeAllowed(file.size)) {
-    return jsonError(413, "file_too_large", "Le fichier doit peser entre 1 octet et 20 Mio.");
-  }
-
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  if (bytes.byteLength !== file.size) {
-    return jsonError(400, "invalid_file", "Le fichier transmis est incomplet.");
-  }
-
-  const detectedMime = detectDocumentMime(bytes);
-  if (!detectedMime) {
-    return jsonError(415, "unsupported_file", "Formats acceptés : PDF, JPEG, PNG et WebP.");
+    return jsonError(400, "invalid_request", "Entreprise, fiche ou caractéristiques du fichier invalides.");
   }
 
   const supabase = await createClient();
@@ -149,8 +140,7 @@ export async function POST(request: NextRequest) {
     return jsonError(401, "unauthorized", "Connecte-toi pour déposer un document.");
   }
 
-  // Le contrôle SQL utilise le JWT courant et vérifie la permission de création
-  // ainsi que l'appartenance réelle de la fiche à l'entreprise ciblée.
+  // La permission est évaluée par PostgreSQL avec le JWT de l'utilisateur.
   const { data: allowed, error: permissionError } = await supabase.rpc("can_upload_document", {
     p_company_id: companyId,
     p_module_code: moduleCode,
@@ -171,8 +161,7 @@ export async function POST(request: NextRequest) {
 
   const documentId = randomUUID();
   const storagePath = `${companyId}/${documentId}`;
-  const originalName = sanitizeDocumentFilename(file.name);
-  const sha256 = createHash("sha256").update(bytes).digest("hex");
+  const originalName = sanitizeDocumentFilename(fileName);
 
   const { error: insertError } = await service.from("documents").insert({
     id: documentId,
@@ -182,42 +171,26 @@ export async function POST(request: NextRequest) {
     entity_id: entityId,
     storage_path: storagePath,
     original_name: originalName,
-    mime_type: detectedMime,
-    byte_size: bytes.byteLength,
-    sha256,
+    mime_type: mimeType,
+    byte_size: byteSize,
+    sha256: null,
     scan_status: "pending_upload",
     created_by: user.id,
   });
 
   if (insertError) {
     console.error("Document metadata insert failed:", { code: insertError.code });
-    return jsonError(500, "document_create_failed", "Le document n'a pas pu être enregistré.");
+    return jsonError(500, "document_create_failed", "Le document n'a pas pu être réservé.");
   }
 
-  const { error: uploadError } = await service.storage
+  const { data: signedUpload, error: signedUploadError } = await service.storage
     .from(DOCUMENT_BUCKET)
-    .upload(storagePath, Buffer.from(bytes), {
-      cacheControl: "0",
-      contentType: detectedMime,
-      upsert: false,
-    });
+    .createSignedUploadUrl(storagePath, { upsert: false });
 
-  if (uploadError) {
-    console.error("Private document upload failed:", { statusCode: uploadError.statusCode });
-    await service.storage.from(DOCUMENT_BUCKET).remove([storagePath]);
+  if (signedUploadError || !signedUpload?.token) {
+    console.error("Private document upload token failed:", { name: signedUploadError?.name });
     await service.from("documents").delete().eq("id", documentId);
-    return jsonError(502, "upload_failed", "Le stockage a refusé le fichier. Réessaie.");
-  }
-
-  const { error: completeError } = await service.rpc("complete_document_upload", {
-    p_document_id: documentId,
-  });
-
-  if (completeError) {
-    console.error("Document upload finalization failed:", { code: completeError.code });
-    await service.storage.from(DOCUMENT_BUCKET).remove([storagePath]);
-    await service.from("documents").delete().eq("id", documentId);
-    return jsonError(502, "upload_finalize_failed", "Le document n'a pas pu être finalisé.");
+    return jsonError(503, "upload_session_failed", "La session de dépôt n'a pas pu être créée.");
   }
 
   return NextResponse.json(
@@ -225,9 +198,13 @@ export async function POST(request: NextRequest) {
       document: {
         id: documentId,
         original_name: originalName,
-        mime_type: detectedMime,
-        byte_size: bytes.byteLength,
-        scan_status: "pending_scan",
+        mime_type: mimeType,
+        byte_size: byteSize,
+        scan_status: "pending_upload",
+      },
+      upload: {
+        path: signedUpload.path,
+        token: signedUpload.token,
       },
     },
     {
@@ -238,5 +215,92 @@ export async function POST(request: NextRequest) {
         "X-Content-Type-Options": "nosniff",
       },
     },
+  );
+}
+
+/**
+ * Termine un upload ou annule une session en attente.
+ * Une session est toujours liée à son créateur ; un autre membre ne peut pas
+ * finaliser ou supprimer son objet.
+ */
+export async function PUT(request: NextRequest) {
+  if (!sameOrigin(request)) {
+    return jsonError(403, "origin_denied", "Origine de requête non autorisée.");
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonError(400, "invalid_request", "La demande est invalide.");
+  }
+  if (!body || typeof body !== "object") {
+    return jsonError(400, "invalid_request", "La demande est invalide.");
+  }
+
+  const input = body as Record<string, unknown>;
+  const documentId = input.documentId;
+  const action = input.action;
+  if (!validUuid(documentId) || (action !== "complete" && action !== "cancel")) {
+    return jsonError(400, "invalid_request", "Document ou action invalide.");
+  }
+
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return jsonError(401, "unauthorized", "Connecte-toi pour terminer le dépôt.");
+  }
+
+  let service;
+  try {
+    service = createServiceClient();
+  } catch {
+    return jsonError(503, "storage_not_configured", "Le stockage privé n'est pas encore configuré sur cet environnement.");
+  }
+
+  const { data: document, error: documentError } = await service
+    .from("documents")
+    .select("id, created_by, storage_path, scan_status")
+    .eq("id", documentId)
+    .maybeSingle();
+
+  if (documentError || !document || document.created_by !== user.id) {
+    return jsonError(404, "not_found", "Session de dépôt introuvable.");
+  }
+  if (document.scan_status !== "pending_upload") {
+    return jsonError(409, "invalid_state", "Cette session de dépôt n'est plus modifiable.");
+  }
+
+  if (action === "cancel") {
+    const { error: removeError } = await service.storage
+      .from(DOCUMENT_BUCKET)
+      .remove([document.storage_path]);
+    if (removeError && removeError.name !== "StorageApiError") {
+      console.error("Private document cleanup failed:", { name: removeError.name });
+      return jsonError(502, "cleanup_failed", "Le fichier temporaire n'a pas pu être nettoyé.");
+    }
+    const { error: deleteError } = await service
+      .from("documents")
+      .delete()
+      .eq("id", documentId)
+      .eq("created_by", user.id);
+    if (deleteError) {
+      console.error("Document session cleanup failed:", { code: deleteError.code });
+      return jsonError(500, "cleanup_failed", "La session temporaire n'a pas pu être annulée.");
+    }
+    return NextResponse.json({ cancelled: true }, { headers: { "Cache-Control": "no-store, private" } });
+  }
+
+  const { error: completeError } = await service.rpc("complete_document_upload", {
+    p_document_id: documentId,
+  });
+  if (completeError) {
+    console.error("Document upload finalization failed:", { code: completeError.code });
+    return jsonError(409, "upload_not_complete", "L'objet n'est pas encore présent dans le stockage.");
+  }
+
+  return NextResponse.json(
+    { documentId, scanStatus: "pending_scan" },
+    { headers: { "Cache-Control": "no-store, private" } },
   );
 }
