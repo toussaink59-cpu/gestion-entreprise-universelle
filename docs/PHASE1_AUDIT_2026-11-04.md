@@ -110,11 +110,11 @@ La migration `20261104120000_stockage_prive_documents.sql` ajoute les métadonn�
 
 Le dépôt passe par une RPC authentifiée qui revalide la permission `create` et l'appartenance de la fiche parente à l'entreprise. Le serveur émet ensuite un jeton d'upload signé à chemin unique ; le navigateur transfère directement le fichier à Storage. Le téléchargement utilise un lien signé de **120 secondes**, après vérification de l'état du document et de la permission de lecture. La variable `DOCUMENT_SCANNER_ENABLED=false` désactive par défaut les nouveaux dépôts tant que le scanner n'est pas configuré.
 
-Les tests couvrent les formats, les tailles, les permissions, l'isolation inter-entreprises, le refus de lecture avant analyse et après rejet, et la finalisation réservée au rôle serveur.
+Les tests couvrent les formats, les tailles, les permissions, l'isolation inter-entreprises, le refus de lecture avant analyse et après rejet, et la finalisation réservée au rôle serveur. La PR #65 est fusionnée dans `main` au commit `43611ad73a032a99186818c7a8cbaa33188f474b`. Résultats pré-fusion : CI web `41819650036` (14 fichiers / 178 tests, zéro vulnérabilité), Supabase réel `41819650061` (5 fichiers / 92 tests, `plpgsql_check` et Storage) et restauration `41819650069` (succès).
 
 **Bloquant avant activation réelle :** aucun moteur antivirus n'est encore connecté. Les documents finalisés restent en `pending_scan` et les liens de téléchargement sont refusés tant qu'un scanner serveur n'a pas retourné le type détecté, la taille réelle et le SHA-256. Il reste également à intégrer le nettoyage des sessions d'upload abandonnées et à vérifier le bucket sur un environnement Supabase hébergé.
 
-La configuration locale ne prouve pas que le bucket ou les secrets existent sur un projet hébergé. Ne pas activer les uploads en production avant fermeture de ces points. Voir [la spécification du stockage privé](STOCKAGE_DOCUMENTS_PRIVES.md).
+La configuration locale ne prouve pas que le bucket ou les secrets existent sur un projet hébergé. Ne pas activer les uploads en production avant fermeture de ces points. La prévisualisation Vercel de la PR #65 n'a pas été déployée à cause du quota quotidien gratuit ; les tests GitHub Actions verts ne valent pas validation d'un déploiement hébergé. Voir [la spécification du stockage privé](STOCKAGE_DOCUMENTS_PRIVES.md).
 
 ## 5. Sauvegarde, restauration et continuité
 
@@ -144,7 +144,7 @@ L’audit automatique couvre désormais l’arbre complet installé par `npm ci`
 | Région d’hébergement et résidence des données | À décider | Comparer coûts, disponibilité, traitement des données, exigences contractuelles et obligations locales |
 | Protection de la branche principale | Non vérifiée | L’API de protection de branche n’était pas accessible à l’intégration ; aucune règle de dépôt n’a été retournée par l’API rulesets. Ne pas en déduire que la branche est protégée |
 | RPO/RTO et rétention | À décider | Définir des objectifs réalistes selon le budget et les engagements de service |
-| Socle stockage privé | Implémenté dans la branche de travail, validation CI en attente | Vérifier migration, bucket local, RLS Storage et tests négatifs avant fusion |
+| Socle stockage privé | Fusionné dans `main` (PR #65) ; CI web, Supabase réel et restauration réussis | Vérifier le bucket et les secrets sur Supabase hébergé avant activation |
 | Analyse antivirus / quarantaine | Non intégrée, bloquante | Choisir puis déployer un scanner serveur ; aucun document ne doit passer à `available` sans analyse réelle |
 | Conservation, export et suppression des données personnelles | À formaliser | Politique documentée avant traitement de données réelles |
 | Accès exceptionnel du personnel plateforme | À formaliser | Accès minimal, durée limitée, justification et journalisation |
