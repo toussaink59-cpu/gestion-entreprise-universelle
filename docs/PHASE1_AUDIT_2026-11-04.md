@@ -179,3 +179,15 @@ L’audit ci-dessus est un instantané historique, rédigé avant les derniers c
 - Les éléments bloquants de la Phase 1 restent ouverts : configuration Supabase hébergée, décision et intégration du scanner antivirus, protection de branche à vérifier, stratégie réelle de sauvegarde/restauration et validation HTTP du déploiement.
 
 En conséquence, la Phase 1 reste **non clôturée**. Les brouillons métier ne doivent pas être présentés comme une validation de la Phase 2 complète ou comme une aptitude à traiter des opérations réelles.
+
+
+## Addendum — état opérationnel après la PR #81 (4 novembre 2026)
+
+- La PR #81 a été fusionnée dans `main` au commit `50cc338b4d99bf26f77775d0bd91f3978ad9813e`. La CI web, ShellCheck, les tests Supabase local réel, la restauration et le déploiement Vercel Production associés ont réussi.
+- L’alias public `https://polygest.vercel.app` a été vérifié en lecture seule sur `/`, `/login` et `/dashboard`. Les routes répondent en 2xx après redirection et servent HSTS, CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` et `Permissions-Policy`. Cette vérification porte sur **Production**, pas sur un environnement de staging.
+- Aucun endpoint Preview/staging distinct n’a été récupéré : un ancien déploiement Preview est en échec et ne fournit pas d’URL exploitable. Aucune nouvelle Preview n’a été déclenchée afin de ne pas consommer de quota sans accord.
+- GitHub confirme que `main` n’a ni protection de branche ni ruleset. Le propriétaire du dépôt a choisi de ne pas modifier cette configuration dans cette suite de travail ; les pushes directs restent donc possibles.
+- Aucun accès à un projet Supabase hébergé non productif n’était disponible dans la session. Aucune migration, restauration, sauvegarde hébergée ni modification du bucket distant n’a été effectuée ou revendiquée.
+- Une vérification HTTP réutilisable et son exécution après déploiement sont ajoutées dans la branche de suivi ; leur mise en production dépendra de la revue et de la fusion de sa PR.
+
+La Phase 1 reste **non clôturée** : il reste à valider un environnement Supabase non productif et son bucket, vérifier les sauvegardes hébergées, choisir puis intégrer le scanner antivirus, définir le nettoyage des uploads abandonnés et obtenir une validation de staging distincte.

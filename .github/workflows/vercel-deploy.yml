@@ -107,6 +107,9 @@ jobs:
           VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
 
+      - name: Vérifier les en-têtes HTTP après déploiement
+        run: scripts/check-security-headers.sh https://polygest.vercel.app
+
   preview:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04

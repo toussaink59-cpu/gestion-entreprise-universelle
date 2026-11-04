@@ -61,6 +61,18 @@ Dans l'environnement GitHub **production**, configurer un approbateur obligatoir
 
 Fusionner une PR après les contrôles obligatoires. Le workflow de production démarre automatiquement après la réussite du workflow **CI** sur `main`.
 
+## Vérification HTTP après déploiement
+
+Après une mise en production, le workflow vérifie les routes `/`, `/login` et `/dashboard` de `https://polygest.vercel.app` avec `scripts/check-security-headers.sh`. Le contrôle exige HTTPS, une réponse finale 2xx, l’absence de redirection hors de l’origine, les en-têtes définis dans `apps/web/next.config.ts` et l’absence de `X-Powered-By`.
+
+Pour vérifier manuellement une URL Preview ou de staging, utiliser la même commande avec son origine HTTPS :
+
+```bash
+scripts/check-security-headers.sh https://<hote-preview-ou-staging>
+```
+
+Ce contrôle ne remplace pas les tests d’authentification ni la validation fonctionnelle. Au 4 novembre 2026, l’alias Production a été vérifié ; aucune URL Preview/staging distincte n’a pu être validée.
+
 ## Limites et garde-fous
 
 - Ce mécanisme supprime les builds automatiques déclenchés par Git ; il ne supprime pas les quotas Vercel applicables aux déploiements réellement demandés.
