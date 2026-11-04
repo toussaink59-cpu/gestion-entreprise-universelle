@@ -6,7 +6,7 @@ import {
   detectDocumentMime,
   isDocumentSizeAllowed,
   sanitizeDocumentFilename,
-} from "@/lib/security/document-validation";
+} from "../../src/lib/security/document-validation";
 
 describe("document validation", () => {
   it("recognises only the four approved binary signatures", () => {
