@@ -37,6 +37,8 @@ Le détail des constats vérifiés et des risques restants se trouve dans [l’a
 - [Spécification du stockage privé des documents](docs/STOCKAGE_DOCUMENTS_PRIVES.md)
 - [Checklist historique de la Phase 1](docs/PHASE1_CHECKLIST.md)
 - [Design system PolyGest](docs/POLYGEST_DESIGN_SYSTEM.md)
+- [Norme frontend, sécurité et confidentialité](docs/FRONTEND_SECURITY_STANDARD.md)
+- [Skill frontend PolyGest](skills/chatgpt-5-4-frontend-skill/README.md)
 - [Spécification fonctionnelle — Devis et factures](docs/SPECIFICATION_FONCTIONNELLE_DEVIS_FACTURES.md)
 - [Modèle de données — Devis et factures](docs/MODELE_DONNEES_DEVIS_FACTURES.md)
 - [Référentiel de conformité fiscale — Facturation au Burkina Faso](docs/CONFORMITE_FISCALE_BURKINA_FACTURATION.md)
