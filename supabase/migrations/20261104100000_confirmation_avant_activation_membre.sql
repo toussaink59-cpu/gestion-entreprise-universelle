@@ -60,3 +60,13 @@ create trigger company_membership_active_insert_guard
   before insert on public.company_memberships
   for each row
   execute function app.guard_active_membership_insert();
+
+-- Les clients applicatifs ne créent jamais directement une appartenance :
+-- toutes les invitations doivent passer par la RPC qui crée atomiquement
+-- l'appartenance et son jeton à usage unique. Cela évite les invitations
+-- orphelines qui bloqueraient une nouvelle invitation via l'unicité company/user.
+revoke insert on table public.company_memberships from public, anon, authenticated;
+revoke insert (company_id, user_id, role_code, status, invited_by)
+  on public.company_memberships
+  from authenticated;
+drop policy if exists memberships_insert on public.company_memberships;
