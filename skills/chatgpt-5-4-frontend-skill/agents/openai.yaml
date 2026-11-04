@@ -1,0 +1,4 @@
+interface:
+  display_name: "PolyGest Frontend Skill"
+  short_description: "Design secure, accessible PolyGest interfaces"
+  default_prompt: "Use $chatgpt-5-4-frontend-skill. Follow the PolyGest design system and frontend security standard. Inspect existing patterns before changing code; never expose server secrets or bypass server authorization and RLS."
