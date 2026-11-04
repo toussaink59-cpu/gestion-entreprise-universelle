@@ -1,9 +1,7 @@
 name: Vercel Deploy
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  push:
     branches: [main]
   workflow_dispatch:
     inputs:
@@ -23,20 +21,48 @@ concurrency:
 
 jobs:
   production:
-    if: >-
-      ${{ github.event_name == 'workflow_run' &&
-          github.event.workflow_run.conclusion == 'success' &&
-          github.event.workflow_run.event == 'push' &&
-          github.event.workflow_run.head_branch == 'main' }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment: production
     steps:
-      - name: Checkout du commit exact validé par CI
+      - name: Checkout du commit poussé sur main
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Attendre et vérifier la réussite de la CI sur ce commit exact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha="${GITHUB_SHA}"
+          for attempt in $(seq 1 30); do
+            checks="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/check-runs?per_page=100")"
+            state="$(jq -r '
+              [.check_runs[]
+                | select(.app.slug == "github-actions")
+                | select(.name == "Web — lint, types, tests, build" or .name == "Scripts shell — shellcheck")]
+              | if length != 2 then "pending"
+                elif any(.[]; .conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out") then "failure"
+                elif all(.[]; .status == "completed" and .conclusion == "success") then "success"
+                else "pending" end
+            ' <<< "$checks")"
+
+            if [[ "$state" == "success" ]]; then
+              echo "Les deux jobs CI sont verts pour ${sha}."
+              exit 0
+            fi
+            if [[ "$state" == "failure" ]]; then
+              echo "::error::La CI a échoué pour ${sha}. Déploiement bloqué."
+              exit 1
+            fi
+            echo "CI en attente pour ${sha} (tentative ${attempt}/30)."
+            sleep 30
+          done
+          echo "::error::Délai dépassé : la CI n'a pas confirmé les deux jobs pour ${sha}."
+          exit 1
 
       - name: Installer Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
@@ -71,7 +97,7 @@ jobs:
         run: |
           set -euo pipefail
           sha="$(git rev-parse HEAD)"
-          checks_ok="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/check-runs" --jq '[.check_runs[] | select(.app.slug == "github-actions")] | if length == 0 then false else all(.[]; .status == "completed" and .conclusion == "success") end')"
+          checks_ok="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/check-runs?per_page=100" --jq '[.check_runs[] | select(.app.slug == "github-actions")] | if length == 0 then false else all(.[]; .status == "completed" and .conclusion == "success") end')"
           if [[ "$checks_ok" != "true" ]]; then
             echo "::error::Les contrôles GitHub Actions du commit ${sha} ne sont pas tous terminés avec succès."
             exit 1
