@@ -120,17 +120,24 @@ La première livraison métier doit rester petite et vérifiable. Elle ne doit p
 - Aucun document n'est présenté comme certifié sans réponse vérifiable d'un système homologué.
 - CI web, tests Supabase réels, contrôles de sécurité, lint SQL et restauration réussissent.
 
-## 7. Décisions métier à soumettre au porteur du projet
+## 7. Décisions métier et statut
 
-Ces décisions ne doivent pas être prises implicitement par le codeur :
+**Décision confirmée le 4 novembre 2026 : matrice des rôles.** Le porteur du projet a validé la répartition suivante :
 
-1. **Matrice de rôles :** confirmer la matrice proposée dans la spécification (notamment `sales_purchasing` peut transmettre un devis mais pas émettre une facture ; `finance` peut émettre).
-2. **Identité de facturation :** confirmer qui peut renseigner et valider les identifiants fiscaux et les justificatifs du profil émetteur.
-3. **Numérotation :** confirmer si l'entreprise souhaite un format interne provisoire pour les devis et quelle autorité/professionnel validera la série légale des factures.
-4. **Corrections :** confirmer que l'émission de factures reste désactivée jusqu'à validation de la procédure légale de correction/avoir/FEC.
-5. **Portée de la première PR :** confirmer le démarrage par les devis brouillons uniquement, sans émission de facture ni calcul fiscal présenté comme définitif.
+- `owner` et `company_admin` : tous les droits commerciaux, dans les limites des permissions globales existantes (notamment l'exclusion de la paie pour `company_admin`).
+- `finance` : lecture et export des devis ; lecture, création et modification des brouillons de factures, émission et export. L'annulation directe d'une facture est retirée ; toute correction suit une procédure distincte.
+- `sales_purchasing` : lecture, création, modification et transmission des devis, ainsi que saisie de la réponse client ; lecture seule des factures. Aucun droit de créer, modifier, émettre ou annuler une facture.
+- `auditor` : lecture et export uniquement.
+- `hr_payroll`, `operations`, `employee` : aucun accès commercial par défaut.
 
-En attendant ces validations, le développement peut préparer les composants techniques non ambigus, mais ne doit pas activer l'émission légale ou un calcul fiscal non vérifié.
+**Décisions encore ouvertes :**
+
+1. **Identité de facturation :** qui peut renseigner et valider les identifiants fiscaux et les justificatifs du profil émetteur ?
+2. **Numérotation :** quel format interne provisoire utiliser pour les devis ? La série légale des factures doit être validée par un professionnel compétent.
+3. **Corrections :** confirmer la procédure légale de correction/avoir/FEC avant toute émission de facture.
+4. **Périmètre de la première tranche :** devis brouillons uniquement, sans transmission, numérotation, émission de facture ni calcul fiscal présenté comme définitif.
+
+Le développement avance sur les devis brouillons et leur sécurité. Il ne doit pas activer l'émission légale ou un calcul fiscal non vérifié.
 
 ## 8. Références internes
 
