@@ -145,6 +145,13 @@ export async function POST(request: NextRequest) {
     return jsonError(401, "unauthorized", "Connecte-toi pour déposer un document.");
   }
 
+  let service;
+  try {
+    service = createServiceClient();
+  } catch {
+    return jsonError(503, "storage_not_configured", "Le stockage privé n'est pas encore configuré sur cet environnement.");
+  }
+
   const originalName = sanitizeDocumentFilename(fileName);
 
   // La fonction SQL refait le contrôle des droits et du rattachement à la fiche,
@@ -174,13 +181,6 @@ export async function POST(request: NextRequest) {
 
   const documentId = String(reservationRow.document_id);
   const storagePath = String(reservationRow.storage_path);
-
-  let service;
-  try {
-    service = createServiceClient();
-  } catch {
-    return jsonError(503, "storage_not_configured", "Le stockage privé n'est pas encore configuré sur cet environnement.");
-  }
 
   const { data: signedUpload, error: signedUploadError } = await service.storage
     .from(DOCUMENT_BUCKET)
