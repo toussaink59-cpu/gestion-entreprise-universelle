@@ -18,7 +18,18 @@ const q = <R extends object = Record<string, unknown>>(
   params?: unknown[],
 ) => t.db.query<R>(sql, params);
 
-const draftLines = [
+type DraftLine = {
+  description: string;
+  quantity: string;
+  unit_label: string;
+  unit_price: string;
+  discount_type?: string;
+  discount_value?: string;
+  tax_rate?: string;
+  tax_label?: string;
+};
+
+const draftLines: DraftLine[] = [
   {
     description: "Prestation de conseil",
     quantity: "2",
@@ -41,7 +52,7 @@ async function saveDraft(
   actor: "alice" | "carol" | "dave" | "erin" | "frank" | "bob",
   companyId: string,
   customer: string,
-  lines = draftLines,
+  lines: DraftLine[] = draftLines,
   existingQuoteId: string | null = null,
 ) {
   return asUser(t.db, actor, () =>
