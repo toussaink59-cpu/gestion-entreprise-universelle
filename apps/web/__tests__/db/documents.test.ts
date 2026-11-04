@@ -130,6 +130,62 @@ describe("Stockage privé des documents — autorisation métier", () => {
     expect(result.rows[0].allowed).toBe(true);
   });
 
+  it("crée une réservation uniquement après vérification de la permission et du parent", async () => {
+    const created = await asUser(t.db, "alice", () =>
+      q<{ document_id: string; storage_path: string }>(
+        `select * from public.create_document_upload(
+          $1, 'customers', 'customer', $2, 'contrat-client.pdf',
+          'application/pdf', 512
+        )`,
+        [t.companyA, customerId],
+      ),
+    );
+
+    expect(created.rows).toHaveLength(1);
+    expect(created.rows[0].storage_path).toBe(
+      `${t.companyA}/${created.rows[0].document_id}`,
+    );
+
+    const metadata = await asUser(t.db, "alice", () =>
+      q<{ scan_status: string; created_by: string; sha256: string | null }>(
+        `select scan_status, created_by, sha256
+         from public.documents where id = $1`,
+        [created.rows[0].document_id],
+      ),
+    );
+    expect(metadata.rows[0]).toEqual({
+      scan_status: "pending_upload",
+      created_by: ids.alice,
+      sha256: null,
+    });
+  });
+
+  it("refuse les réservations par un rôle en lecture seule et hors de son entreprise", async () => {
+    await expect(
+      asUser(t.db, "carol", () =>
+        q(
+          `select * from public.create_document_upload(
+            $1, 'customers', 'customer', $2, 'finance.pdf',
+            'application/pdf', 512
+          )`,
+          [t.companyA, customerId],
+        ),
+      ),
+    ).rejects.toThrow(/permission de dépôt requise/i);
+
+    await expect(
+      asUser(t.db, "bob", () =>
+        q(
+          `select * from public.create_document_upload(
+            $1, 'customers', 'customer', $2, 'foreign.pdf',
+            'application/pdf', 512
+          )`,
+          [t.companyA, customerId],
+        ),
+      ),
+    ).rejects.toThrow(/permission de dépôt requise/i);
+  });
+
   it("refuse une entreprise étrangère et un identifiant parent inexistant", async () => {
     const foreign = await asUser(t.db, "bob", () =>
       q<{ allowed: boolean }>(
