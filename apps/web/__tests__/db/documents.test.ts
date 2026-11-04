@@ -22,6 +22,24 @@ const q = <R extends object = Record<string, unknown>>(
 
 beforeAll(async () => {
   t = await seed(await createMigratedDb());
+
+  // Fixture PGlite uniquement : sur la pile Supabase réelle, le bucket est
+  // provisionné par supabase/config.toml au démarrage du Storage local.
+  if (!process.env.TEST_DATABASE_URL) {
+    await asServiceRole(t.db, () =>
+      q(
+        `insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+         values (
+           'company-private-documents',
+           'company-private-documents',
+           false,
+           20971520,
+           array['application/pdf', 'image/jpeg', 'image/png', 'image/webp']::text[]
+         )`,
+      ),
+    );
+  }
+
   const customer = await asUser(t.db, "alice", () =>
     q<{ id: string }>(
       `insert into public.customers (company_id, name)
