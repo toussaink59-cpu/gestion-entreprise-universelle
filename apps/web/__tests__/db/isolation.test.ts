@@ -303,6 +303,24 @@ describe('Sécurité des appartenances — invitant et activation', () => {
       ),
     ).rejects.toThrow(/seul un propriétaire/);
   });
+
+  it('un propriétaire ne peut pas contourner l’invitation par une insertion active directe', async () => {
+    await expect(
+      asUser(t.db, 'alice', () =>
+        q(`
+          insert into public.company_memberships
+            (company_id, user_id, role_code, status)
+          values ($1, $2, 'employee', 'active')
+        `, [t.companyA, ids.mallory]),
+      ),
+    ).rejects.toThrow(/invitation et la confirmation d’adresse e-mail/);
+
+    const membership = await q(
+      `select 1 from public.company_memberships where company_id = $1 and user_id = $2`,
+      [t.companyA, ids.mallory],
+    );
+    expect(membership.rows).toHaveLength(0);
+  });
   it('un utilisateur ne peut pas falsifier invited_by', async () => {
     await expect(
       asUser(t.db, 'alice', () =>
