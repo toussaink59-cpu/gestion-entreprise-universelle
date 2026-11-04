@@ -31,37 +31,65 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+          fetch-depth: 2
 
-      - name: Attendre et vérifier la réussite de la CI sur ce commit exact
+      - name: Attendre les contrôles requis sur ce commit exact
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           sha="${GITHUB_SHA}"
+          if ! git rev-parse HEAD^ >/dev/null 2>&1; then
+            echo "::error::Impossible de déterminer les fichiers modifiés du commit ${sha}."
+            exit 1
+          fi
+          changed_files="$(git diff --name-only HEAD^ HEAD)"
+          required_checks=(
+            "Web — lint, types, tests, build"
+            "Scripts shell — shellcheck"
+          )
+          if grep -Eq '^(supabase/|apps/web/__tests__/db/|apps/web/package\.json$|apps/web/package-lock\.json$|\.github/workflows/supabase-reel\.yml$)' <<< "${changed_files}"; then
+            required_checks+=("Migrations, lint SQL et tests sur Supabase local")
+          fi
+          if grep -Eq '^(scripts/|supabase/|\.github/workflows/restore-test\.yml$)' <<< "${changed_files}"; then
+            required_checks+=("Sauvegarde puis restauration")
+          fi
           for attempt in $(seq 1 30); do
             checks="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/check-runs?per_page=100")"
-            state="$(jq -r '
-              [.check_runs[]
-                | select(.app.slug == "github-actions")
-                | select(.name == "Web — lint, types, tests, build" or .name == "Scripts shell — shellcheck")]
-              | if length != 2 then "pending"
-                elif any(.[]; .conclusion == "failure" or .conclusion == "cancelled" or .conclusion == "timed_out") then "failure"
-                elif all(.[]; .status == "completed" and .conclusion == "success") then "success"
-                else "pending" end
-            ' <<< "$checks")"
-
+            state="success"
+            for required_check in "${required_checks[@]}"; do
+              check_state="$(jq -r --arg name "$required_check" '
+                [.check_runs[]
+                  | select(.app.slug == "github-actions")
+                  | select(.name == $name)]
+                | sort_by(.started_at // .created_at)
+                | if length == 0 then "pending"
+                  else .[-1]
+                    | if .status != "completed" then "pending"
+                      elif .conclusion == "success" then "success"
+                      else "failure" end
+                  end
+              ' <<< "$checks")"
+              if [[ "$check_state" == "failure" ]]; then
+                echo "::error::Le contrôle requis '${required_check}' a échoué pour ${sha}."
+                state="failure"
+                break
+              fi
+              if [[ "$check_state" != "success" ]]; then
+                state="pending"
+              fi
+            done
             if [[ "$state" == "success" ]]; then
-              echo "Les deux jobs CI sont verts pour ${sha}."
+              echo "Tous les contrôles requis sont verts pour ${sha}: ${required_checks[*]}"
               exit 0
             fi
             if [[ "$state" == "failure" ]]; then
-              echo "::error::La CI a échoué pour ${sha}. Déploiement bloqué."
               exit 1
             fi
-            echo "CI en attente pour ${sha} (tentative ${attempt}/30)."
+            echo "Contrôles requis en attente pour ${sha} (tentative ${attempt}/30): ${required_checks[*]}"
             sleep 30
           done
-          echo "::error::Délai dépassé : la CI n'a pas confirmé les deux jobs pour ${sha}."
+          echo "::error::Délai dépassé : les contrôles requis ne sont pas tous verts pour ${sha}."
           exit 1
 
       - name: Installer Node.js

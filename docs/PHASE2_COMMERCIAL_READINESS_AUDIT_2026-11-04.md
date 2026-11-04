@@ -6,6 +6,8 @@
 **Référence fonctionnelle :** cahier des charges v0.1 et `docs/ROADMAP.md`  
 **Périmètre :** préparation de la première tranche métier devis, factures et événements fiscaux de paiement.
 
+> **Instantané historique.** Les constats d’absence d’écrans et de tables métier ci-dessous décrivent le commit `731a20e4b68746908c3723807e1578d482eec223`, pas l’état actuel de `main`. Au commit `bb61795f5e19fa665de18dc75491c00fbab8181d`, des brouillons de devis et de dépenses sont déjà implémentés. Ils ne couvrent toujours ni la transmission des devis, ni les factures, ni les règlements. Pour l’état actualisé de la Phase 1, consulter l’addendum de `docs/PHASE1_AUDIT_2026-11-04.md`.
+
 ## 1. Résultat exécutif
 
 La branche `main` est à jour au commit inspecté. Les workflows GitHub Actions associés à ce commit sont terminés avec succès :

@@ -1,6 +1,6 @@
 # Plateforme universelle de gestion d’entreprise
 
-> > **Nom commercial : PolyGest** — plateforme de gestion intégrée destinée aux entrepreneurs et aux PME.
+> **Nom commercial : PolyGest** — plateforme de gestion intégrée destinée aux entrepreneurs et aux PME.
 
 Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME. Le projet vise à réunir dans un espace sécurisé les principales opérations d’une entreprise : ventes, facturation, dépenses, trésorerie, budgets, personnel, paie, stocks et rapports.
 
@@ -21,9 +21,10 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 - des tests automatisés d’isolation entre entreprises, de permissions par rôle, de révocation et d’audit, exécutés sur les migrations ;
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
 - un socle de stockage documentaire privé livré et intégré aux fiches clients/fournisseurs : bucket privé, métadonnées isolées, permissions héritées du module, dépôt direct signé et liens de téléchargement de 120 secondes ; le dépôt reste désactivé par défaut (`DOCUMENT_SCANNER_ENABLED=false`) tant que le scanner antivirus n'est pas branché ;
+- des modules **en brouillon seulement** pour les devis et les dépenses : enregistrement/listage de brouillons, sans transmission de devis, émission de factures, paiement ni mouvement de trésorerie ;
 - une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit de toutes les dépendances (runtime et développement), ShellCheck, lint SQL et tests sur une pile Supabase locale réelle.
 
-**Limites actuelles :** les modules devis, facturation, paiements, dépenses, trésorerie, budgets, stocks et paie n’existent pas encore. Les migrations n’ont pas encore été validées sur le projet Supabase hébergé, la matrice des rôles n’est pas validée par le porteur du projet, et l’hébergement, la région et la politique de sauvegarde ne sont pas décidés. Les scripts de sauvegarde ne remplacent pas un dispositif de sauvegarde opérationnel pour la production.
+**Limites actuelles :** les devis et dépenses ne couvrent que des brouillons ; la transmission des devis, les factures, règlements, trésorerie, budgets, stocks et paie ne sont pas implémentés. Le scanner antivirus n’est pas intégré. Les migrations et paramètres n’ont pas été validés sur le projet Supabase hébergé ; la région, la politique de sauvegarde et les objectifs RPO/RTO restent à formaliser. Les scripts de sauvegarde ne remplacent pas un dispositif opérationnel de production.
 
 Le détail des constats vérifiés et des risques restants se trouve dans [l’audit Phase 1 du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md). La [checklist historique](docs/PHASE1_CHECKLIST.md) conserve le relevé du 23 octobre et n’est pas la source de statut actuelle.
 
@@ -34,6 +35,7 @@ Le détail des constats vérifiés et des risques restants se trouve dans [l’a
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
 - [Audit de la Phase 1 — état vérifié du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md)
+- [Audit de préparation commerciale — état initial du 4 novembre 2026](docs/PHASE2_COMMERCIAL_READINESS_AUDIT_2026-11-04.md)
 - [Spécification du stockage privé des documents](docs/STOCKAGE_DOCUMENTS_PRIVES.md)
 - [Checklist historique de la Phase 1](docs/PHASE1_CHECKLIST.md)
 - [Design system PolyGest](docs/POLYGEST_DESIGN_SYSTEM.md)
