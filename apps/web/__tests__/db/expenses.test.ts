@@ -214,6 +214,9 @@ describe("Brouillons de dépenses — données et intégrité", () => {
 
 describe("Brouillons de dépenses — permissions et isolation", () => {
   it("le commercial peut créer une dépense mais pas modifier un brouillon", async () => {
+    await asUser(t.db, "alice", () =>
+      q(`update public.company_memberships set role_code = 'sales_purchasing' where user_id = $1 and company_id = $2`, [ids.erin, t.companyA]),
+    );
     const created = await saveDraft("erin", t.companyA);
     expect(created.rows[0].id).toBeTruthy();
 
@@ -242,6 +245,9 @@ describe("Brouillons de dépenses — permissions et isolation", () => {
   });
 
   it("l'auditeur peut lire mais ne peut pas créer une dépense", async () => {
+    await asUser(t.db, "alice", () =>
+      q(`update public.company_memberships set role_code = 'auditor' where user_id = $1 and company_id = $2`, [ids.erin, t.companyA]),
+    );
     const visible = await asUser(t.db, "erin", () =>
       q<{ id: string }>(
         `select id from public.expenses where company_id = $1`,
@@ -251,7 +257,7 @@ describe("Brouillons de dépenses — permissions et isolation", () => {
     expect(visible.rows.length).toBeGreaterThan(0);
 
     await expect(
-      saveDraft("dave", t.companyA),
+      saveDraft("erin", t.companyA),
     ).rejects.toThrow(DENIED);
   });
 
