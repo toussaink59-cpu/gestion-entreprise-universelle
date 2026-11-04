@@ -4,8 +4,8 @@
 # 1. crée une base source jetable : migrations + données fictives ;
 # 2. la sauvegarde avec scripts/backup-db.sh ;
 # 3. la restaure dans une base vierge avec scripts/restore-db.sh ;
-# 4. compare les données et les définitions de structure/sécurité ;
-# 5. vérifie l'isolation sur la base restaurée.
+# 5. compare les données et les définitions de structure/sécurité ;
+# 6. vérifie l'isolation sur la base restaurée.
 #
 # Usage : ADMIN_URL=postgresql://utilisateur:motdepasse@hote:5432/postgres ./scripts/test-restore.sh
 # ADMIN_URL doit désigner un superutilisateur sur une base de maintenance, sans paramètres
@@ -55,12 +55,28 @@ if [[ -z "$BACKUP_FILE" || ! -s "$BACKUP_FILE" ]]; then
     exit 1
 fi
 
-echo "3/5 Restauration dans une base vierge (scripts/restore-db.sh)"
+echo "3/6 Restauration dans une base vierge (scripts/restore-db.sh)"
 run_sql "$ADMIN_URL" -c "create database ${DST_DB}" >/dev/null
 DATABASE_URL="$DST_URL" "$ROOT/scripts/restore-db.sh" "$BACKUP_FILE" >/dev/null
 echo "    durée sauvegarde + restauration : $((SECONDS - START)) s"
 
-echo "4/5 Comparaison des données et des définitions de structure/sécurité"
+echo "4/6 Vérification du refus d'une restauration sur une base déjà remplie"
+if DATABASE_URL="$DST_URL" "$ROOT/scripts/restore-db.sh" "$BACKUP_FILE" >"$WORKDIR/refuse-nonempty.log" 2>&1; then
+    echo "ÉCHEC : une seconde restauration a été autorisée sur une base non vide." >&2
+    exit 1
+fi
+if ! grep -q "base cible n'est pas vide" "$WORKDIR/refuse-nonempty.log"; then
+    cat "$WORKDIR/refuse-nonempty.log" >&2
+    echo "ÉCHEC : le refus ne correspond pas au contrôle de base non vide." >&2
+    exit 1
+fi
+COMPANIES_AFTER_REFUSAL="$(run_sql "$DST_URL" -c "select count(*) from public.companies")"
+if [[ "$COMPANIES_AFTER_REFUSAL" != "2" ]]; then
+    echo "ÉCHEC : le contenu de la base a changé après le refus de restauration." >&2
+    exit 1
+fi
+
+echo "5/6 Comparaison des données et des définitions de structure/sécurité"
 fingerprint() {
     local url="$1" tables t
     tables="$(run_sql "$url" -c "select schemaname || '.' || tablename from pg_tables
@@ -160,7 +176,7 @@ if [[ "${ROWS:-0}" -lt 10 ]]; then
 fi
 echo "    ${ROWS} lignes comparées dans le schéma public : identiques"
 
-echo "5/5 Isolation sur la base restaurée (ACC-01 après restauration)"
+echo "6/6 Isolation sur la base restaurée (ACC-01 après restauration)"
 VISIBLE="$(run_sql "$DST_URL" -c "set role authenticated" \
     -c "select set_config('request.jwt.claim.sub', '$ALICE', false)" \
     -c "select count(*) from public.companies" | tail -n 1)"
