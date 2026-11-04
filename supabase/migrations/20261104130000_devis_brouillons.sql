@@ -180,9 +180,9 @@ create function public.save_quote_draft(
   p_company_id uuid,
   p_customer_id uuid,
   p_lines jsonb,
+  p_issue_date date,
+  p_valid_until date,
   p_quote_id uuid default null,
-  p_issue_date date default current_date,
-  p_valid_until date default null,
   p_subject text default null,
   p_terms text default null,
   p_notes text default null
@@ -196,7 +196,7 @@ declare
   v_actor uuid := (select auth.uid());
   v_quote_id uuid;
   v_currency char(3);
-  v_valid_until date := coalesce(p_valid_until, p_issue_date + 30);
+  v_valid_until date := p_valid_until;
   v_item jsonb;
   v_position integer := 0;
   v_description text;
@@ -219,8 +219,8 @@ begin
     raise exception 'Entreprise et client requis' using errcode = '22023';
   end if;
 
-  if p_issue_date is null or v_valid_until < p_issue_date then
-    raise exception 'Période de validité incorrecte' using errcode = '22023';
+  if p_issue_date is null or v_valid_until is null or v_valid_until < p_issue_date then
+    raise exception 'Les dates du devis sont obligatoires et la validité doit être cohérente' using errcode = '22023';
   end if;
 
   if p_lines is null or jsonb_typeof(p_lines) <> 'array'
@@ -392,9 +392,9 @@ begin
 end;
 $$;
 
-revoke all on function public.save_quote_draft(uuid, uuid, jsonb, uuid, date, date, text, text, text)
+revoke all on function public.save_quote_draft(uuid, uuid, jsonb, date, date, uuid, text, text, text)
   from public, anon;
-grant execute on function public.save_quote_draft(uuid, uuid, jsonb, uuid, date, date, text, text, text)
+grant execute on function public.save_quote_draft(uuid, uuid, jsonb, date, date, uuid, text, text, text)
   to authenticated;
 
 -- Le rôle service_role conserve ses capacités administratives Supabase.
