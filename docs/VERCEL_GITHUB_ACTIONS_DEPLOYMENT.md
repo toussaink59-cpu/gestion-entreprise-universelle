@@ -13,7 +13,7 @@
 
 Le runner n'exécute pas `npm ci`, les scripts du dépôt ou le build applicatif avec le jeton Vercel présent. Il installe la version figée du CLI sans secret, puis utilise le jeton uniquement pour la commande de déploiement. Le build applicatif est réalisé par Vercel.
 
-## Configuration manuelle requise avant activation
+## Configuration manuelle requise avant fusion et activation
 
 ### 1. Déconnecter l'intégration Git du seul projet PolyGest
 
@@ -23,7 +23,7 @@ Dans Vercel :
 2. Aller dans **Settings → Git**.
 3. Utiliser **Disconnect** pour ce projet uniquement.
 
-Ne pas désinstaller l'application GitHub Vercel de l'équipe et ne pas modifier le projet FasoShop. La déconnexion du projet PolyGest arrête les déploiements Git automatiques ; le projet et ses domaines restent en place. Les déploiements CLI restent possibles.
+Ne pas désinstaller l'application GitHub Vercel de l'équipe et ne pas modifier le projet FasoShop. Effectuer cette déconnexion **avant de fusionner cette PR**, afin que le commit de fusion ne déclenche pas un déploiement automatique. La déconnexion du projet PolyGest arrête les déploiements Git automatiques ; le projet et ses domaines restent en place. Les déploiements CLI restent possibles.
 
 **Ne pas utiliser l'Ignored Build Step pour simuler cette déconnexion** : Vercel précise que les déploiements annulés par cette étape comptent quand même dans les quotas de déploiement.
 
@@ -40,7 +40,7 @@ Ces identifiants ne sont pas des secrets.
 
 ### 3. Ajouter le jeton Vercel
 
-Créer un jeton Vercel à durée limitée, limité à l'équipe **nex-skill-group** et avec les permissions minimales disponibles. Dans GitHub, créer les environnements **preview** et **production** (Settings → Environments), puis ajouter dans chacun un secret nommé `VERCEL_TOKEN`.
+Créer un jeton Vercel à durée limitée, limité à l'équipe **nex-skill-group** et avec les permissions minimales disponibles. Dans GitHub, créer les environnements **preview** et **production** (Settings → Environments), puis ajouter dans chacun un secret nommé `VERCEL_TOKEN`. Faire cette configuration avant la fusion pour que le premier déploiement de production ne parte pas sans authentification.
 
 Ne jamais placer le jeton dans le dépôt, les variables publiques, les fichiers de configuration ou les journaux.
 
