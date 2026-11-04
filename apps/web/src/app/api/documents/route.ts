@@ -275,7 +275,7 @@ export async function PUT(request: NextRequest) {
     const { error: removeError } = await service.storage
       .from(DOCUMENT_BUCKET)
       .remove([document.storage_path]);
-    if (removeError && removeError.name !== "StorageApiError") {
+    if (removeError) {
       console.error("Private document cleanup failed:", { name: removeError.name });
       return jsonError(502, "cleanup_failed", "Le fichier temporaire n'a pas pu être nettoyé.");
     }
