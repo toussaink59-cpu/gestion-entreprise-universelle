@@ -168,3 +168,14 @@ Ordre de travail recommandé :
 5. développer la paie de base en Phase 3 avec règles locales datées et validées avant tout calcul réel.
 
 **Aucune conformité fiscale, comptable, sociale ou de paie n’est certifiée par cet audit technique.**
+
+## Addendum — état de `main` au 4 novembre 2026
+
+L’audit ci-dessus est un instantané historique, rédigé avant les derniers changements de `main`. La dernière révision relue pour le présent addendum est `bb61795f5e19fa665de18dc75491c00fbab8181d`.
+
+- Des parcours **de brouillons seulement** existent désormais pour les devis et les dépenses. Ils ne constituent pas des modules complets : aucune transmission de devis, émission de facture, validation de dépense, paiement ou mouvement de trésorerie n’est couvert.
+- Les exécutions CI, Supabase local réel et Vercel Deploy associées à cette révision sont réussies ; les contrôles locaux de l’audit actualisé ont également réussi (218 tests, lint, build, TypeScript et `npm audit`). Ces résultats ne valident pas un projet Supabase hébergé ni le fonctionnement avec des données réelles.
+- Le garde de production a été renforcé sur cette branche : les modifications de schéma/tests DB déclenchent et attendent les tests Supabase local réel ; les modifications de schéma/scripts déclenchent et attendent aussi la restauration. Les changements purement applicatifs continuent d’attendre les deux contrôles communs web et ShellCheck. La vérification réelle de ces événements interviendra sur la CI GitHub après publication de la branche.
+- Les éléments bloquants de la Phase 1 restent ouverts : configuration Supabase hébergée, décision et intégration du scanner antivirus, protection de branche à vérifier, stratégie réelle de sauvegarde/restauration et validation HTTP du déploiement.
+
+En conséquence, la Phase 1 reste **non clôturée**. Les brouillons métier ne doivent pas être présentés comme une validation de la Phase 2 complète ou comme une aptitude à traiter des opérations réelles.

@@ -72,17 +72,6 @@ function normalizeDecimal(
   return value;
 }
 
-function optionalTextValue(
-  value: unknown,
-  maxLength: number,
-): string | null | undefined {
-  if (value === null || value === undefined) return null;
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  if (trimmed.length > maxLength) return undefined;
-  return trimmed || null;
-}
-
 function parseLines(raw: string | null): ParsedQuoteDraftLine[] | null {
   if (!raw || raw.length > 150_000) return null;
 
