@@ -47,7 +47,7 @@ async function saveDraft(
   return asUser(t.db, actor, () =>
     q<{ id: string }>(
       `select public.save_quote_draft(
-        $1, $2, $3::jsonb, $4, current_date, current_date + 30,
+        $1, $2, $3::jsonb, current_date, current_date + 30, $4,
         $5, $6, $7
       ) as id`,
       [
@@ -250,7 +250,7 @@ describe("Devis brouillons — permissions et isolation", () => {
     await expect(
       asUser(t.db, "carol", () =>
         q(`select public.save_quote_draft(
-          $1, $2, $3::jsonb, $4, current_date, current_date + 30, null, null, null
+          $1, $2, $3::jsonb, current_date, current_date + 30, $4, null, null, null
         )`, [t.companyA, customerId, JSON.stringify(draftLines), quoteId]),
       ),
     ).rejects.toThrow(DENIED);
