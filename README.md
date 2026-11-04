@@ -20,7 +20,7 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 - aucune limite fixe de cinq entreprises par propriétaire dans le MVP ; les quotas éventuels seront définis dans les futures formules d’abonnement ;
 - des tests automatisés d’isolation entre entreprises, de permissions par rôle, de révocation et d’audit, exécutés sur les migrations ;
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
-- une fondation de stockage documentaire privé en cours d'intégration : bucket privé, métadonnées isolées, contrôles hérités du module, dépôt direct signé et liens de téléchargement de 120 secondes ; les fichiers restent bloqués tant que l'analyse antivirus n'est pas branchée ;
+- une fondation de stockage documentaire privé en cours d'intégration : bucket privé, métadonnées isolées, contrôles hérités du module, dépôt direct signé et liens de téléchargement de 120 secondes ; le dépôt est désactivé par défaut (`DOCUMENT_SCANNER_ENABLED=false`) tant que l'analyse antivirus n'est pas branchée ;
 - une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit de toutes les dépendances (runtime et développement), ShellCheck, lint SQL et tests sur une pile Supabase locale réelle.
 
 **Limites actuelles :** les modules devis, facturation, paiements, dépenses, trésorerie, budgets, stocks et paie n’existent pas encore. Les migrations n’ont pas encore été validées sur le projet Supabase hébergé, la matrice des rôles n’est pas validée par le porteur du projet, et l’hébergement, la région et la politique de sauvegarde ne sont pas décidés. Les scripts de sauvegarde ne remplacent pas un dispositif de sauvegarde opérationnel pour la production.
