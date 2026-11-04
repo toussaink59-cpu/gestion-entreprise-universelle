@@ -2,6 +2,7 @@
 
 **Statut :** fondation technique implémentée en branche de fonctionnalité ; intégration antivirus et validation de l'environnement hébergé encore requises.  
 **Référence :** cahier des charges v0.1, exigences FR-DOC-01 et SEC-07.  
+**Édition :** 4 novembre 2026 — TTL de téléchargement approuvé : 120 secondes.  
 **Politique approuvée :** 4 novembre 2026.
 
 ## 1. Politique produit approuvée
@@ -70,7 +71,7 @@ Les états possibles sont :
 
 Seule la clé serveur `SUPABASE_SERVICE_ROLE_KEY` peut appeler `complete_document_upload` et `complete_document_scan`. Elle n'est jamais importée dans un composant navigateur. Le navigateur peut effectuer un contrôle préliminaire de signature pour améliorer l'expérience, mais ce contrôle n'est pas une preuve de sécurité.
 
-**Limite volontaire actuelle : aucun moteur antivirus / scanner n'est encore branché.** Par conséquent, les documents restent `pending_scan` et aucun lien de téléchargement ne leur est délivré. La RPC de finalisation exige le type réellement détecté, la taille réelle et l'empreinte SHA-256 ; elle est réservée au service serveur. Il ne faut pas marquer un fichier comme propre sur la seule base de son nom, de son extension, de son en-tête HTTP ou du résultat du navigateur.
+**Limite volontaire actuelle : aucun moteur antivirus / scanner n'est encore branché.** La variable serveur `DOCUMENT_SCANNER_ENABLED` vaut `false` par défaut ; la réservation et le dépôt de nouveaux fichiers sont donc refusés côté interface et côté API. Elle ne doit passer à `true` qu'après installation et test du scanner. Les documents existants restent `pending_scan` et aucun lien de téléchargement ne leur est délivré. La RPC de finalisation exige le type réellement détecté, la taille réelle et l'empreinte SHA-256 ; elle est réservée au service serveur. Il ne faut pas marquer un fichier comme propre sur la seule base de son nom, de son extension, de son en-tête HTTP ou du résultat du navigateur.
 
 Avant ouverture du dépôt documentaire à l'usage réel, un moteur de scan doit :
 - récupérer le fichier dans un environnement isolé ;
