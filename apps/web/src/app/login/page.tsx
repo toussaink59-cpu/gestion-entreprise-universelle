@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signIn } from "@/app/auth/actions";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthSubmitButton } from "@/components/auth/auth-submit-button";
 import { getSafeRedirectPath } from "@/lib/security/safe-redirect";
 
 export const instant = false;
@@ -15,9 +16,6 @@ type LoginPageProps = {
 
 const INPUT_CLASS =
   "mt-2 block min-h-12 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2.5 text-base text-[var(--pg-text)] outline-none transition-colors placeholder:text-[var(--pg-text-muted)] focus-visible:border-[var(--pg-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
-
-const BUTTON_CLASS =
-  "inline-flex min-h-12 w-full items-center justify-center rounded-md bg-[var(--pg-accent)] px-5 py-3 text-base font-semibold text-white transition-colors hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
 
 function getLoginError(code: string | undefined): string | null {
   switch (code) {
@@ -123,9 +121,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           />
         </div>
 
-        <button type="submit" className={BUTTON_CLASS}>
-          Se connecter
-        </button>
+        <AuthSubmitButton label="Se connecter" />
       </form>
     </AuthShell>
   );
