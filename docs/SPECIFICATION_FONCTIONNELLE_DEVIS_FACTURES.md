@@ -2,7 +2,7 @@
 
 **Produit :** PolyGest  
 **Périmètre :** première version du module commercial — devis, factures intégrales et facturation fractionnée  
-**Statut :** proposition fonctionnelle à valider avant toute migration SQL  
+**Statut :** matrice des rôles validée le 4 novembre 2026 ; règles fiscales, profil émetteur, numérotation et correction encore à valider  
 **Marché initial :** Burkina Faso, avec paramètres conçus pour ne pas figer les règles d'un seul pays
 
 ## 1. Objectif
@@ -12,6 +12,8 @@ Permettre à chaque entreprise de créer des devis, de les transmettre à ses cl
 Le module doit préserver l'historique des documents émis, empêcher la facturation supérieure au devis accepté, isoler les données de chaque entreprise et préparer l'intégration ultérieure des encaissements.
 
 ## 2. Périmètre de la V1
+
+**Découpage de livraison :** la première tranche technique implémente exclusivement les devis brouillons (création, consultation, modification, lignes et calculs hors taxes), leur isolation multi-entreprises et les permissions validées. La transmission, la numérotation, l'acceptation, les snapshots et toute émission fiscale seront livrées séparément après validation de leurs règles. Les taxes ne sont pas calculées dans cette première tranche.
 
 ### Inclus
 
