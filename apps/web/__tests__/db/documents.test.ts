@@ -212,7 +212,7 @@ describe("Stockage privé des documents — accès aux métadonnées et objets",
     const id = await createPendingDocument();
     await expect(
       asUser(t.db, "alice", () =>
-        q("select public.complete_document_scan($1, true, 'test-scanner')", [id]),
+        q("select public.complete_document_scan($1, true, 'application/pdf', 128, repeat('a', 64), 'test-scanner')", [id]),
       ),
     ).rejects.toThrow(/permission denied/i);
 
@@ -262,7 +262,7 @@ describe("Stockage privé des documents — accès aux métadonnées et objets",
   it("un document rejeté reste inaccessible même à son propriétaire", async () => {
     const id = await createPendingDocument();
     await asServiceRole(t.db, () =>
-      q("select public.complete_document_scan($1, false, 'test-scanner')", [id]),
+      q("select public.complete_document_scan($1, false, null, null, null, 'test-scanner')", [id]),
     );
 
     const object = await asUser(t.db, "alice", () =>
