@@ -249,7 +249,7 @@ revoke all on function public.create_document_upload(uuid, text, text, uuid, tex
 grant execute on function public.create_document_upload(uuid, text, text, uuid, text, text, bigint)
   to authenticated;
 
--- Finalisation réservée au serveur après que le binaire a été écrit et vérifié.
+-- Finalisation réservée au serveur après réception du binaire dans le bucket privé.
 create or replace function public.complete_document_upload(p_document_id uuid)
 returns void
 language plpgsql
