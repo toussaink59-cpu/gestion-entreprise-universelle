@@ -14,12 +14,12 @@ create table if not exists auth.users (
 create or replace function auth.role()
 returns text
 language sql stable
-as $
+as $$
   select coalesce(
     nullif(current_setting('request.jwt.claim.role', true), ''),
     current_user
   );
-$;
+$$;
 
 -- Comme Supabase : l'identité de l'appelant vient du jeton (JWT) de la requête.
 create or replace function auth.uid()
