@@ -68,7 +68,7 @@ Le destinataire doit déjà disposer d'un compte actif associé à l'adresse inv
 
 - La matrice rôles/permissions est un point de départ **à valider** avec le porteur du projet.
 - La configuration Supabase hébergée (Auth, SMTP/fournisseur e-mail, URLs de redirection, secrets, RLS, Storage et migrations) n'a pas encore été vérifiée.
-- Le socle de stockage privé est en cours d'intégration : bucket local, métadonnées, permissions héritées et liens signés sont définis ; le scanner antivirus/quarantaine, le nettoyage des sessions abandonnées et la validation du bucket sur Supabase hébergé restent à achever.
+- Le socle de stockage privé est livré dans `main` (PR #65) : bucket local, métadonnées, permissions héritées et liens signés de 120 secondes sont en place. Restent à achever : scanner antivirus/quarantaine, nettoyage des sessions abandonnées et validation du bucket sur Supabase hébergé.
 - L'accès exceptionnel de l'équipe plateforme aux données clients reste à concevoir (§4 du cahier des charges).
 - Les objectifs RPO/RTO, la rétention et le stockage hors site des sauvegardes restent à définir.
 

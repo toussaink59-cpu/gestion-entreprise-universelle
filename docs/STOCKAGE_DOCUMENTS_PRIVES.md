@@ -1,6 +1,6 @@
 # Stockage privé des documents d'entreprise
 
-**Statut :** fondation technique implémentée en branche de fonctionnalité ; intégration antivirus et validation de l'environnement hébergé encore requises.  
+**Statut :** fondation technique fusionnée dans `main` via la PR #65 le 4 novembre 2026 ; intégration antivirus et validation de l'environnement hébergé encore requises.  
 **Référence :** cahier des charges v0.1, exigences FR-DOC-01 et SEC-07.  
 **Édition :** 4 novembre 2026 — TTL de téléchargement approuvé : 120 secondes.  
 **Politique approuvée :** 4 novembre 2026.
@@ -95,6 +95,9 @@ Le panneau de pièces jointes est intégré aux fiches clients et fournisseurs. 
 - Aucune migration ni aucun stockage de production n'a été modifié.
 
 ## 6. Tests
+
+La PR #65 a été fusionnée dans `main` (commit `43611ad73a032a99186818c7a8cbaa33188f474b`). Les contrôles exécutés avant fusion ont réussi : CI web (run `41819650036`, 14 fichiers / 178 tests, audit des dépendances à zéro vulnérabilité), Supabase réel avec Storage (run `41819650061`, 5 fichiers / 92 tests et lint `plpgsql_check`) et restauration (run `41819650069`). La prévisualisation Vercel de la PR n'a pas été déployée : le quota quotidien gratuit de déploiements était atteint ; aucune validation d'une URL de prévisualisation ou d'un déploiement hébergé n'est revendiquée.
+
 
 La suite couvre :
 - signatures PDF/JPEG/PNG/WebP, formats non reconnus, limite 20 Mio et nettoyage du nom ;
