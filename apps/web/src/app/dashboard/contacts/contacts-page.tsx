@@ -320,7 +320,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
                         <td className="px-5 py-4"><div className="text-slate-700">{contact.email || "—"}</div><div className="mt-1 text-xs text-slate-500">{contact.phone || "—"}</div></td>
                         <td className="px-5 py-4 text-slate-700">{contact.city || "—"}</td>
                         <td className="px-5 py-4"><span className={contact.status === "active" ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"}>{contact.status === "active" ? "Actif" : "Archivé"}</span></td>
-                        <td className="px-5 py-4"><DocumentAttachments companyId={selectedCompanyId} moduleCode={kind === "customer" ? "customers" : "suppliers"} entityType={kind} entityId={contact.id} canUpload={canWrite} /></td>
+                        <td className="px-5 py-4"><DocumentAttachments companyId={selectedCompanyId} moduleCode={kind === "customer" ? "customers" : "suppliers"} entityType={kind} entityId={contact.id} canUpload={canWrite && process.env.DOCUMENT_SCANNER_ENABLED === "true"} scannerEnabled={process.env.DOCUMENT_SCANNER_ENABLED === "true"} /></td>
                         <td className="px-5 py-4">
                           <div className="flex min-w-40 flex-col items-start gap-3">
                             {canWrite && <details className="w-full"><summary className="cursor-pointer font-semibold text-blue-700 hover:underline">Modifier</summary><form action={updateContact} className="mt-3 min-w-72 space-y-4 rounded-lg border border-slate-200 bg-white p-4">
