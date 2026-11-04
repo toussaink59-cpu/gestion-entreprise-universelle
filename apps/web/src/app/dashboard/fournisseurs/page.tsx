@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ContactsPage } from "@/app/dashboard/contacts/contacts-page";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const instant = false;
 
@@ -16,12 +17,17 @@ type FournisseursPageProps = {
 function FournisseursPageFallback() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <PageHeader
+        eyebrow="PolyGest · Répertoires"
+        title="Fournisseurs"
+        description="Chargement du répertoire fournisseurs…"
+      />
       <div
         role="status"
         aria-live="polite"
         className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600"
       >
-        Chargement du répertoire fournisseurs…
+        Chargement en cours…
       </div>
     </main>
   );
