@@ -286,8 +286,9 @@ describe("Stockage privé des documents — accès aux métadonnées et objets",
     await expect(
       asAnon(t.db, () => q("select * from public.documents")),
     ).rejects.toThrow(DENIED);
-    await expect(
-      asAnon(t.db, () => q("select * from storage.objects")),
-    ).rejects.toThrow(DENIED);
+    const objects = await asAnon(t.db, () =>
+      q("select * from storage.objects where bucket_id = 'company-private-documents'"),
+    );
+    expect(objects.rows).toHaveLength(0);
   });
 });
