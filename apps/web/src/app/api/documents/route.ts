@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -140,47 +139,41 @@ export async function POST(request: NextRequest) {
     return jsonError(401, "unauthorized", "Connecte-toi pour déposer un document.");
   }
 
-  // La permission est évaluée par PostgreSQL avec le JWT de l'utilisateur.
-  const { data: allowed, error: permissionError } = await supabase.rpc("can_upload_document", {
+  const originalName = sanitizeDocumentFilename(fileName);
+
+  // La fonction SQL refait le contrôle des droits et du rattachement à la fiche,
+  // puis crée les métadonnées dans la même transaction et sous le JWT courant.
+  const { data: reservation, error: reservationError } = await supabase.rpc("create_document_upload", {
     p_company_id: companyId,
     p_module_code: moduleCode,
     p_entity_type: entityType,
     p_entity_id: entityId,
+    p_original_name: originalName,
+    p_mime_type: mimeType,
+    p_byte_size: byteSize,
   });
 
-  if (permissionError || allowed !== true) {
-    return jsonError(403, "permission_denied", "Tu ne peux pas joindre un fichier à cette fiche.");
+  const reservationRow = Array.isArray(reservation) ? reservation[0] : reservation;
+  if (reservationError || !reservationRow?.document_id || !reservationRow?.storage_path) {
+    console.error("Document reservation failed:", { code: reservationError?.code });
+    const status = reservationError?.code === "42501" ? 403 : 400;
+    return jsonError(
+      status,
+      status === 403 ? "permission_denied" : "document_create_failed",
+      status === 403
+        ? "Tu ne peux pas joindre un fichier à cette fiche."
+        : "La session de dépôt n'a pas pu être réservée.",
+    );
   }
+
+  const documentId = String(reservationRow.document_id);
+  const storagePath = String(reservationRow.storage_path);
 
   let service;
   try {
     service = createServiceClient();
   } catch {
     return jsonError(503, "storage_not_configured", "Le stockage privé n'est pas encore configuré sur cet environnement.");
-  }
-
-  const documentId = randomUUID();
-  const storagePath = `${companyId}/${documentId}`;
-  const originalName = sanitizeDocumentFilename(fileName);
-
-  const { error: insertError } = await service.from("documents").insert({
-    id: documentId,
-    company_id: companyId,
-    module_code: moduleCode,
-    entity_type: entityType,
-    entity_id: entityId,
-    storage_path: storagePath,
-    original_name: originalName,
-    mime_type: mimeType,
-    byte_size: byteSize,
-    sha256: null,
-    scan_status: "pending_upload",
-    created_by: user.id,
-  });
-
-  if (insertError) {
-    console.error("Document metadata insert failed:", { code: insertError.code });
-    return jsonError(500, "document_create_failed", "Le document n'a pas pu être réservé.");
   }
 
   const { data: signedUpload, error: signedUploadError } = await service.storage
