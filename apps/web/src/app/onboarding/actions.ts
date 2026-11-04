@@ -89,10 +89,6 @@ async function handleCompanyCreation(
   if (error) {
     console.error("create_company failed:", error.code);
 
-    if (error.code === "54000") {
-      redirect(`${returnPath}?error=limit-reached`);
-    }
-
     if (error.code === "22023") {
       redirect(`${returnPath}?error=invalid-company-data`);
     }
