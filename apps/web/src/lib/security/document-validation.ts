@@ -65,7 +65,7 @@ export function sanitizeDocumentFilename(input: string): string {
   const normalized = input
     .normalize("NFC")
     .replace(/[\\/]/g, "_")
-    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
