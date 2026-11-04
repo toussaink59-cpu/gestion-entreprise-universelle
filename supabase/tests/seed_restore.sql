@@ -12,11 +12,21 @@ select public.create_company('Entreprise A (test de restauration)');
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-00000000000b', false);
 select public.create_company('Entreprise B (test de restauration)');
 
--- Carol rejoint l'entreprise A comme responsable finance (action de l'administratrice Alice).
+-- Carol rejoint l'entreprise A via le parcours invitation-confirmation-activation.
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-00000000000a', false);
-insert into public.company_memberships (company_id, user_id, role_code)
-select id, '00000000-0000-4000-8000-00000000000c', 'finance'
-from public.companies where legal_name like 'Entreprise A%';
+select public.create_company_member_invitation(
+  (select id from public.companies where legal_name like 'Entreprise A%'),
+  'carol@example.test',
+  'finance',
+  repeat('c', 64)
+);
+select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-00000000000c', false);
+select public.confirm_company_member_invitation(repeat('c', 64));
+select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-00000000000a', false);
+update public.company_memberships
+set status = 'active'
+where company_id = (select id from public.companies where legal_name like 'Entreprise A%')
+  and user_id = '00000000-0000-4000-8000-00000000000c';
 
 select set_config('request.jwt.claim.sub', '', false);
 
