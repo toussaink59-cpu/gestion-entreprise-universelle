@@ -11,6 +11,7 @@ const navigation = [
   { href: "/dashboard/clients", label: "Clients" },
   { href: "/dashboard/fournisseurs", label: "Fournisseurs" },
   { href: "/dashboard/devis", label: "Devis" },
+  { href: "/dashboard/depenses", label: "Dépenses" },
   { href: "/dashboard/membres", label: "Membres" },
 ];
 
