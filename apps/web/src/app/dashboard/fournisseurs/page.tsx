@@ -25,7 +25,7 @@ function FournisseursPageFallback() {
       <div
         role="status"
         aria-live="polite"
-        className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600"
+        className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 text-sm text-[var(--pg-text-muted)]"
       >
         Chargement en cours…
       </div>
