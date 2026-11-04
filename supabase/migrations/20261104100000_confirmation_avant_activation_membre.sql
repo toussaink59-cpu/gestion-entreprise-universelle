@@ -28,6 +28,13 @@ begin
     return new;
   end if;
 
+  if new.role_code in ('owner', 'company_admin')
+     and not app.has_role(new.company_id, 'owner')
+  then
+    raise exception 'seul le propriétaire peut attribuer ce rôle'
+      using errcode = '42501';
+  end if;
+
   if not app.has_permission(new.company_id, 'members', 'create') then
     raise exception 'permission denied: permission members:create requise'
       using errcode = '42501';
