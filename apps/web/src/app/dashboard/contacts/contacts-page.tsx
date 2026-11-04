@@ -166,7 +166,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     .eq("status", "active");
 
   if (membershipError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.</p><p className="mt-4"><a href="/dashboard" className="text-[var(--pg-accent)] hover:underline">Retour au tableau de bord</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.</p><p className="mt-4"><a href="/dashboard" className="text-[var(--pg-accent)] hover:underline">Retour au tableau de bord</a></p></main>;
   }
 
   const membershipRows = memberships ?? [];
@@ -180,7 +180,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     .order("legal_name");
 
   if (companiesError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Impossible de charger les entreprises accessibles.</p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">Impossible de charger les entreprises accessibles.</p></main>;
   }
   const companies = (companyData ?? []) as CompanyRow[];
   if (companies.length === 0) redirect("/onboarding");
@@ -218,7 +218,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
   const selectedCompany = companies.find((company) => company.id === selectedCompanyId);
   const membership = membershipRows.find((row) => row.company_id === selectedCompanyId);
   if (!selectedCompany || !membership) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-[var(--pg-accent)] hover:underline">Choisir une autre entreprise</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-[var(--pg-accent)] hover:underline">Choisir une autre entreprise</a></p></main>;
   }
 
   const roleCode = String(membership.role_code);
@@ -309,7 +309,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
             </div>
 
             {contactsError ? (
-              <p role="alert" className="m-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">{contactsError}</p>
+              <p role="alert" className="m-5 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">{contactsError}</p>
             ) : contacts.length === 0 ? (
               <div className="p-5 sm:p-6"><EmptyState title="Aucune fiche à afficher" description="Modifie les filtres ou ajoute une première fiche si ton rôle le permet." /></div>
             ) : (
