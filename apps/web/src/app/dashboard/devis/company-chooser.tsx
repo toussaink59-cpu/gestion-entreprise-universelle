@@ -4,8 +4,10 @@ import type { QuoteCompany } from "./workspace";
 
 export function QuoteCompanyChooser({
   companies,
+  destinationPath = "/dashboard/devis",
 }: {
   companies: QuoteCompany[];
+  destinationPath?: string;
 }) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
@@ -23,7 +25,7 @@ export function QuoteCompanyChooser({
           {companies.map((company) => (
             <Link
               key={company.id}
-              href={"/dashboard/devis?company=" + encodeURIComponent(company.id)}
+              href={destinationPath + "?company=" + encodeURIComponent(company.id)}
               className="block rounded-md px-3 py-4 hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
             >
               <span className="block font-semibold text-[var(--pg-text)]">
@@ -33,7 +35,7 @@ export function QuoteCompanyChooser({
                 {company.legal_name}
               </span>
               <span className="mt-2 block text-sm font-medium text-[var(--pg-accent)]">
-                Ouvrir les devis
+                Ouvrir
               </span>
             </Link>
           ))}
