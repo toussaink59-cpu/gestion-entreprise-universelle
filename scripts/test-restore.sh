@@ -38,7 +38,7 @@ trap cleanup EXIT
 
 run_sql() { psql "$1" -v ON_ERROR_STOP=1 -q -tA "${@:2}"; }
 
-echo "1/5 Création de la base source (migrations + données fictives)"
+echo "1/6 Création de la base source (migrations + données fictives)"
 run_sql "$ADMIN_URL" -c "create database ${SRC_DB}" >/dev/null
 run_sql "$SRC_URL" -f "$ROOT/supabase/tests/auth_shim.sql" >/dev/null
 for f in "$ROOT"/supabase/migrations/*.sql; do
@@ -46,7 +46,7 @@ for f in "$ROOT"/supabase/migrations/*.sql; do
 done
 run_sql "$SRC_URL" -f "$ROOT/supabase/tests/seed_restore.sql" >/dev/null
 
-echo "2/5 Sauvegarde (scripts/backup-db.sh)"
+echo "2/6 Sauvegarde (scripts/backup-db.sh)"
 START=$SECONDS
 (cd "$WORKDIR" && DATABASE_URL="$SRC_URL" "$ROOT/scripts/backup-db.sh")
 BACKUP_FILE="$(find "$WORKDIR/backups" -maxdepth 1 -type f -name '*.sql' -print -quit)"
