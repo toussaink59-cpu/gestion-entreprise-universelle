@@ -1,4 +1,3 @@
-
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   asUserId,
@@ -33,8 +32,8 @@ async function createUser() {
     "insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)",
     [
       id,
-      `quota-${id}@example.test`,
-      JSON.stringify({ full_name: "Utilisateur quota" }),
+      `company-owner-${id}@example.test`,
+      JSON.stringify({ full_name: "Propriétaire entreprise" }),
     ],
   );
 
@@ -56,17 +55,15 @@ async function createCompany(
   });
 }
 
-describe("Anti-abus : limite de création des entreprises", () => {
-  it("autorise cinq entreprises et refuse la sixième", async () => {
+describe("Création d'entreprises — périmètre MVP", () => {
+  it("autorise plus de cinq entreprises pour un même propriétaire", async () => {
     const userId = await createUser();
 
-    for (let i = 1; i <= 5; i++) {
-      await createCompany(userId, `Entreprise quota ${i}`);
+    for (let i = 1; i <= 8; i++) {
+      await expect(
+        createCompany(userId, `Entreprise MVP ${i}`),
+      ).resolves.toBeTruthy();
     }
-
-    await expect(
-      createCompany(userId, "Entreprise quota 6"),
-    ).rejects.toThrow(/limite du nombre/);
 
     const result = await q<{ total: string }>(
       `select count(*)::text as total
@@ -77,31 +74,28 @@ describe("Anti-abus : limite de création des entreprises", () => {
       [userId],
     );
 
-    expect(result.rows[0].total).toBe("5");
+    expect(result.rows[0].total).toBe("8");
   });
 
-  it("applique le plafond indépendamment à chaque utilisateur", async () => {
+  it("n'impose pas de plafond global partagé entre utilisateurs", async () => {
     const firstUser = await createUser();
-
-    for (let i = 1; i <= 5; i++) {
-      await createCompany(
-        firstUser,
-        `Entreprise utilisateur 1 - ${i}`,
-      );
-    }
-
-    await expect(
-      createCompany(firstUser, "Entreprise utilisateur 1 - 6"),
-    ).rejects.toThrow(/limite du nombre/);
-
     const secondUser = await createUser();
 
-    const companyId = await createCompany(
-      secondUser,
-      "Entreprise utilisateur 2",
+    for (let i = 1; i <= 6; i++) {
+      await createCompany(firstUser, `Entreprise propriétaire 1 - ${i}`);
+      await createCompany(secondUser, `Entreprise propriétaire 2 - ${i}`);
+    }
+
+    const result = await q<{ total: string }>(
+      `select count(*)::text as total
+       from public.company_memberships
+       where user_id = any($1::uuid[])
+         and role_code = 'owner'
+         and status = 'active'`,
+      [[firstUser, secondUser]],
     );
 
-    expect(companyId).toBeTruthy();
+    expect(result.rows[0].total).toBe("12");
   });
 
   it("refuse une raison sociale de moins de deux caractères", async () => {

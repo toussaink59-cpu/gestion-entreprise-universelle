@@ -100,7 +100,7 @@ Ces modules sont développés après le MVP, selon les besoins confirmés et ave
 - Intégrations bancaires et Mobile Money, uniquement après validation des API, contrats, exigences KYC et coûts.
 - Multi-devise avancée et extension multi-pays.
 - Application mobile native, mode hors ligne et API partenaires.
-- Abonnements, limites par formule, facturation du service et mécanismes anti-abus.
+- Abonnements, limites configurables par formule, facturation du service et mécanismes anti-abus. Aucun plafond fixe arbitraire de création d’entreprise n’est appliqué au MVP ; les quotas éventuels seront définis avec les offres et appliqués selon une politique versionnée.
 - Observabilité, support, tests de charge, pilote et procédures d’exploitation.
 
 Aucune intégration ne doit être présentée comme disponible avant vérification de son fonctionnement réel et des conditions du prestataire.
