@@ -91,14 +91,14 @@ Le taux normal de référence documenté est 18 %. Le taux réduit de 10 % ne s'
 
 La base actuelle possède les rôles `owner`, `company_admin`, `finance`, `sales_purchasing`, `auditor`, `hr_payroll`, `operations` et `employee`. Elle possède déjà les actions `read`, `create`, `update`, `validate`, `cancel` et `export`, mais le module `quotes` n'existe pas encore dans le référentiel des permissions.
 
-Matrice initiale proposée (à faire valider par le porteur du projet) :
+**Matrice validée par le porteur du projet le 4 novembre 2026 :**
 
 | Rôle | Devis | Factures |
 |---|---|---|
 | owner | Tous droits | Tous droits |
-| company_admin | Tous droits | Tous droits |
-| finance | Lecture et export | Lecture, création, modification des brouillons, émission et export ; ouverture d'un dossier de correction selon habilitation |
-| sales_purchasing | Lecture, création, modification des brouillons, transmission et enregistrement de la réponse client | Lecture et création/modification des brouillons ; pas d'émission ni d'annulation en V1 |
+| company_admin | Tous droits, hors paie selon le modèle global | Tous droits, hors paie selon le modèle global |
+| finance | Lecture et export | Lecture, création et modification des brouillons, émission et export ; toute correction d'une facture émise suit une procédure distincte |
+| sales_purchasing | Lecture, création, modification des brouillons, transmission et enregistrement de la réponse client | Lecture seule ; aucune création, modification, émission ou annulation |
 | auditor | Lecture et export | Lecture et export |
 | hr_payroll, operations, employee | Aucun accès par défaut | Aucun accès par défaut |
 
@@ -322,12 +322,12 @@ Les éléments suivants ne sont pas déterminés par les migrations actuelles et
 1. **Réglementation et fiscalité :** mentions obligatoires des devis/factures, identifiants fiscaux, taxes applicables, exonérations, arrondis, délais et règles d'annulation. Faire vérifier par un professionnel compétent au Burkina Faso.
 2. **Profil émetteur :** adresse, téléphone, e-mail, identifiant fiscal, logo et conditions de règlement requis sur les documents.
 3. **Numérotation :** format souhaité (préfixe, année, compteur) et éventuelles obligations de séquence.
-4. **Permissions :** valider la matrice proposée, particulièrement le droit d'émission pour finance et la transmission des devis pour sales_purchasing.
+4. **Permissions :** matrice validée le 4 novembre 2026. Les tests et migrations doivent la faire respecter, notamment l'interdiction de création/modification de factures pour `sales_purchasing`.
 5. **Correction :** confirmer la procédure légale d'avoir, facture rectificative ou correction SECeF/SFE pour une facture émise.
 6. **Mode de transmission :** manuel en V1 ou intégration d'un fournisseur d'e-mail.
 7. **Devise et précision :** confirmer les paramètres de devise et d'arrondi par entreprise.
 
-Aucune migration SQL de production ne doit être préparée comme définitive tant que ces décisions ne sont pas validées. La présente spécification constitue le contrat fonctionnel proposé pour la conception technique.
+La matrice des rôles est validée. Les autres décisions réglementaires, profil émetteur, numérotation et correction restent ouvertes. Aucune émission fiscale ne doit être activée tant que ces points ne sont pas validés. La présente spécification constitue le contrat fonctionnel de référence pour la conception technique, sous réserve des validations réglementaires indiquées.
 
 
 ### Référentiel réglementaire burkinabè
