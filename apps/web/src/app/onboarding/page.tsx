@@ -1,7 +1,9 @@
-
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui/page-header";
+import { CompanyCreationForm } from "@/components/companies/company-creation-form";
 import { createCompany } from "@/app/onboarding/actions";
+import { createClient } from "@/lib/supabase/server";
 import { decideOnboardingAccess } from "@/lib/security/onboarding-access";
 
 export const instant = false;
@@ -10,6 +12,14 @@ type OnboardingPageProps = {
   searchParams: Promise<{
     error?: string;
   }>;
+};
+
+const ERROR_MESSAGES: Record<string, string> = {
+  "missing-name": "La raison sociale est obligatoire.",
+  "invalid-name": "La raison sociale doit contenir entre 2 et 200 caractères.",
+  "invalid-trade-name": "Le nom commercial doit contenir entre 2 et 200 caractères.",
+  "invalid-company-data": "Les informations de l’entreprise sont invalides. Vérifie les noms saisis.",
+  "creation-failed": "La création a échoué. Vérifie les informations et réessaie.",
 };
 
 export default async function OnboardingPage({
@@ -22,9 +32,7 @@ export default async function OnboardingPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: memberships, error: membershipError } = await supabase
     .from("company_memberships")
@@ -40,117 +48,77 @@ export default async function OnboardingPage({
 
   if (accessDecision === "error") {
     return (
-      <main style={{ maxWidth: 520, margin: "4rem auto", padding: "1.5rem" }}>
-        <h1>Vérification des accès impossible</h1>
-
-        <p role="alert">
-          Nous ne pouvons pas vérifier les entreprises associées à ce compte.
-          Pour éviter une création en double, aucun formulaire n&apos;est affiché.
+      <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        <PageHeader
+          eyebrow="PolyGest · Configuration"
+          title="Configurer ton entreprise"
+          description="Une vérification de sécurité est nécessaire avant de créer ton premier espace."
+        />
+        <p
+          role="alert"
+          className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm leading-6 text-[#963F3F]"
+        >
+          Impossible de vérifier les entreprises associées à ce compte. Pour
+          éviter une création en double, le formulaire reste temporairement
+          indisponible.
         </p>
-
-        <p>
-          <a href="/onboarding">Réessayer</a>
+        <p className="mt-5 text-sm">
+          <Link
+            href="/onboarding"
+            className="font-semibold text-[var(--pg-accent)] underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--pg-focus)]"
+          >
+            Réessayer
+          </Link>
         </p>
       </main>
     );
   }
 
-  if (accessDecision === "dashboard") {
-    redirect("/dashboard");
-  }
+  if (accessDecision === "dashboard") redirect("/dashboard");
+
+  const errorMessage =
+    params.error && Object.prototype.hasOwnProperty.call(ERROR_MESSAGES, params.error)
+      ? ERROR_MESSAGES[params.error]
+      : null;
 
   return (
-    <main style={{ maxWidth: 520, margin: "4rem auto", padding: "1.5rem" }}>
-      <h1>Configurer ton entreprise</h1>
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <PageHeader
+        eyebrow="PolyGest · Bienvenue"
+        title="Créer ton espace d’entreprise"
+        description="Renseigne les informations de ton entreprise pour commencer à organiser ton activité dans PolyGest."
+      />
 
-      <p>
-        Renseigne les informations de ton entreprise pour créer ton espace de
-        gestion.
-      </p>
-
-      {params.error === "missing-name" && (
-        <p role="alert">
-          La raison sociale est obligatoire.
-        </p>
-      )}
-
-      {params.error === "invalid-name" && (
-        <p role="alert">
-          La raison sociale doit contenir entre 2 et 200 caractères.
-        </p>
-      )}
-
-      {params.error === "invalid-trade-name" && (
-        <p role="alert">
-          Le nom commercial doit contenir entre 2 et 200 caractères.
-        </p>
-      )}
-
-      {params.error === "invalid-company-data" && (
-  <p role="alert">
-    Les informations de l&apos;entreprise sont invalides. Vérifie la raison
-    sociale et le nom commercial.
-  </p>
-)}
-
-      {params.error === "limit-reached" && (
-        <p role="alert">
-          Tu as atteint la limite de cinq entreprises dont tu peux être
-          propriétaire.
-        </p>
-      )}
-
-      {params.error === "creation-failed" && (
-        <p role="alert">
-          La création a échoué. Vérifie les données et les droits en base, puis
-          réessaie.
-        </p>
-      )}
-
-      <form action={createCompany}>
-        <label style={{ display: "block", marginTop: "1rem" }}>
-          Raison sociale
-          <input
-            name="legal_name"
-            type="text"
-            required
-            minLength={2}
-            maxLength={200}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "0.7rem",
-            }}
-          />
-        </label>
-
-        <label style={{ display: "block", marginTop: "1rem" }}>
-          Nom commercial
-          <input
-            name="trade_name"
-            type="text"
-            minLength={2}
-            maxLength={200}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: "0.7rem",
-            }}
-          />
-        </label>
-
-        <p>
-          Pays : Burkina Faso · Devise : XOF · Fuseau horaire :
-          Africa/Ouagadougou
-        </p>
-
-        <button
-          type="submit"
-          style={{ marginTop: "1rem", padding: "0.7rem 1rem" }}
+      {errorMessage ? (
+        <p
+          role="alert"
+          aria-live="assertive"
+          className="mb-6 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm leading-6 text-[#963F3F]"
         >
-          Créer mon entreprise
-        </button>
-      </form>
+          {errorMessage}
+        </p>
+      ) : null}
+
+      <section className="border-y border-[var(--pg-border)] py-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">
+            Informations de l’entreprise
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-[var(--pg-text-muted)]">
+            La raison sociale est obligatoire. Le nom commercial peut être
+            renseigné plus tard.
+          </p>
+        </div>
+        <CompanyCreationForm
+          action={createCompany}
+          submitLabel="Créer mon espace"
+        />
+      </section>
+
+      <p className="mt-5 text-sm leading-6 text-[var(--pg-text-muted)]">
+        Le compte qui crée cet espace reçoit automatiquement le rôle de
+        propriétaire. Les accès des autres membres pourront être gérés ensuite.
+      </p>
     </main>
   );
 }
