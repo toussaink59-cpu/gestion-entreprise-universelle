@@ -161,9 +161,9 @@ La paie de base reste P0 dans le MVP, conformément au cahier des charges, mais 
 Ordre de travail recommandé :
 1. confirmer les règles produit encore codées comme hypothèses, notamment la limite de cinq entreprises par propriétaire ;
 2. terminer les protections opérationnelles restantes : règles de branche, vérifications d’en-têtes sur staging et validation des sauvegardes hébergées ;
-2. arrêter les décisions d’hébergement, de sauvegarde et de stockage privé avant toute gestion de documents réels ;
-3. terminer la validation de la configuration Supabase hébergée dans un environnement non productif ;
-4. clôturer la Phase 1 avec preuves, puis commencer les modules P0 de la Phase 2 ;
-5. développer la paie de base en Phase 3 avec règles locales datées et validées avant tout calcul réel.
+3. arrêter les décisions d’hébergement, de sauvegarde et de stockage privé avant toute gestion de documents réels ;
+4. terminer la validation de la configuration Supabase hébergée dans un environnement non productif ;
+5. clôturer la Phase 1 avec preuves, puis commencer les modules P0 de la Phase 2 ;
+6. développer la paie de base en Phase 3 avec règles locales datées et validées avant tout calcul réel.
 
 **Aucune conformité fiscale, comptable, sociale ou de paie n’est certifiée par cet audit technique.**
