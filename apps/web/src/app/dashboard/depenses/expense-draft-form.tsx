@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { saveExpenseDraft } from "./actions";
 
@@ -175,12 +176,12 @@ export function ExpenseDraftForm({
           <button type="submit" className={PRIMARY_BUTTON_CLASS} disabled={pending}>
             {pending ? "Enregistrement…" : "Enregistrer le brouillon"}
           </button>
-          <a
+          <Link
             href={cancelHref}
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
           >
             Annuler
-          </a>
+          </Link>
         </div>
       </div>
     </form>
