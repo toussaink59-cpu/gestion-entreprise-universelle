@@ -4,6 +4,8 @@ import { createContact, setContactStatus, updateContact } from "@/app/dashboard/
 import { DocumentAttachments } from "./document-attachments";
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessContactKind } from "@/lib/security/business-contact-validation";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 
 type PageSearchParams = Promise<{
   company?: string;
@@ -35,9 +37,9 @@ type CompanyRow = {
   trade_name: string | null;
 };
 
-const INPUT_CLASS = "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100";
-const BUTTON_CLASS = "inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
-const SECONDARY_BUTTON_CLASS = "inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50";
+const INPUT_CLASS = "mt-1 block min-h-11 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+const BUTTON_CLASS = "inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+const SECONDARY_BUTTON_CLASS = "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
 
 const READ_ROLES = new Set(["owner", "company_admin", "finance", "sales_purchasing", "auditor"]);
 const WRITE_ROLES = new Set(["owner", "company_admin", "sales_purchasing"]);
@@ -133,19 +135,19 @@ function ContactFields({ contact }: { contact?: ContactRow }) {
 
 function CompanyChooser({ companies, kind }: { companies: CompanyRow[]; kind: BusinessContactKind }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
       <h2 className="text-lg font-semibold text-slate-900">Choisir une entreprise</h2>
-      <p className="mt-1 text-sm text-slate-600">Les répertoires sont séparés pour chaque entreprise.</p>
+      <p className="mt-1 text-sm text-[var(--pg-text-muted)]">Les répertoires sont séparés pour chaque entreprise.</p>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {companies.map((company) => (
-          <a key={company.id} href={`${routeFor(kind)}?company=${encodeURIComponent(company.id)}`} className="rounded-xl border border-slate-200 p-4 hover:border-blue-400 hover:bg-blue-50">
-            <span className="block font-semibold text-slate-900">{company.trade_name || company.legal_name}</span>
-            <span className="mt-1 block text-sm text-slate-600">{company.legal_name}</span>
-            <span className="mt-3 inline-block text-sm font-semibold text-blue-700">Ouvrir le répertoire →</span>
+          <a key={company.id} href={`${routeFor(kind)}?company=${encodeURIComponent(company.id)}`} className="rounded-md border border-[var(--pg-border)] p-4 hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]">
+            <span className="block font-semibold text-[var(--pg-text)]">{company.trade_name || company.legal_name}</span>
+            <span className="mt-1 block text-sm text-[var(--pg-text-muted)]">{company.legal_name}</span>
+            <span className="mt-3 inline-block text-sm font-medium text-[var(--pg-accent)]">Ouvrir le répertoire →</span>
           </a>
         ))}
       </div>
-      <p className="mt-5 text-sm"><a className="font-medium text-blue-700 hover:underline" href="/dashboard">Retour au tableau de bord</a></p>
+      <p className="mt-5 text-sm"><a className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline" href="/dashboard">Retour au tableau de bord</a></p>
     </section>
   );
 }
@@ -164,7 +166,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     .eq("status", "active");
 
   if (membershipError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.</p><p className="mt-4"><a href="/dashboard" className="text-blue-700 hover:underline">Retour au tableau de bord</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.</p><p className="mt-4"><a href="/dashboard" className="text-blue-700 hover:underline">Retour au tableau de bord</a></p></main>;
   }
 
   const membershipRows = memberships ?? [];
@@ -178,7 +180,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     .order("legal_name");
 
   if (companiesError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Impossible de charger les entreprises accessibles.</p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Impossible de charger les entreprises accessibles.</p></main>;
   }
   const companies = (companyData ?? []) as CompanyRow[];
   if (companies.length === 0) redirect("/onboarding");
@@ -199,10 +201,12 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
   if (!selectedCompanyId) {
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Répertoires</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{pageTitle}</h1><p className="mt-2 max-w-2xl text-slate-600">Sélectionne l’entreprise concernée pour continuer.</p></div>
-          <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
-        </header>
+        <PageHeader
+          eyebrow="PolyGest · Répertoires"
+          title={pageTitle}
+          description="Sélectionne l’entreprise concernée pour continuer."
+          actions={<a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>}
+        />
         {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p>}
         {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
         {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
@@ -214,7 +218,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
   const selectedCompany = companies.find((company) => company.id === selectedCompanyId);
   const membership = membershipRows.find((row) => row.company_id === selectedCompanyId);
   if (!selectedCompany || !membership) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-blue-700 hover:underline">Choisir une autre entreprise</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-blue-700 hover:underline">Choisir une autre entreprise</a></p></main>;
   }
 
   const roleCode = String(membership.role_code);
@@ -251,53 +255,53 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Répertoires</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{pageTitle}</h1>
-          <p className="mt-2 text-slate-600">{selectedCompany.trade_name || selectedCompany.legal_name}<span className="mx-2 text-slate-300">/</span>Gestion des coordonnées et des conditions de paiement.</p>
-        </div>
-        <nav aria-label="Navigation du module" className="flex flex-wrap gap-2">
-          <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
-          <a href={`${otherRoute}${companyQuery}`} className={SECONDARY_BUTTON_CLASS}>{otherLabel}</a>
-          {companies.length > 1 && <a href={baseRoute} className={SECONDARY_BUTTON_CLASS}>Changer d’entreprise</a>}
-        </nav>
-      </header>
+      <PageHeader
+        eyebrow="PolyGest · Répertoires"
+        title={pageTitle}
+        description={`${selectedCompany.trade_name || selectedCompany.legal_name} · Gestion des coordonnées et des conditions de paiement.`}
+        actions={
+          <nav aria-label="Navigation du module" className="flex flex-wrap gap-2">
+            <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
+            <a href={`${otherRoute}${companyQuery}`} className={SECONDARY_BUTTON_CLASS}>{otherLabel}</a>
+            {companies.length > 1 && <a href={baseRoute} className={SECONDARY_BUTTON_CLASS}>Changer d’entreprise</a>}
+          </nav>
+        }
+      />
 
       {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
       {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
 
       {!canRead ? (
-        <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
+        <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-5 text-[var(--pg-text)]">
           <h2 className="font-semibold">Consultation non autorisée</h2>
           <p className="mt-1 text-sm">Le rôle associé à cette entreprise ne donne pas accès au répertoire {singularLabel}. Demande au propriétaire de vérifier tes permissions.</p>
         </section>
       ) : (
         <>
           {canWrite && (
-            <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Ajouter un {singularLabel}</h2><p className="mt-1 text-sm text-slate-600">Les champs marqués d’un astérisque sont obligatoires.</p></div>
+            <section className="mb-8 border-b border-[var(--pg-border)] pb-6">
+              <div className="mb-5"><h2 className="text-lg font-semibold text-[var(--pg-text)]">Ajouter un {singularLabel}</h2><p className="mt-1 text-sm text-[var(--pg-text-muted)]">Les champs marqués d’un astérisque sont obligatoires.</p></div>
               <form action={createContact} className="space-y-5">
                 <input type="hidden" name="contact_kind" value={kind} />
                 <input type="hidden" name="company_id" value={selectedCompanyId} />
                 <ContactFields />
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-                  <p className="text-xs text-slate-500">La suppression définitive n’est pas proposée ; les fiches peuvent être archivées.</p>
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--pg-border)] pt-4">
+                  <p className="text-xs text-[var(--pg-text-muted)]">La suppression définitive n’est pas proposée ; les fiches peuvent être archivées.</p>
                   <button type="submit" className={BUTTON_CLASS}>Créer la fiche</button>
                 </div>
               </form>
             </section>
           )}
 
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 p-5 sm:p-6">
-              <div><h2 className="text-xl font-semibold text-slate-900">Répertoire</h2><p className="mt-1 text-sm text-slate-600">Recherche par nom, avec filtrage des fiches actives et archivées.</p></div>
+          <section className="overflow-hidden rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)]">
+            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--pg-border)] p-5 sm:p-6">
+              <div><h2 className="text-lg font-semibold text-[var(--pg-text)]">Répertoire</h2><p className="mt-1 text-sm text-[var(--pg-text-muted)]">Recherche par nom, avec filtrage des fiches actives et archivées.</p></div>
               <form method="get" action={baseRoute} className="flex w-full flex-wrap gap-2 sm:w-auto">
                 <input type="hidden" name="company" value={selectedCompanyId} />
                 <label className="sr-only" htmlFor="contact-search">Rechercher un nom</label>
-                <input id="contact-search" className="min-w-48 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900" type="search" name="q" maxLength={80} placeholder="Rechercher un nom…" defaultValue={queryText} />
+                <input id="contact-search" className="min-h-11 min-w-48 rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]" type="search" name="q" maxLength={80} placeholder="Rechercher un nom…" defaultValue={queryText} />
                 <label className="sr-only" htmlFor="contact-status">Statut</label>
-                <select id="contact-status" name="status" className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900" defaultValue={statusFilter}>
+                <select id="contact-status" name="status" className="min-h-11 rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]" defaultValue={statusFilter}>
                   <option value="active">Actifs</option><option value="archived">Archivés</option><option value="all">Tous</option>
                 </select>
                 <button className={SECONDARY_BUTTON_CLASS} type="submit">Filtrer</button>
@@ -305,34 +309,34 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
             </div>
 
             {contactsError ? (
-              <p role="alert" className="m-5 rounded-lg bg-red-50 p-4 text-red-800">{contactsError}</p>
+              <p role="alert" className="m-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 text-sm text-[var(--pg-text)]">{contactsError}</p>
             ) : contacts.length === 0 ? (
-              <div className="p-10 text-center"><p className="font-semibold text-slate-800">Aucune fiche à afficher</p><p className="mt-1 text-sm text-slate-500">Modifie les filtres ou ajoute une première fiche si ton rôle le permet.</p></div>
+              <div className="p-5 sm:p-6"><EmptyState title="Aucune fiche à afficher" description="Modifie les filtres ou ajoute une première fiche si ton rôle le permet." /></div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3 font-semibold">Nom</th><th className="px-5 py-3 font-semibold">Contact</th><th className="px-5 py-3 font-semibold">Coordonnées</th><th className="px-5 py-3 font-semibold">Ville</th><th className="px-5 py-3 font-semibold">Statut</th><th className="px-5 py-3 font-semibold">Pièces jointes</th><th className="px-5 py-3 font-semibold">Actions</th></tr></thead>
+                  <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]"><tr><th className="px-5 py-3 font-semibold">Nom</th><th className="px-5 py-3 font-semibold">Contact</th><th className="px-5 py-3 font-semibold">Coordonnées</th><th className="px-5 py-3 font-semibold">Ville</th><th className="px-5 py-3 font-semibold">Statut</th><th className="px-5 py-3 font-semibold">Pièces jointes</th><th className="px-5 py-3 font-semibold">Actions</th></tr></thead>
                   <tbody>
                     {contacts.map((contact) => (
-                      <tr key={contact.id} className="border-t border-slate-100 align-top hover:bg-slate-50/70">
-                        <td className="px-5 py-4"><p className="font-semibold text-slate-900">{contact.name}</p>{contact.tax_identifier && <p className="mt-1 text-xs text-slate-500">ID fiscal : {contact.tax_identifier}</p>}</td>
-                        <td className="px-5 py-4 text-slate-700">{contact.contact_name || <span className="text-slate-400">—</span>}</td>
-                        <td className="px-5 py-4"><div className="text-slate-700">{contact.email || "—"}</div><div className="mt-1 text-xs text-slate-500">{contact.phone || "—"}</div></td>
-                        <td className="px-5 py-4 text-slate-700">{contact.city || "—"}</td>
-                        <td className="px-5 py-4"><span className={contact.status === "active" ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"}>{contact.status === "active" ? "Actif" : "Archivé"}</span></td>
+                      <tr key={contact.id} className="border-t border-[var(--pg-border)] align-top hover:bg-[var(--pg-surface-subtle)]">
+                        <td className="px-5 py-4"><p className="font-semibold text-[var(--pg-text)]">{contact.name}</p>{contact.tax_identifier && <p className="mt-1 text-xs text-[var(--pg-text-muted)]">ID fiscal : {contact.tax_identifier}</p>}</td>
+                        <td className="px-5 py-4 text-[var(--pg-text)]">{contact.contact_name || <span className="text-[var(--pg-text-muted)]">—</span>}</td>
+                        <td className="px-5 py-4"><div className="text-[var(--pg-text)]">{contact.email || "—"}</div><div className="mt-1 text-xs text-[var(--pg-text-muted)]">{contact.phone || "—"}</div></td>
+                        <td className="px-5 py-4 text-[var(--pg-text)]">{contact.city || "—"}</td>
+                        <td className="px-5 py-4"><span className={contact.status === "active" ? "rounded-md bg-[var(--pg-surface-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--pg-text)]" : "rounded-md bg-[var(--pg-surface-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--pg-text-muted)]"}>{contact.status === "active" ? "Actif" : "Archivé"}</span></td>
                         <td className="px-5 py-4"><DocumentAttachments companyId={selectedCompanyId} moduleCode={kind === "customer" ? "customers" : "suppliers"} entityType={kind} entityId={contact.id} canUpload={canWrite && process.env.DOCUMENT_SCANNER_ENABLED === "true"} scannerEnabled={process.env.DOCUMENT_SCANNER_ENABLED === "true"} /></td>
                         <td className="px-5 py-4">
                           <div className="flex min-w-40 flex-col items-start gap-3">
-                            {canWrite && <details className="w-full"><summary className="cursor-pointer font-semibold text-blue-700 hover:underline">Modifier</summary><form action={updateContact} className="mt-3 min-w-72 space-y-4 rounded-lg border border-slate-200 bg-white p-4">
+                            {canWrite && <details className="w-full"><summary className="cursor-pointer font-medium text-[var(--pg-accent)] hover:underline">Modifier</summary><form action={updateContact} className="mt-3 min-w-72 space-y-4 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4">
                               <input type="hidden" name="contact_kind" value={kind} /><input type="hidden" name="company_id" value={selectedCompanyId} /><input type="hidden" name="contact_id" value={contact.id} />
                               <ContactFields contact={contact} /><button type="submit" className={BUTTON_CLASS}>Enregistrer</button>
                             </form></details>}
                             {canWrite && <form action={setContactStatus}>
                               <input type="hidden" name="contact_kind" value={kind} /><input type="hidden" name="company_id" value={selectedCompanyId} /><input type="hidden" name="contact_id" value={contact.id} />
                               <input type="hidden" name="status" value={contact.status === "active" ? "archived" : "active"} />
-                              <button type="submit" className="text-sm font-semibold text-slate-600 underline decoration-slate-300 underline-offset-4 hover:text-slate-900">{contact.status === "active" ? "Archiver" : "Réactiver"}</button>
+                              <button type="submit" className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--pg-text)] underline underline-offset-4 hover:text-[var(--pg-accent)]">{contact.status === "active" ? "Archiver" : "Réactiver"}</button>
                             </form>}
-                            {!canWrite && <span className="text-xs text-slate-400">Lecture seule</span>}
+                            {!canWrite && <span className="text-xs text-[var(--pg-text-muted)]">Lecture seule</span>}
                           </div>
                         </td>
                       </tr>
@@ -341,11 +345,11 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
                 </table>
               </div>
             )}
-            {contacts.length === 100 && <p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500">100 fiches maximum affichées. Affine la recherche pour retrouver une fiche plus précise.</p>}
+            {contacts.length === 100 && <p className="border-t border-[var(--pg-border)] px-5 py-3 text-xs text-[var(--pg-text-muted)]">100 fiches maximum affichées. Affine la recherche pour retrouver une fiche plus précise.</p>}
           </section>
         </>
       )}
-      <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500"><span>Les accès sont contrôlés par les permissions de l’entreprise et la sécurité RLS de Supabase.</span><a href="/dashboard" className="font-medium text-blue-700 hover:underline">Retour au tableau de bord</a></footer>
+      <footer className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--pg-border)] pt-5 text-sm text-[var(--pg-text-muted)]"><span>Les accès sont contrôlés par les permissions de l’entreprise et la sécurité RLS de Supabase.</span><a href="/dashboard" className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline">Retour au tableau de bord</a></footer>
     </main>
   );
 }
