@@ -54,6 +54,7 @@ export function DocumentAttachments({
   async function loadDocuments() {
     setLoading(true);
     setMessage(null);
+    setMessageIsError(false);
     try {
       const query = new URLSearchParams({
         companyId,
@@ -88,6 +89,7 @@ export function DocumentAttachments({
 
   async function submitUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!selectedFile) {
       setMessage("Sélectionne un fichier avant de continuer.");
       setMessageIsError(true);
@@ -131,10 +133,10 @@ export function DocumentAttachments({
       }
 
       setSelectedFile(null);
-      event.currentTarget.reset();
+      form.reset();
+      await loadDocuments();
       setMessage("Le fichier est déposé. Il restera inaccessible jusqu'à la fin de son analyse de sécurité.");
       setMessageIsError(false);
-      await loadDocuments();
     } catch {
       setMessage("Le service de documents est momentanément indisponible.");
       setMessageIsError(true);
