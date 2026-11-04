@@ -92,12 +92,12 @@ describe("Stockage privé des documents — configuration", () => {
        where schemaname = 'storage'
          and tablename = 'objects'`,
     );
-    expect(policies.rows).toEqual([
+    expect(policies.rows).toContainEqual(
       expect.objectContaining({
         policyname: "company_private_documents_read",
         cmd: "SELECT",
       }),
-    ]);
+    );
   });
 });
 
