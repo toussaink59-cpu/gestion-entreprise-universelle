@@ -97,9 +97,19 @@ export default async function NewQuotePage({ searchParams }: Props) {
     );
   }
 
-  const customers = ((customerData ?? []) as QuoteCustomerOption[]).filter(
-    (customer) => customer.active,
-  );
+  const customers: QuoteCustomerOption[] = (
+    (customerData ?? []) as Array<{
+      id: string;
+      name: string;
+      status: string;
+    }>
+  )
+    .filter((customer) => customer.status === "active")
+    .map((customer) => ({
+      id: customer.id,
+      name: customer.name,
+      active: true,
+    }));
 
   if (customers.length === 0) {
     return (
