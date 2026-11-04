@@ -104,19 +104,17 @@ Le projet configure `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Polic
 
 La réponse HTTP réelle d’un déploiement n’a pas été contrôlée. Une CSP stricte avec nonce reste un chantier distinct ; ne pas présenter la CSP actuelle comme une politique complète de blocage des scripts.
 
-### 4.5 Stockage de fichiers privés — non implémenté
+### 4.5 Stockage privé des documents — socle implémenté, scanner manquant
 
-L’inspection de l’arborescence ne révèle aucun module d’upload, aucun bucket Supabase déclaré et aucune politique RLS Storage spécifique à l’entreprise.
+La migration `20261104120000_stockage_prive_documents.sql` ajoute les métadonnées de documents, la RLS sur les enregistrements et la policy de lecture Storage fondée sur les permissions du module parent. La configuration locale déclare un bucket privé, limité à 20 Mio et aux PDF/JPEG/PNG/WebP.
 
-L’API Storage locale est activée et la configuration générale indique une limite de 50 MiB, mais cela ne constitue pas une implémentation SEC-07. Il manque au minimum :
-- bucket privé et règles d’accès par entreprise ;
-- contrôle du propriétaire du fichier et des permissions du rôle ;
-- contrôle réel du type MIME et de la taille à l’entrée ;
-- URL signée temporaire ;
-- tests d’accès direct, inter-entreprises et après expiration ;
-- stratégie d’analyse des fichiers et de mise en quarantaine avant mise à disposition.
+Le dépôt passe par une RPC authentifiée qui revalide la permission `create` et l'appartenance de la fiche parente à l'entreprise. Le serveur émet ensuite un jeton d'upload signé à chemin unique ; le navigateur transfère directement le fichier à Storage. Le téléchargement utilise un lien signé de **120 secondes**, après vérification de l'état du document et de la permission de lecture. La variable `DOCUMENT_SCANNER_ENABLED=false` désactive par défaut les nouveaux dépôts tant que le scanner n'est pas configuré.
 
-Ce point doit être résolu avant d’autoriser le dépôt de justificatifs, bulletins, factures PDF ou autres documents métier.
+Les tests couvrent les formats, les tailles, les permissions, l'isolation inter-entreprises, le refus de lecture avant analyse et après rejet, et la finalisation réservée au rôle serveur.
+
+**Bloquant avant activation réelle :** aucun moteur antivirus n'est encore connecté. Les documents finalisés restent en `pending_scan` et les liens de téléchargement sont refusés tant qu'un scanner serveur n'a pas retourné le type détecté, la taille réelle et le SHA-256. Il reste également à intégrer le nettoyage des sessions d'upload abandonnées et à vérifier le bucket sur un environnement Supabase hébergé.
+
+La configuration locale ne prouve pas que le bucket ou les secrets existent sur un projet hébergé. Ne pas activer les uploads en production avant fermeture de ces points. Voir [la spécification du stockage privé](STOCKAGE_DOCUMENTS_PRIVES.md).
 
 ## 5. Sauvegarde, restauration et continuité
 
@@ -146,7 +144,8 @@ L’audit automatique couvre désormais l’arbre complet installé par `npm ci`
 | Région d’hébergement et résidence des données | À décider | Comparer coûts, disponibilité, traitement des données, exigences contractuelles et obligations locales |
 | Protection de la branche principale | Non vérifiée | L’API de protection de branche n’était pas accessible à l’intégration ; aucune règle de dépôt n’a été retournée par l’API rulesets. Ne pas en déduire que la branche est protégée |
 | RPO/RTO et rétention | À décider | Définir des objectifs réalistes selon le budget et les engagements de service |
-| Stockage privé et analyse antivirus | À concevoir | Définir la matrice d’accès aux documents et le mécanisme de scan/quarantaine |
+| Socle stockage privé | Implémenté dans la branche de travail, validation CI en attente | Vérifier migration, bucket local, RLS Storage et tests négatifs avant fusion |
+| Analyse antivirus / quarantaine | Non intégrée, bloquante | Choisir puis déployer un scanner serveur ; aucun document ne doit passer à `available` sans analyse réelle |
 | Conservation, export et suppression des données personnelles | À formaliser | Politique documentée avant traitement de données réelles |
 | Accès exceptionnel du personnel plateforme | À formaliser | Accès minimal, durée limitée, justification et journalisation |
 | Supervision et incidents | À formaliser | Alertes, responsables, escalade, incidents et procédure de reprise |
@@ -163,7 +162,7 @@ La paie de base reste P0 dans le MVP, conformément au cahier des charges, mais 
 
 Ordre de travail recommandé :
 1. terminer les protections opérationnelles restantes : règles de branche, vérifications d’en-têtes sur staging et validation des sauvegardes hébergées ;
-2. arrêter les décisions d’hébergement, de sauvegarde et de stockage privé avant toute gestion de documents réels ;
+2. terminer l'intégration du stockage privé : choisir et brancher le scanner antivirus, mettre en place le nettoyage des sessions abandonnées et vérifier la configuration du bucket hébergé ;
 3. terminer la validation de la configuration Supabase hébergée dans un environnement non productif ;
 4. clôturer la Phase 1 avec preuves, puis commencer les modules P0 de la Phase 2 ;
 5. développer la paie de base en Phase 3 avec règles locales datées et validées avant tout calcul réel.

@@ -103,6 +103,18 @@ export async function asUser<T>(db: SqlClient, who: Who | null, fn: () => Promis
   }
 }
 
+/** Exécute `fn` avec le rôle serveur Supabase (tests uniquement). */
+export async function asServiceRole<T>(db: SqlClient, fn: () => Promise<T>): Promise<T> {
+  await db.query(`select set_config('request.jwt.claim.role', $1, false)`, ['service_role'])
+  await db.exec('set role service_role')
+  try {
+    return await fn()
+  } finally {
+    await db.exec('reset role')
+    await db.query(`select set_config('request.jwt.claim.role', '', false)`)
+  }
+}
+
 /** Exécute `fn` comme visiteur non connecté (rôle `anon`). */
 export async function asAnon<T>(db: SqlClient, fn: () => Promise<T>): Promise<T> {
   await db.exec('set role anon')

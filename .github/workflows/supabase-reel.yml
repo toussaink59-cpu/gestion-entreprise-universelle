@@ -61,7 +61,7 @@ jobs:
       - name: Démarrer Supabase local (base + authentification)
         run: >-
           ${{ env.SUPABASE }} start
-          -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+          -x realtime,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
       - name: Lint SQL (plpgsql_check)
         run: ${{ env.SUPABASE }} db lint --local --schema public,app --fail-on error
