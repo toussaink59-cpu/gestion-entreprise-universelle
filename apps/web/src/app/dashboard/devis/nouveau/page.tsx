@@ -61,7 +61,12 @@ export default async function NewQuotePage({ searchParams }: Props) {
     );
   }
   if (workspace.status === "choose") {
-    return <QuoteCompanyChooser companies={workspace.companies} />;
+    return (
+      <QuoteCompanyChooser
+        companies={workspace.companies}
+        destinationPath="/dashboard/devis/nouveau"
+      />
+    );
   }
   if (!workspace.canRead) {
     return (
