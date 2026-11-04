@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import { Client } from 'pg'
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -135,19 +135,31 @@ export async function seed(db: SqlClient): Promise<TestDb> {
     return r.rows[0].create_company
   })
 
-  await asUser(db, 'alice', async () => {
-    for (const [who, role] of [
-      ['carol', 'finance'],
-      ['dave', 'employee'],
-      ['erin', 'auditor'],
-      ['frank', 'company_admin'],
-    ] as const) {
-      await db.query(
-        `insert into public.company_memberships (company_id, user_id, role_code) values ($1, $2, $3)`,
-        [companyA, ids[who], role],
-      )
-    }
-  })
+  // Les membres passent par le même parcours que dans l'application :
+  // invitation, confirmation par le compte cible, puis activation par le propriétaire.
+  for (const [who, role] of [
+    ['carol', 'finance'],
+    ['dave', 'employee'],
+    ['erin', 'auditor'],
+    ['frank', 'company_admin'],
+  ] as const) {
+    const email = `${who}-${ids[who].slice(0, 8)}@example.test`
+    const tokenHash = randomBytes(32).toString('hex')
+    const invitation = await asUser(db, 'alice', () =>
+      db.query<{ membership_id: string }>(
+        `select public.create_company_member_invitation($1, $2, $3, $4) as membership_id`,
+        [companyA, email, role, tokenHash],
+      ),
+    )
+    const membershipId = invitation.rows[0].membership_id
+
+    await asUserId(db, ids[who], () =>
+      db.query(`select public.confirm_company_member_invitation($1)`, [tokenHash]),
+    )
+    await asUser(db, 'alice', () =>
+      db.query(`update public.company_memberships set status = 'active' where id = $1`, [membershipId]),
+    )
+  }
 
   return { db, companyA, companyB }
 }
