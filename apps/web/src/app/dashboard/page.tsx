@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { getTranslations } from "next-intl/server";
 
 export const instant = false;
 
@@ -16,11 +17,22 @@ type ContactPreview = {
   phone: string | null;
 };
 
-function DashboardFallback() {
+type DashboardCopy = {
+  loadingEyebrow: string; loadingTitle: string; loadingDescription: string; loadingLabel: string;
+  eyebrow: string; title: string; welcome: string; welcomeNamed: string; account: string;
+  emailUnavailable: string; createCompany: string; signOut: string; myCompanies: string;
+  directoryDescription: string; membershipError: string; membershipErrorHelp: string;
+  companiesError: string; noCompaniesTitle: string; noCompaniesDescription: string;
+  legalName: string; currency: string; companyBadge: string; manageMembers: string;
+  customerDirectory: string; supplierDirectory: string; recentCount: string;
+  previewError: string; customerEmpty: string; supplierEmpty: string; openDirectory: string;
+};
+
+function DashboardFallback({ copy }: { copy: DashboardCopy }) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <PageHeader eyebrow="PolyGest" title="Tableau de bord" description="Chargement de vos espaces de travail…" />
-      <div role="status" aria-label="Chargement du tableau de bord" className="space-y-4">
+      <PageHeader eyebrow={copy.loadingEyebrow} title={copy.loadingTitle} description={copy.loadingDescription} />
+      <div role="status" aria-label={copy.loadingLabel} className="space-y-4">
         <div className="h-24 animate-pulse rounded-lg bg-[var(--pg-surface-subtle)]" />
         <div className="h-40 animate-pulse rounded-lg bg-[var(--pg-surface-subtle)]" />
       </div>
@@ -28,15 +40,32 @@ function DashboardFallback() {
   );
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const t = await getTranslations("Dashboard.Home");
+  const copy: DashboardCopy = {
+    loadingEyebrow: t("loadingEyebrow"), loadingTitle: t("title"),
+    loadingDescription: t("loadingDescription"), loadingLabel: t("loadingLabel"),
+    eyebrow: t("eyebrow"), title: t("title"), welcome: t("welcome"),
+    welcomeNamed: t("welcomeNamed", { name: "{name}" }), account: t("account", { email: "{email}" }),
+    emailUnavailable: t("emailUnavailable"), createCompany: t("createCompany"), signOut: t("signOut"),
+    myCompanies: t("myCompanies"), directoryDescription: t("directoryDescription"),
+    membershipError: t("membershipError"), membershipErrorHelp: t("membershipErrorHelp"),
+    companiesError: t("companiesError"), noCompaniesTitle: t("noCompaniesTitle"),
+    noCompaniesDescription: t("noCompaniesDescription"), legalName: t("legalName", { name: "{name}" }),
+    currency: t("currency", { currency: "{currency}" }), companyBadge: t("companyBadge"),
+    manageMembers: t("manageMembers"), customerDirectory: t("customerDirectory"),
+    supplierDirectory: t("supplierDirectory"), recentCount: t("recentCount", { count: 5 }),
+    previewError: t("previewError"), customerEmpty: t("customerEmpty"),
+    supplierEmpty: t("supplierEmpty"), openDirectory: t("openDirectory"),
+  };
   return (
-    <Suspense fallback={<DashboardFallback />}>
-      <DashboardContent />
+    <Suspense fallback={<DashboardFallback copy={copy} />}>
+      <DashboardContent copy={copy} />
     </Suspense>
   );
 }
 
-async function DashboardContent() {
+async function DashboardContent({ copy }: { copy: DashboardCopy }) {
   await connection();
   const supabase = await createClient();
   const {
@@ -54,17 +83,16 @@ async function DashboardContent() {
   if (membershipError) {
     return (
       <main className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
-        <PageHeader eyebrow="PolyGest" title="Tableau de bord" />
+        <PageHeader eyebrow={copy.eyebrow} title={copy.title} />
         <p role="alert" className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Impossible de charger les appartenances à l’entreprise. Vérifie le
-          schéma et les politiques d’accès Supabase.
+          {copy.membershipError} {copy.membershipErrorHelp}
         </p>
         <form action={signOut} className="mt-6">
           <button
             className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
             type="submit"
           >
-            Se déconnecter
+            {copy.signOut}
           </button>
         </form>
       </main>
@@ -130,17 +158,17 @@ async function DashboardContent() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Espace de travail"
-        title="Tableau de bord"
-        description={`Bienvenue${user.user_metadata?.full_name ? `, ${String(user.user_metadata.full_name)}` : ""}. Compte : ${user.email ?? "adresse non renseignée"}.`}
+        eyebrow={copy.eyebrow}
+        title={copy.title}
+        description={`${user.user_metadata?.full_name ? copy.welcomeNamed.replace("{name}", String(user.user_metadata.full_name)) : copy.welcome} ${copy.account.replace("{email}", user.email ?? copy.emailUnavailable)}`}
         actions={
           <>
             <a href="/dashboard/entreprises/nouvelle" className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]">
-              Créer une entreprise
+              {copy.createCompany}
             </a>
             <form action={signOut}>
               <button className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]" type="submit">
-                Se déconnecter
+                {copy.signOut}
               </button>
             </form>
           </>
@@ -148,8 +176,8 @@ async function DashboardContent() {
       />
 
       <section className="mb-6">
-        <h2 className="text-lg font-semibold text-[var(--pg-text)]">Mes entreprises</h2>
-        <p className="mt-1 text-sm text-[var(--pg-text-muted)]">Chaque entreprise dispose de ses propres répertoires clients et fournisseurs.</p>
+        <h2 className="text-lg font-semibold text-[var(--pg-text)]">{copy.myCompanies}</h2>
+        <p className="mt-1 text-sm text-[var(--pg-text-muted)]">{copy.directoryDescription}</p>
       </section>
 
       {companiesError && (
@@ -157,15 +185,15 @@ async function DashboardContent() {
           role="alert"
           className="mb-5 rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
         >
-          Impossible de charger les informations des entreprises.
+          {copy.companiesError}
         </p>
       )}
 
       {!companiesError && companies && companies.length === 0 && (
         <EmptyState
-          title="Aucune entreprise accessible"
-          description="Créez une entreprise ou demandez à son propriétaire de vous inviter pour commencer."
-          action={<a href="/dashboard/entreprises/nouvelle" className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]">Créer une entreprise</a>}
+          title={copy.noCompaniesTitle}
+          description={copy.noCompaniesDescription}
+          action={<a href="/dashboard/entreprises/nouvelle" className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]">{copy.createCompany}</a>}
         />
       )}
 
@@ -195,22 +223,22 @@ async function DashboardContent() {
                       {company.trade_name || company.legal_name}
                     </h3>
                     <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-                      Raison sociale : {company.legal_name}
+                      {copy.legalName.replace("{name}", company.legal_name)}
                     </p>
                     <p className="mt-1 text-xs text-[var(--pg-text-muted)]">
-                      Devise : {company.default_currency}
+                      {copy.currency.replace("{currency}", company.default_currency)}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-md bg-[var(--pg-surface-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--pg-text-muted)]">
-                      Entreprise
+                      {copy.companyBadge}
                     </span>
                     {canManageMembers && (
                       <a
                         href={`/dashboard/membres?company=${encodeURIComponent(company.id)}`}
                         className="inline-flex min-h-9 items-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-1 text-xs font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
                       >
-                        Gérer les membres
+                        {copy.manageMembers}
                       </a>
                     )}
                   </div>
@@ -218,18 +246,18 @@ async function DashboardContent() {
 
                 <div className="mt-6 grid gap-5 xl:grid-cols-2">
                   <ContactDirectoryPreview
-                    title="Répertoire clients"
-                    kind="customer"
+                    title={copy.customerDirectory}
                     contacts={preview?.customers ?? []}
                     hasError={preview?.customerError ?? false}
                     href={clientsUrl}
+                    labels={{ recentCount: copy.recentCount, previewError: copy.previewError, empty: copy.customerEmpty, open: copy.openDirectory }}
                   />
                   <ContactDirectoryPreview
-                    title="Répertoire fournisseurs"
-                    kind="supplier"
+                    title={copy.supplierDirectory}
                     contacts={preview?.suppliers ?? []}
                     hasError={preview?.supplierError ?? false}
                     href={suppliersUrl}
+                    labels={{ recentCount: copy.recentCount, previewError: copy.previewError, empty: copy.supplierEmpty, open: copy.openDirectory }}
                   />
                 </div>
               </article>
@@ -243,33 +271,32 @@ async function DashboardContent() {
 
 function ContactDirectoryPreview({
   title,
-  kind,
   contacts,
   hasError,
   href,
+  labels,
 }: {
   title: string;
-  kind: "customer" | "supplier";
   contacts: ContactPreview[];
   hasError: boolean;
   href: string;
+  labels: { recentCount: string; previewError: string; empty: string; open: string };
 }) {
-  const singularLabel = kind === "customer" ? "client" : "fournisseur";
 
   return (
     <section className="min-w-0 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h4 className="font-semibold text-[var(--pg-text)]">{title}</h4>
-        <span className="text-xs text-[var(--pg-text-muted)]">5 fiches actives récentes max.</span>
+        <span className="text-xs text-[var(--pg-text-muted)]">{labels.recentCount}</span>
       </div>
 
       {hasError ? (
         <p role="alert" className="mt-4 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-3 text-sm text-[var(--pg-text)]">
-          Impossible de charger les fiches de ce répertoire.
+          {labels.previewError}
         </p>
       ) : contacts.length === 0 ? (
         <p className="mt-4 rounded-md border border-dashed border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text-muted)]">
-          Aucune fiche {singularLabel} active visible pour cette entreprise.
+          {labels.empty}
         </p>
       ) : (
         <ul className="mt-3 divide-y divide-[var(--pg-border)] rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)]">
@@ -298,7 +325,7 @@ function ContactDirectoryPreview({
           href={href}
           className="inline-flex min-h-11 items-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
         >
-          Ouvrir le répertoire
+          {labels.open}
         </a>
       </div>
     </section>

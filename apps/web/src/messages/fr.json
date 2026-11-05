@@ -125,5 +125,49 @@
     "description": "La traduction du tableau de bord et des modules de gestion est en cours. Pour cette première étape, ces écrans restent disponibles en français.",
     "continue": "Continuer vers l’espace de travail en français",
     "languageLabel": "Choisir la langue"
+  },
+  "Dashboard": {
+    "Navigation": {
+      "ariaLabel": "Navigation principale",
+      "workspace": "Espace de travail",
+      "overview": "Vue d’ensemble",
+      "clients": "Clients",
+      "suppliers": "Fournisseurs",
+      "quotes": "Devis",
+      "expenses": "Dépenses",
+      "members": "Membres",
+      "footer": "Gestion d’entreprise"
+    },
+    "Home": {
+      "eyebrow": "PolyGest · Espace de travail",
+      "title": "Tableau de bord",
+      "loadingEyebrow": "PolyGest",
+      "loadingDescription": "Chargement de vos espaces de travail…",
+      "loadingLabel": "Chargement du tableau de bord",
+      "welcome": "Bienvenue.",
+      "welcomeNamed": "Bienvenue, {name}.",
+      "account": "Compte : {email}.",
+      "emailUnavailable": "adresse non renseignée",
+      "createCompany": "Créer une entreprise",
+      "signOut": "Se déconnecter",
+      "myCompanies": "Mes entreprises",
+      "directoryDescription": "Chaque entreprise dispose de ses propres répertoires clients et fournisseurs.",
+      "membershipError": "Impossible de charger les appartenances à l’entreprise.",
+      "membershipErrorHelp": "Vérifie le schéma et les politiques d’accès Supabase.",
+      "companiesError": "Impossible de charger les informations des entreprises.",
+      "noCompaniesTitle": "Aucune entreprise accessible",
+      "noCompaniesDescription": "Crée une entreprise ou demande à son propriétaire de t’inviter pour commencer.",
+      "legalName": "Raison sociale : {name}",
+      "currency": "Devise : {currency}",
+      "companyBadge": "Entreprise",
+      "manageMembers": "Gérer les membres",
+      "customerDirectory": "Répertoire clients",
+      "supplierDirectory": "Répertoire fournisseurs",
+      "recentCount": "{count} fiches actives récentes maximum.",
+      "previewError": "Impossible de charger les fiches de ce répertoire.",
+      "customerEmpty": "Aucune fiche client active visible pour cette entreprise.",
+      "supplierEmpty": "Aucune fiche fournisseur active visible pour cette entreprise.",
+      "openDirectory": "Ouvrir le répertoire"
+    }
   }
 }
