@@ -4,7 +4,7 @@ import {localePath} from "@/i18n/locale";
 import type {Locale} from "@/i18n/locale";
 import {LocaleSwitcher} from "@/components/i18n/locale-switcher";
 export function AuthShell({title,description,children,footer,locale,route,copy}:{
-title:string;description:string;children:ReactNode;footer:ReactNode;locale:Locale;route:"/login"|"/register";
+title:string;description:string;children:ReactNode;footer:ReactNode;locale:Locale;route:"/login"|"/register"|"/forgot-password"|"/reset-password";
 copy:{homeLabel:string;eyebrow:string;headline:string;description:string;footer:string;languageLabel:string};
 }){
 return <main className="min-h-screen bg-[var(--pg-canvas)]"><div className="mx-auto grid min-h-screen w-full max-w-7xl lg:grid-cols-[minmax(0,0.9fr)_minmax(30rem,1.1fr)]">
