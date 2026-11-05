@@ -23,7 +23,7 @@ export default async function NewCompanyPage({ searchParams }: Props) {
 
   const params = await searchParams;
   const t = await getTranslations("Companies");
-  const locale = await getLocale();
+  const locale = (await getLocale()) as import("@/i18n/locale").Locale;
   const errorMessages: Record<string, string> = {
     "missing-name": t("errors.missingName"),
     "invalid-name": t("errors.invalidName"),
