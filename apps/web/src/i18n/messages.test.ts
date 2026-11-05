@@ -45,4 +45,12 @@ describe("French and English message catalogs", () => {
     expect(fr.Companies.submit).toBe("Créer l’entreprise");
     expect(en.Companies.submit).toBe("Create company");
   });
+  it("provide expense management copy and errors in both locales", () => {
+    expect(fr.Expenses.List.title).toBe("Dépenses");
+    expect(en.Expenses.List.title).toBe("Expenses");
+    expect(fr.Expenses.Form.errors.amount).toBeTruthy();
+    expect(en.Expenses.Form.errors.amount).toBeTruthy();
+    expect(fr.Expenses.Errors.readDenied).toBeTruthy();
+    expect(en.Expenses.Errors.readDenied).toBeTruthy();
+  });
 });

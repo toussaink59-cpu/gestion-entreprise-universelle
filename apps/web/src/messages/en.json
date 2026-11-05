@@ -606,5 +606,86 @@
       "invalidCompanyData": "The company information is invalid. Check the names you entered.",
       "creationFailed": "Company creation failed. Check your permissions and try again."
     }
+  },
+  "Expenses": {
+    "Errors": {
+      "membershipAccess": "Unable to verify company memberships. Please try again later.",
+      "companies": "Unable to load accessible companies.",
+      "noActiveCompanies": "No active company is available for expenses.",
+      "companyNotAccessible": "This company is not accessible with your account.",
+      "readDenied": "Your role does not allow you to view this company’s expenses.",
+      "createDenied": "Your role allows you to view expenses but not to create a draft.",
+      "loadFailed": "Unable to load drafts. Check your permissions and try again."
+    },
+    "Chooser": {
+      "eyebrow": "PolyGest · Finance",
+      "title": "Expenses",
+      "description": "Choose the company you want to manage. Expense data remains strictly separated between companies.",
+      "chooseCompany": "Choose a company",
+      "open": "Open",
+      "backDashboard": "Back to dashboard"
+    },
+    "List": {
+      "eyebrow": "PolyGest · Finance",
+      "title": "Expenses",
+      "description": "{company} · Expense draft register.",
+      "backDashboard": "Back to dashboard",
+      "newExpense": "New expense",
+      "changeCompany": "Change company",
+      "savedSuccess": "Draft saved. No payment or cash movement was made.",
+      "sectionTitle": "Saved drafts",
+      "sectionDescription": "These entries are neither approved nor considered paid. No cash movement is associated with them.",
+      "emptyTitle": "No expense drafts",
+      "emptyCanCreate": "Save a first draft to prepare expense tracking for this company.",
+      "emptyReadOnly": "No draft is available for this company.",
+      "createDraft": "Create a draft",
+      "columns": {
+        "date": "Date",
+        "categoryDescription": "Category and description",
+        "supplier": "Supplier",
+        "amount": "Amount",
+        "status": "Status"
+      },
+      "supplierUnavailable": "Supplier unavailable",
+      "notSpecified": "Not specified",
+      "supplierNotSpecified": "Supplier not specified",
+      "draft": "Draft",
+      "showingLimit": "Showing the 100 most recent drafts."
+    },
+    "Form": {
+      "eyebrow": "PolyGest · Finance",
+      "newTitle": "New expense",
+      "newDescription": "{company} · Internal draft creation.",
+      "backDashboard": "Back to dashboard",
+      "backExpenses": "Back to expenses",
+      "supplierUnavailable": "The supplier list is temporarily unavailable. You can continue without selecting a supplier.",
+      "informationTitle": "Expense information",
+      "currencyDescription": "The draft is saved in the company currency ({currencyCode}).",
+      "expenseDate": "Expense date",
+      "category": "Category",
+      "categoryPlaceholder": "E.g. transport, supplies, maintenance",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the purpose of the expense",
+      "amount": "Amount ({currencyCode})",
+      "amountPlaceholder": "0",
+      "amountHelp": "Positive amount, up to four decimal places. Taxes are not calculated at this stage.",
+      "supplier": "Supplier",
+      "notSpecified": "Not specified",
+      "notes": "Internal notes",
+      "saveNotice": "Saving creates a draft only. No payment, cash movement, tax calculation or accounting entry is triggered.",
+      "saving": "Saving…",
+      "saveDraft": "Save draft",
+      "cancel": "Cancel",
+      "errors": {
+        "context": "The company or supplier context is invalid. Reload the page.",
+        "amount": "Enter a strictly positive amount with no more than four decimal places.",
+        "fields": "Check the date and text fields before saving.",
+        "session": "Your session has expired. Sign in again before continuing.",
+        "access": "This company is not accessible with your account.",
+        "permission": "This company is not accessible or your role does not allow this operation.",
+        "invalidData": "The expense information is inconsistent. Check the supplier, date and amount.",
+        "save": "Unable to save the draft. Check the information and try again."
+      }
+    }
   }
 }

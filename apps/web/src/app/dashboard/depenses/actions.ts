@@ -5,8 +5,18 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { parseExpenseDraftForm } from "@/lib/security/expense-draft-validation";
 
+export type ExpenseErrorKey =
+  | "errors.context"
+  | "errors.amount"
+  | "errors.fields"
+  | "errors.session"
+  | "errors.access"
+  | "errors.permission"
+  | "errors.invalidData"
+  | "errors.save";
+
 export type ExpenseActionState = {
-  error: string | null;
+  error: ExpenseErrorKey | null;
 };
 
 export async function saveExpenseDraft(
@@ -18,16 +28,16 @@ export async function saveExpenseDraft(
   if (!parsed.ok) {
     if (parsed.reason === "context") {
       return {
-        error: "Le contexte de l’entreprise ou du fournisseur est invalide. Recharge la page.",
+        error: "errors.context",
       };
     }
     if (parsed.reason === "amount") {
       return {
-        error: "Saisis un montant strictement positif, avec au plus quatre décimales.",
+        error: "errors.amount",
       };
     }
     return {
-      error: "Vérifie la date et les champs texte avant d’enregistrer.",
+      error: "errors.fields",
     };
   }
 
@@ -39,7 +49,7 @@ export async function saveExpenseDraft(
 
   if (userError || !user) {
     return {
-      error: "Ta session a expiré. Reconnecte-toi avant de poursuivre.",
+      error: "errors.session",
     };
   }
 
@@ -53,7 +63,7 @@ export async function saveExpenseDraft(
 
   if (membershipError || !membership) {
     return {
-      error: "Cette entreprise n’est pas accessible avec ton compte.",
+      error: "errors.access",
     };
   }
 
@@ -78,18 +88,18 @@ export async function saveExpenseDraft(
 
     if (saveError?.code === "42501") {
       return {
-        error: "Cette entreprise n’est pas accessible ou ton rôle ne permet pas cette opération.",
+        error: "errors.permission",
       };
     }
 
     if (saveError?.code === "22023") {
       return {
-        error: "Les informations de la dépense sont incohérentes. Vérifie le fournisseur, la date et le montant.",
+        error: "errors.invalidData",
       };
     }
 
     return {
-      error: "Impossible d’enregistrer le brouillon. Vérifie les informations et réessaie.",
+      error: "errors.save",
     };
   }
 
