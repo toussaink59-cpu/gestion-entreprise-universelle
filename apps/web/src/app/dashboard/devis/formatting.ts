@@ -1,63 +1,34 @@
-export function formatQuoteCurrency(
-  amount: string | number,
-  currencyCode: string,
-): string {
-  const numericAmount =
-    typeof amount === "number" ? amount : Number(amount);
+export type FormatLocale = "fr" | "en";
 
-  if (!Number.isFinite(numericAmount)) return "Montant indisponible";
+function intlLocale(locale: FormatLocale): string {
+  return locale === "en" ? "en-GB" : "fr-FR";
+}
 
-  if (!/^[A-Z]{3}$/.test(currencyCode)) {
-    return (
-      new Intl.NumberFormat("fr-FR", {
-        maximumFractionDigits: 4,
-      }).format(numericAmount) +
-      " " +
-      currencyCode
-    );
+export function formatQuoteCurrency(amount: string | number, currencyCode: string, locale: FormatLocale = "fr"): string {
+  const numericAmount = typeof amount === "number" ? amount : Number(amount);
+  if (!Number.isFinite(numericAmount)) return locale === "en" ? "Amount unavailable" : "Montant indisponible";
+  try {
+    return new Intl.NumberFormat(intlLocale(locale), { style: "currency", currency: currencyCode, maximumFractionDigits: 4 }).format(numericAmount);
+  } catch {
+    return new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 4 }).format(numericAmount) + " " + currencyCode;
   }
-
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: currencyCode,
-    maximumFractionDigits: 4,
-  }).format(numericAmount);
 }
 
-export function formatQuoteDate(value: string): string {
+export function formatQuoteDate(value: string, locale: FormatLocale = "fr"): string {
   const timestamp = Date.parse(value + "T00:00:00.000Z");
-  if (!Number.isFinite(timestamp)) return "Date indisponible";
-
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(timestamp);
+  if (!Number.isFinite(timestamp)) return locale === "en" ? "Date unavailable" : "Date indisponible";
+  return new Intl.DateTimeFormat(intlLocale(locale), { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(timestamp);
 }
 
-export function formatQuoteQuantity(value: string): string {
+export function formatQuoteQuantity(value: string, locale: FormatLocale = "fr"): string {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) return value;
-
-  return new Intl.NumberFormat("fr-FR", {
-    maximumFractionDigits: 4,
-  }).format(numericValue);
+  return new Intl.NumberFormat(intlLocale(locale), { maximumFractionDigits: 4 }).format(numericValue);
 }
 
-export function quoteStatusLabel(status: string): string {
-  switch (status) {
-    case "draft":
-      return "Brouillon";
-    case "sent":
-      return "Transmis";
-    case "accepted":
-      return "Accepté";
-    case "rejected":
-      return "Refusé";
-    case "cancelled":
-      return "Annulé";
-    default:
-      return "Statut inconnu";
-  }
+export function quoteStatusLabel(status: string, locale: FormatLocale = "fr"): string {
+  const labels = locale === "en"
+    ? { draft: "Draft", sent: "Sent", accepted: "Accepted", rejected: "Rejected", cancelled: "Cancelled" }
+    : { draft: "Brouillon", sent: "Transmis", accepted: "Accepté", rejected: "Refusé", cancelled: "Annulé" };
+  return labels[status as keyof typeof labels] ?? (locale === "en" ? "Unknown status" : "Statut inconnu");
 }

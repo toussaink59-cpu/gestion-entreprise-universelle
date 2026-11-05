@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { getLocale } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -79,6 +80,7 @@ function errorMessage(code: string | undefined): string | null {
 export default async function QuotesPage({ searchParams }: Props) {
   await connection();
   const params = await searchParams;
+  const locale = (await getLocale()) as "fr" | "en";
   const workspace = await getQuoteWorkspace(params.company);
 
   if (workspace.status === "error") {
@@ -283,7 +285,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                           {quote.quote_number ?? "Brouillon sans numéro"}
                         </span>
                         <span className="mt-1 block text-xs text-[var(--pg-text-muted)]">
-                          {quoteStatusLabel(quote.status)}
+                          {quoteStatusLabel(quote.status, locale)}
                         </span>
                         <span className="mt-1 block font-mono text-xs text-[var(--pg-text-muted)]">
                           ID {quote.id.slice(0, 8).toUpperCase()}
@@ -296,13 +298,13 @@ export default async function QuotesPage({ searchParams }: Props) {
                         {quote.subject || "Sans objet"}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-[var(--pg-text)]">
-                        {formatQuoteDate(quote.issue_date)}
+                        {formatQuoteDate(quote.issue_date, locale)}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-[var(--pg-text)]">
-                        {formatQuoteDate(quote.valid_until)}
+                        {formatQuoteDate(quote.valid_until, locale)}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">
-                        {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
+                        {formatQuoteCurrency(quote.total_amount, quote.currency_code, locale)}
                       </td>
                       <td className="px-5 py-4">
                         <Link
@@ -331,15 +333,15 @@ export default async function QuotesPage({ searchParams }: Props) {
                       </p>
                     </div>
                     <span className="shrink-0 rounded-md bg-[var(--pg-surface-subtle)] px-2 py-1 text-xs font-medium text-[var(--pg-text-muted)]">
-                      {quote.quote_number ?? quoteStatusLabel(quote.status)}
+                      {quote.quote_number ?? quoteStatusLabel(quote.status, locale)}
                     </span>
                   </div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
                     <span className="text-[var(--pg-text-muted)]">
-                      {formatQuoteDate(quote.issue_date)} · ID {quote.id.slice(0, 8).toUpperCase()}
+                      {formatQuoteDate(quote.issue_date, locale)} · ID {quote.id.slice(0, 8).toUpperCase()}
                     </span>
                     <span className="font-semibold tabular-nums text-[var(--pg-text)]">
-                      {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
+                      {formatQuoteCurrency(quote.total_amount, quote.currency_code, locale)}
                     </span>
                   </div>
                   <Link

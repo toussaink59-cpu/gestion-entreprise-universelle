@@ -32,17 +32,15 @@ export function escapeHtml(value: string): string {
   });
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  employee: "Employé",
-  finance: "Finance",
-  sales_purchasing: "Commercial / achats",
-  auditor: "Auditeur",
-  company_admin: "Administrateur d’entreprise",
-  owner: "Propriétaire",
+export type InvitationEmailLocale = "fr" | "en";
+
+const ROLE_LABELS: Record<InvitationEmailLocale, Record<string, string>> = {
+  fr: { employee: "Employé", finance: "Finance", sales_purchasing: "Commercial / achats", auditor: "Auditeur", company_admin: "Administrateur d’entreprise", owner: "Propriétaire" },
+  en: { employee: "Employee", finance: "Finance", sales_purchasing: "Sales / purchasing", auditor: "Auditor", company_admin: "Company administrator", owner: "Owner" },
 };
 
-export function roleLabelForEmail(roleCode: string): string {
-  return ROLE_LABELS[roleCode] ?? "Membre";
+export function roleLabelForEmail(roleCode: string, locale: InvitationEmailLocale = "fr"): string {
+  return ROLE_LABELS[locale][roleCode] ?? (locale === "en" ? "Member" : "Membre");
 }
 
 export function isMemberInvitationEmailConfigured(): boolean {
@@ -65,15 +63,29 @@ export function buildInvitationEmail(params: {
   roleLabel: string;
   inviterName: string;
   acceptUrl: string;
+  locale?: InvitationEmailLocale;
 }): { subject: string; html: string; text: string } {
+  const locale = params.locale ?? "fr";
   const company = escapeHtml(params.companyName);
   const role = escapeHtml(params.roleLabel);
   const inviter = escapeHtml(params.inviterName);
   const urlHtml = escapeHtml(params.acceptUrl);
+  const french = locale === "fr";
+  const subject = french ? `Invitation à rejoindre ${params.companyName} sur PolyGest` : `Invitation to join ${params.companyName} on PolyGest`;
+  const heading = french ? "Tu es invité(e) à rejoindre une entreprise" : "You are invited to join a company";
+  const invitation = french ? `${inviter} t’invite à rejoindre <strong>${company}</strong> avec le rôle <strong>${role}</strong>.` : `${inviter} invited you to join <strong>${company}</strong> as <strong>${role}</strong>.`;
+  const confirmation = french ? "Confirme que tu as accès à cette adresse e-mail. Pour des raisons de sécurité, le propriétaire devra encore activer ton accès après vérification." : "Confirm that you have access to this email address. For security, the owner must still review and activate your access.";
+  const button = french ? "Confirmer l’invitation" : "Confirm invitation";
+  const expiry = french ? "Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message." : "This one-time link expires in 7 days. If you were not expecting this invitation, you can ignore this message.";
+  const teamLabel = french ? "ÉQUIPE" : "TEAM";
+  const footerLabel = french ? "Gestion d’entreprise" : "Business management";
+  const text = french
+    ? `${params.inviterName} t’invite à rejoindre ${params.companyName} sur PolyGest avec le rôle ${params.roleLabel}. Confirme l’accès à ton adresse e-mail : ${params.acceptUrl}\n\nLe propriétaire devra encore activer ton accès après vérification. Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.`
+    : `${params.inviterName} invited you to join ${params.companyName} on PolyGest as ${params.roleLabel}. Confirm access to your email address: ${params.acceptUrl}\n\nThe owner must still review and activate your access. This one-time link expires in 7 days. If you were not expecting this invitation, ignore this message.`;
   return {
-    subject: `Invitation à rejoindre ${params.companyName} sur PolyGest`,
-    html: `<!doctype html><html lang="fr"><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a"><main style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px"><p style="font-size:12px;font-weight:bold;letter-spacing:2px;color:#1d4ed8">POLYGEST · ÉQUIPE</p><h1 style="font-size:24px">Tu es invité(e) à rejoindre une entreprise</h1><p>${inviter} t’invite à rejoindre <strong>${company}</strong> avec le rôle <strong>${role}</strong>.</p><p>Confirme que tu as accès à cette adresse e-mail. Pour des raisons de sécurité, le propriétaire devra encore activer ton accès après vérification.</p><p style="margin:28px 0"><a href="${urlHtml}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:bold;display:inline-block">Confirmer l’invitation</a></p><p style="font-size:13px;color:#64748b">Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.</p><p style="font-size:12px;color:#94a3b8">PolyGest · Gestion d’entreprise</p></main></body></html>`,
-    text: `${params.inviterName} t’invite à rejoindre ${params.companyName} sur PolyGest avec le rôle ${params.roleLabel}. Confirme l’accès à ton adresse e-mail : ${params.acceptUrl}\n\nLe propriétaire devra encore activer ton accès après vérification. Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.`,
+    subject,
+    html: `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a"><main style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px"><p style="font-size:12px;font-weight:bold;letter-spacing:2px;color:#1d4ed8">POLYGEST · ${teamLabel}</p><h1 style="font-size:24px">${heading}</h1><p>${invitation}</p><p>${confirmation}</p><p style="margin:28px 0"><a href="${urlHtml}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:bold;display:inline-block">${button}</a></p><p style="font-size:13px;color:#64748b">${expiry}</p><p style="font-size:12px;color:#94a3b8">PolyGest · ${footerLabel}</p></main></body></html>`,
+    text,
   };
 }
 
@@ -82,6 +94,7 @@ export async function sendMemberInvitationEmail(params: {
   companyName: string;
   roleCode: string;
   inviterName: string;
+  locale?: InvitationEmailLocale;
   token: string;
   idempotencyKey: string;
 }): Promise<InvitationEmailResult> {
@@ -95,9 +108,10 @@ export async function sendMemberInvitationEmail(params: {
   url.searchParams.set("token", params.token);
   const email = buildInvitationEmail({
     companyName: params.companyName,
-    roleLabel: roleLabelForEmail(params.roleCode),
-    inviterName: params.inviterName || "Un administrateur PolyGest",
+    roleLabel: roleLabelForEmail(params.roleCode, params.locale),
+    inviterName: params.inviterName || (params.locale === "en" ? "A PolyGest administrator" : "Un administrateur PolyGest"),
     acceptUrl: url.toString(),
+    locale: params.locale,
   });
   try {
     const response = await fetch("https://api.resend.com/emails", {

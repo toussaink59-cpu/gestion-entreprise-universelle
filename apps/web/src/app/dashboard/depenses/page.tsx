@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { getLocale } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { ExpenseCompanyChooser } from "./company-chooser";
@@ -60,6 +61,7 @@ function Message({
 export default async function ExpensesPage({ searchParams }: Props) {
   await connection();
   const params = await searchParams;
+  const locale = (await getLocale()) as "fr" | "en";
   const workspace = await getExpenseWorkspace(params.company);
 
   if (workspace.status === "error") {
@@ -218,7 +220,7 @@ export default async function ExpensesPage({ searchParams }: Props) {
                   {expenses.map((expense) => (
                     <tr key={expense.id} className="border-t border-[var(--pg-border)] align-top hover:bg-[var(--pg-surface-subtle)]">
                       <td className="whitespace-nowrap px-5 py-4 text-[var(--pg-text-muted)]">
-                        {formatExpenseDate(expense.expense_date)}
+                        {formatExpenseDate(expense.expense_date, locale)}
                       </td>
                       <td className="max-w-md px-5 py-4">
                         <span className="block font-medium text-[var(--pg-text)]">{expense.category}</span>
@@ -228,7 +230,7 @@ export default async function ExpensesPage({ searchParams }: Props) {
                         {expense.supplier_id ? supplierNames.get(expense.supplier_id) ?? "Fournisseur non disponible" : "Non renseigné"}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">
-                        {formatExpenseCurrency(expense.amount, expense.currency_code)}
+                        {formatExpenseCurrency(expense.amount, expense.currency_code, locale)}
                       </td>
                       <td className="px-5 py-4 text-[var(--pg-text-muted)]">Brouillon</td>
                     </tr>
@@ -246,11 +248,11 @@ export default async function ExpensesPage({ searchParams }: Props) {
                       <p className="mt-1 break-words text-sm text-[var(--pg-text-muted)]">{expense.description}</p>
                     </div>
                     <p className="shrink-0 text-right text-sm font-semibold tabular-nums text-[var(--pg-text)]">
-                      {formatExpenseCurrency(expense.amount, expense.currency_code)}
+                      {formatExpenseCurrency(expense.amount, expense.currency_code, locale)}
                     </p>
                   </div>
                   <p className="text-xs text-[var(--pg-text-muted)]">
-                    {formatExpenseDate(expense.expense_date)}
+                    {formatExpenseDate(expense.expense_date, locale)}
                     {" · "}
                     {expense.supplier_id ? supplierNames.get(expense.supplier_id) ?? "Fournisseur non disponible" : "Fournisseur non renseigné"}
                     {" · Brouillon"}
