@@ -236,7 +236,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Répertoires"
+        eyebrow={t("eyebrow")}
         title={pageTitle}
         description={t("description", { company: selectedCompany.trade_name || selectedCompany.legal_name })}
         actions={

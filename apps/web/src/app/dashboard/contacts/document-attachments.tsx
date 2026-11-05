@@ -197,7 +197,7 @@ export function DocumentAttachments({
           body: JSON.stringify({ documentId, action: "cancel" }),
         }).catch(() => undefined);
       }
-      setMessage("Le service de documents est momentanément indisponible.");
+      setMessage(t("messages.serviceUnavailable"));
       setMessageIsError(true);
     } finally {
       setUploading(false);
@@ -292,7 +292,7 @@ export function DocumentAttachments({
                         rel="noreferrer"
                         className="mt-1 inline-block text-xs font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
                       >
-                        Télécharger
+                        {t("download")}
                       </a>
                     )}
                   </li>
