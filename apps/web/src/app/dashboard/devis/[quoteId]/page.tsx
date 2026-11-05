@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { QuoteDraftForm } from "../quote-draft-form";
 import {
@@ -12,7 +12,6 @@ import {
 import { cancelQuote, recordQuoteResponse, sendQuote } from "../actions";
 import {
   QUOTE_RESPONSE_METHODS,
-  QUOTE_RESPONSE_METHOD_LABELS,
 } from "@/lib/security/quote-response-validation";
 import { QuoteCompanyChooser } from "../company-chooser";
 import { getQuoteWorkspace, isQuoteUuid } from "../workspace";
@@ -73,16 +72,10 @@ type QuoteLineRecord = {
 const SECONDARY_BUTTON =
   "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
 
-function Notice({
-  title,
-  message,
-}: {
-  title: string;
-  message: string;
-}) {
+function Notice({ title, message, eyebrow, back }: { title: string; message: string; eyebrow: string; back: string }) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <PageHeader eyebrow="PolyGest · Commercial" title={title} />
+      <PageHeader eyebrow={eyebrow} title={title} />
       <p
         role="alert"
         className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
@@ -94,7 +87,7 @@ function Notice({
           href="/dashboard/devis"
           className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
         >
-          Retour aux devis
+          {back}
         </Link>
       </p>
     </main>
@@ -106,6 +99,7 @@ function discountLabel(
   value: string,
   currencyCode: string,
   locale: "fr" | "en",
+  noneLabel: string,
 ): string {
   if (type === "percentage") {
     return formatQuoteQuantity(value, locale) + " %";
@@ -113,7 +107,7 @@ function discountLabel(
   if (type === "fixed") {
     return formatQuoteCurrency(value, currencyCode, locale);
   }
-  return "Aucune";
+  return noneLabel;
 }
 
 export default async function QuoteDetailPage({
@@ -122,6 +116,10 @@ export default async function QuoteDetailPage({
 }: Props) {
   await connection();
   const locale = (await getLocale()) as "fr" | "en";
+  const t = await getTranslations("Quotes.Detail");
+  const eyebrow = t("eyebrow");
+  const back = t("back");
+  const methodLabels = { email: t("methods.email"), whatsapp: t("methods.whatsapp"), phone: t("methods.phone"), signed_document: t("methods.signed_document"), in_person: t("methods.in_person"), other: t("methods.other") };
   const [routeParams, queryParams] = await Promise.all([
     params,
     searchParams,
@@ -129,14 +127,11 @@ export default async function QuoteDetailPage({
   const workspace = await getQuoteWorkspace(queryParams.company);
 
   if (workspace.status === "error") {
-    return <Notice title="Devis" message={workspace.message} />;
+    return <Notice title={t("title")} message={t("workspaceError")} eyebrow={eyebrow} back={back} />;
   }
   if (workspace.status === "denied") {
     return (
-      <Notice
-        title="Devis"
-        message="Cette entreprise n’est pas accessible avec ton compte."
-      />
+      <Notice title={t("title")} message={t("companyDenied")} eyebrow={eyebrow} back={back} />
     );
   }
   if (workspace.status === "choose") {
@@ -149,18 +144,12 @@ export default async function QuoteDetailPage({
   }
   if (!workspace.canRead) {
     return (
-      <Notice
-        title="Devis"
-        message="Ton rôle ne permet pas de consulter les devis de cette entreprise."
-      />
+      <Notice title={t("title")} message={t("readDenied")} eyebrow={eyebrow} back={back} />
     );
   }
   if (!isQuoteUuid(routeParams.quoteId)) {
     return (
-      <Notice
-        title="Devis introuvable"
-        message="Ce brouillon n’est pas accessible dans l’entreprise sélectionnée."
-      />
+      <Notice title={t("notFoundTitle")} message={t("notFound")} eyebrow={eyebrow} back={back} />
     );
   }
 
@@ -176,10 +165,7 @@ export default async function QuoteDetailPage({
   if (quoteError) {
     console.error("Quote detail load failed:", { code: quoteError.code });
     return (
-      <Notice
-        title="Devis indisponible"
-        message="Impossible de charger ce brouillon. Vérifie tes permissions et réessaie."
-      />
+      <Notice title={t("unavailableTitle")} message={t("loadFailed")} eyebrow={eyebrow} back={back} />
     );
   }
   if (!quoteData) {
@@ -204,10 +190,7 @@ export default async function QuoteDetailPage({
   if (lineError) {
     console.error("Quote line detail load failed:", { code: lineError.code });
     return (
-      <Notice
-        title="Lignes indisponibles"
-        message="Les informations des lignes de ce brouillon ne peuvent pas être chargées."
-      />
+      <Notice title={t("linesUnavailableTitle")} message={t("linesLoadFailed")} eyebrow={eyebrow} back={back} />
     );
   }
 
@@ -233,7 +216,7 @@ export default async function QuoteDetailPage({
   const selectedCustomer = allCustomers.find(
     (customer) => customer.id === quote.customer_id,
   );
-  const customerName = selectedCustomer?.name ?? "Client non consultable";
+  const customerName = selectedCustomer?.name ?? t("customerUnavailable");
   const customers: QuoteCustomerOption[] = allCustomers.map((customer) => ({
     id: customer.id,
     name: customer.name,
@@ -264,45 +247,35 @@ export default async function QuoteDetailPage({
   const companyQuery =
     "?company=" + encodeURIComponent(workspace.company.id);
   const successMessage =
-    queryParams.success === "saved"
-      ? "Le brouillon a été enregistré."
-      : queryParams.success === "sent"
-        ? "Le devis a été transmis et numéroté. Il n’est plus modifiable."
-        : queryParams.success === "accepted"
-          ? "L’acceptation du client est enregistrée."
-          : queryParams.success === "rejected"
-            ? "Le refus du client est enregistré."
-            : queryParams.success === "cancelled"
-              ? "Le devis est annulé."
-              : null;
+    queryParams.success === "saved" ? t("success.saved") : queryParams.success === "sent" ? t("success.sent") : queryParams.success === "accepted" ? t("success.accepted") : queryParams.success === "rejected" ? t("success.rejected") : queryParams.success === "cancelled" ? t("success.cancelled") : null;
   const actionErrorMessage = (() => {
     switch (queryParams.action_error) {
       case "permission":
-        return "Ton rôle ne permet pas cette opération.";
+        return t("actionErrors.permission");
       case "state":
-        return "L’état du devis a changé : recharge la page.";
+        return t("actionErrors.state");
       case "invalid":
-        return "Vérifie la méthode et la référence de preuve (obligatoires pour une acceptation), et que le devis n’est pas expiré.";
+        return t("actionErrors.invalid");
       case "reason":
-        return "Indique un motif d’annulation de 3 à 500 caractères.";
+        return t("actionErrors.reason");
       case undefined:
         return null;
       default:
-        return "L’opération a échoué. Réessaie, ou contacte l’administrateur si le problème continue.";
+        return t("actionErrors.generic");
     }
   })();
   const sendErrorMessage = (() => {
     switch (queryParams.send_error) {
       case "permission":
-        return "Ton rôle ne permet pas de transmettre ce devis.";
+        return t("sendErrors.permission");
       case "not-draft":
-        return "Ce devis a déjà été transmis.";
+        return t("sendErrors.notDraft");
       case "invalid":
-        return "Le devis ne peut pas être transmis : vérifie qu’il a au moins une ligne, que sa date de validité n’est pas dépassée et que le client est actif.";
+        return t("sendErrors.invalid");
       case undefined:
         return null;
       default:
-        return "La transmission a échoué. Réessaie, ou contacte l’administrateur si le problème continue.";
+        return t("sendErrors.generic");
     }
   })();
   const isDraft = quote.status === "draft";
@@ -331,19 +304,19 @@ export default async function QuoteDetailPage({
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Commercial"
-        title={isDraft ? "Devis brouillon" : "Devis " + (quote.quote_number ?? "")}
+        eyebrow={eyebrow}
+        title={isDraft ? t("draftTitle") : t("quoteTitle", { number: quote.quote_number ?? "" })}
         description={
           (workspace.company.trade_name || workspace.company.legal_name) +
-          " · ID interne " +
+          " · " + t("internalId") + " " +
           quote.id.slice(0, 8).toUpperCase() +
           (isDraft
-            ? " · Aucun numéro attribué."
+            ? " · " + t("noNumber")
             : " · " + quoteStatusLabel(quote.status, locale) + ".")
         }
         actions={
           <Link href={cancelHref} className={SECONDARY_BUTTON}>
-            Retour aux devis
+            {t("back")}
           </Link>
         }
       />
@@ -361,7 +334,7 @@ export default async function QuoteDetailPage({
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <div>
             <p className="text-xs font-medium text-[var(--pg-text-muted)]">
-              Client
+              {t("customer")}
             </p>
             <p className="mt-1 font-semibold text-[var(--pg-text)]">
               {customerName}
@@ -369,7 +342,7 @@ export default async function QuoteDetailPage({
           </div>
           <div>
             <p className="text-xs font-medium text-[var(--pg-text-muted)]">
-              Date du devis
+              {t("issueDate")}
             </p>
             <p className="mt-1 font-medium text-[var(--pg-text)]">
               {formatQuoteDate(quote.issue_date, locale)}
@@ -377,7 +350,7 @@ export default async function QuoteDetailPage({
           </div>
           <div>
             <p className="text-xs font-medium text-[var(--pg-text-muted)]">
-              Valable jusqu’au
+              {t("validUntil")}
             </p>
             <p className="mt-1 font-medium text-[var(--pg-text)]">
               {formatQuoteDate(quote.valid_until, locale)}
@@ -385,7 +358,7 @@ export default async function QuoteDetailPage({
           </div>
           <div>
             <p className="text-xs font-medium text-[var(--pg-text-muted)]">
-              {isDraft ? "Total du brouillon" : "Total"}
+              {isDraft ? t("draftTotal") : t("total")}
             </p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-[var(--pg-text)]">
               {formatQuoteCurrency(quote.total_amount, quote.currency_code, locale)}
@@ -394,8 +367,8 @@ export default async function QuoteDetailPage({
         </div>
         <p className="mt-4 text-sm text-[var(--pg-text-muted)]">
           {isDraft
-            ? "Ce document est encore en préparation. Il n’est ni numéroté, ni transmis, ni utilisable comme facture."
-            : "Numéro provisoire interne aux devis, sans valeur de numéro de facture. Ce document n’est pas une facture."}
+            ? t("draftNotice")
+            : t("sentNotice")}
         </p>
       </section>
 
@@ -410,42 +383,41 @@ export default async function QuoteDetailPage({
 
       {quote.status === "accepted" ? (
         <p className="mb-5 rounded-md border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-sm text-[#285C45]">
-          Accepté le {quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10), locale) : "—"}
+          {t("acceptedOn", { date: quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10), locale) : "—" })}
           {quote.acceptance_method && quote.acceptance_method in QUOTE_RESPONSE_METHOD_LABELS
             ? " · " + QUOTE_RESPONSE_METHOD_LABELS[quote.acceptance_method as keyof typeof QUOTE_RESPONSE_METHOD_LABELS]
             : ""}
-          {quote.acceptance_reference ? " · Preuve : " + quote.acceptance_reference : ""}
+          {quote.acceptance_reference ? " · " + t("proof") + ": " + quote.acceptance_reference : ""}
         </p>
       ) : null}
 
       {quote.status === "rejected" ? (
         <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Refusé par le client le {quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10), locale) : "—"}.
+          {t("rejectedOn", { date: quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10), locale) : "—" })}
         </p>
       ) : null}
 
       {quote.status === "cancelled" ? (
         <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Annulé le {quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10), locale) : "—"}
-          {quote.cancellation_reason ? " · Motif : " + quote.cancellation_reason : ""}
+          {t("cancelledOn", { date: quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10), locale) : "—" })}
+          {quote.cancellation_reason ? " · " + t("reason") + ": " + quote.cancellation_reason : ""}
         </p>
       ) : null}
 
       {quote.status === "sent" && workspace.canSend ? (
         <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-            Réponse du client
+            {t("responseTitle")}
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            Une acceptation exige une méthode et une référence de preuve (par exemple
-            la date d’un courriel ou d’un message). Une réponse enregistrée est définitive.
+            {t("responseDescription")}
           </p>
           <form action={recordQuoteResponse} className="mt-4 grid gap-4 sm:grid-cols-2">
             <input type="hidden" name="company_id" value={workspace.company.id} />
             <input type="hidden" name="quote_id" value={quote.id} />
             <div>
               <label htmlFor="decision" className="block text-sm font-medium text-[var(--pg-text)]">
-                Décision du client
+                {t("decision")}
               </label>
               <select
                 id="decision"
@@ -454,14 +426,14 @@ export default async function QuoteDetailPage({
                 defaultValue=""
                 className="mt-1 min-h-11 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)]"
               >
-                <option value="" disabled>Choisir…</option>
-                <option value="accepted">Devis accepté</option>
-                <option value="rejected">Devis refusé</option>
+                <option value="" disabled>{t("choose")}</option>
+                <option value="accepted">{t("accepted")}</option>
+                <option value="rejected">{t("rejected")}</option>
               </select>
             </div>
             <div>
               <label htmlFor="method" className="block text-sm font-medium text-[var(--pg-text)]">
-                Méthode (obligatoire si accepté)
+                {t("method")}
               </label>
               <select
                 id="method"
@@ -472,14 +444,14 @@ export default async function QuoteDetailPage({
                 <option value="">—</option>
                 {QUOTE_RESPONSE_METHODS.map((method) => (
                   <option key={method} value={method}>
-                    {QUOTE_RESPONSE_METHOD_LABELS[method]}
+                    {methodLabels[method]}
                   </option>
                 ))}
               </select>
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="reference" className="block text-sm font-medium text-[var(--pg-text)]">
-                Référence de preuve (obligatoire si accepté)
+                {t("reference")}
               </label>
               <input
                 id="reference"
@@ -494,7 +466,7 @@ export default async function QuoteDetailPage({
                 type="submit"
                 className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
               >
-                Enregistrer la réponse
+                {t("saveResponse")}
               </button>
             </div>
           </form>
@@ -507,15 +479,14 @@ export default async function QuoteDetailPage({
             Annuler le devis
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            Réservé au propriétaire et à l’administrateur. Le devis annulé reste consultable
-            et son numéro n’est jamais réattribué.
+            {t("cancelDescription")}
           </p>
           <form action={cancelQuote} className="mt-4 flex flex-wrap items-end gap-3">
             <input type="hidden" name="company_id" value={workspace.company.id} />
             <input type="hidden" name="quote_id" value={quote.id} />
             <div className="min-w-64 flex-1">
               <label htmlFor="cancellation_reason" className="block text-sm font-medium text-[var(--pg-text)]">
-                Motif de l’annulation
+                {t("cancelReason")}
               </label>
               <input
                 id="cancellation_reason"
@@ -552,9 +523,7 @@ export default async function QuoteDetailPage({
             Transmettre le devis
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            La transmission attribue un numéro provisoire (D-AAAA-NNNN) et conserve
-            une copie des informations du client. Le devis ne sera plus modifiable.
-            Enregistre d’abord tes modifications en cours.
+            {t("sendDescription")}
           </p>
           <form action={sendQuote} className="mt-4">
             <input type="hidden" name="company_id" value={workspace.company.id} />
@@ -563,7 +532,7 @@ export default async function QuoteDetailPage({
               type="submit"
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
             >
-              Transmettre et numéroter
+              {t("sendButton")}
             </button>
           </form>
         </section>
@@ -574,7 +543,7 @@ export default async function QuoteDetailPage({
           role="alert"
           className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
         >
-          Impossible de charger la liste des clients nécessaire à la modification.
+          {t("customerLoadFailed")}
         </p>
       ) : null}
 
@@ -585,8 +554,7 @@ export default async function QuoteDetailPage({
               role="status"
               className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
             >
-              Aucun client actif n’est disponible. Réactive une fiche client avant
-              de modifier ce devis.
+              {t("noActiveCustomer")}
             </p>
           ) : null}
           <QuoteDraftForm
@@ -601,28 +569,28 @@ export default async function QuoteDetailPage({
         <section className="space-y-5">
           <div>
             <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-              Lignes du devis
+              {t("linesTitle")}
             </h2>
             <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-              Consultation en lecture seule.
+              {t("readOnly")}
             </p>
           </div>
 
           {lines.length === 0 ? (
             <p className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-              Aucune ligne disponible pour ce brouillon.
+              {t("noLines")}
             </p>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)]">
               <table className="w-full min-w-[760px] border-collapse text-left text-sm">
                 <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]">
                   <tr>
-                    <th className="px-4 py-3 font-semibold">Description</th>
-                    <th className="px-4 py-3 text-right font-semibold">Quantité</th>
-                    <th className="px-4 py-3 font-semibold">Unité</th>
-                    <th className="px-4 py-3 text-right font-semibold">Prix unitaire</th>
-                    <th className="px-4 py-3 font-semibold">Remise</th>
-                    <th className="px-4 py-3 text-right font-semibold">Total ligne</th>
+                    <th className="px-4 py-3 font-semibold">{t("columns.description")}</th>
+                    <th className="px-4 py-3 text-right font-semibold">{t("columns.quantity")}</th>
+                    <th className="px-4 py-3 font-semibold">{t("columns.unit")}</th>
+                    <th className="px-4 py-3 text-right font-semibold">{t("columns.unitPrice")}</th>
+                    <th className="px-4 py-3 font-semibold">{t("columns.discount")}</th>
+                    <th className="px-4 py-3 text-right font-semibold">{t("columns.lineTotal")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -649,6 +617,7 @@ export default async function QuoteDetailPage({
                           line.discount_value,
                           quote.currency_code,
                           locale,
+                          t("none"),
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">
@@ -662,11 +631,11 @@ export default async function QuoteDetailPage({
           )}
 
           <dl className="ml-auto grid max-w-md grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--pg-border)] pt-4 text-sm">
-            <dt className="text-[var(--pg-text-muted)]">Sous-total</dt>
+            <dt className="text-[var(--pg-text-muted)]">{t("subtotal")}</dt>
             <dd className="text-right tabular-nums text-[var(--pg-text)]">
               {formatQuoteCurrency(quote.subtotal_amount, quote.currency_code, locale)}
             </dd>
-            <dt className="text-[var(--pg-text-muted)]">Remises</dt>
+            <dt className="text-[var(--pg-text-muted)]">{t("discounts")}</dt>
             <dd className="text-right tabular-nums text-[var(--pg-text)]">
               {formatQuoteCurrency(quote.discount_amount, quote.currency_code, locale)}
             </dd>
@@ -681,7 +650,7 @@ export default async function QuoteDetailPage({
           {quote.terms ? (
             <section className="border-t border-[var(--pg-border)] pt-4">
               <h3 className="font-semibold text-[var(--pg-text)]">
-                Conditions commerciales
+                {t("terms")}
               </h3>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">
                 {quote.terms}
@@ -692,7 +661,7 @@ export default async function QuoteDetailPage({
           {quote.notes ? (
             <section className="border-t border-[var(--pg-border)] pt-4">
               <h3 className="font-semibold text-[var(--pg-text)]">
-                Notes internes
+                {t("notes")}
               </h3>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">
                 {quote.notes}
