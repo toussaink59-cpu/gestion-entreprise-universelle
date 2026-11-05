@@ -606,5 +606,86 @@
       "invalidCompanyData": "Les informations de l’entreprise sont invalides. Vérifie les noms saisis.",
       "creationFailed": "La création a échoué. Vérifie tes droits et réessaie."
     }
+  },
+  "Expenses": {
+    "Errors": {
+      "membershipAccess": "Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.",
+      "companies": "Impossible de charger les entreprises accessibles.",
+      "noActiveCompanies": "Aucune entreprise active n’est accessible pour les dépenses.",
+      "companyNotAccessible": "Cette entreprise n’est pas accessible avec ton compte.",
+      "readDenied": "Ton rôle ne permet pas de consulter les dépenses de cette entreprise.",
+      "createDenied": "Ton rôle permet de consulter les dépenses, mais pas de créer un brouillon.",
+      "loadFailed": "Impossible de charger les brouillons. Vérifie tes droits et réessaie."
+    },
+    "Chooser": {
+      "eyebrow": "PolyGest · Finance",
+      "title": "Dépenses",
+      "description": "Sélectionne l’entreprise concernée. Les données de dépenses restent strictement séparées entre les entreprises.",
+      "chooseCompany": "Choisir une entreprise",
+      "open": "Ouvrir",
+      "backDashboard": "Retour au tableau de bord"
+    },
+    "List": {
+      "eyebrow": "PolyGest · Finance",
+      "title": "Dépenses",
+      "description": "{company} · Registre des brouillons de dépenses.",
+      "backDashboard": "Retour au tableau de bord",
+      "newExpense": "Nouvelle dépense",
+      "changeCompany": "Changer d’entreprise",
+      "savedSuccess": "Brouillon enregistré. Aucun paiement ni mouvement de trésorerie n’a été effectué.",
+      "sectionTitle": "Brouillons enregistrés",
+      "sectionDescription": "Ces éléments ne sont ni validés ni considérés comme payés. Aucun mouvement de caisse n’est associé.",
+      "emptyTitle": "Aucun brouillon de dépense",
+      "emptyCanCreate": "Enregistre un premier brouillon pour préparer le suivi des dépenses de cette entreprise.",
+      "emptyReadOnly": "Aucun brouillon n’est disponible pour cette entreprise.",
+      "createDraft": "Créer un brouillon",
+      "columns": {
+        "date": "Date",
+        "categoryDescription": "Catégorie et description",
+        "supplier": "Fournisseur",
+        "amount": "Montant",
+        "status": "Statut"
+      },
+      "supplierUnavailable": "Fournisseur non disponible",
+      "notSpecified": "Non renseigné",
+      "supplierNotSpecified": "Fournisseur non renseigné",
+      "draft": "Brouillon",
+      "showingLimit": "Affichage des 100 brouillons les plus récents."
+    },
+    "Form": {
+      "eyebrow": "PolyGest · Finance",
+      "newTitle": "Nouvelle dépense",
+      "newDescription": "{company} · Création d’un brouillon interne.",
+      "backDashboard": "Retour au tableau de bord",
+      "backExpenses": "Retour aux dépenses",
+      "supplierUnavailable": "La liste des fournisseurs est momentanément indisponible. Tu peux continuer sans associer de fournisseur.",
+      "informationTitle": "Informations sur la dépense",
+      "currencyDescription": "Le brouillon est enregistré dans la devise de l’entreprise ({currencyCode}).",
+      "expenseDate": "Date de la dépense",
+      "category": "Catégorie",
+      "categoryPlaceholder": "Ex. : Transport, fournitures, maintenance",
+      "description": "Description",
+      "descriptionPlaceholder": "Décris l’objet de la dépense",
+      "amount": "Montant ({currencyCode})",
+      "amountPlaceholder": "0",
+      "amountHelp": "Montant positif, jusqu’à quatre décimales. Les taxes ne sont pas calculées dans cette étape.",
+      "supplier": "Fournisseur",
+      "notSpecified": "Non renseigné",
+      "notes": "Notes internes",
+      "saveNotice": "L’enregistrement crée uniquement un brouillon. Aucun paiement, mouvement de caisse, calcul fiscal ou écriture comptable n’est déclenché.",
+      "saving": "Enregistrement…",
+      "saveDraft": "Enregistrer le brouillon",
+      "cancel": "Annuler",
+      "errors": {
+        "context": "Le contexte de l’entreprise ou du fournisseur est invalide. Recharge la page.",
+        "amount": "Saisis un montant strictement positif, avec au plus quatre décimales.",
+        "fields": "Vérifie la date et les champs texte avant d’enregistrer.",
+        "session": "Ta session a expiré. Reconnecte-toi avant de poursuivre.",
+        "access": "Cette entreprise n’est pas accessible avec ton compte.",
+        "permission": "Cette entreprise n’est pas accessible ou ton rôle ne permet pas cette opération.",
+        "invalidData": "Les informations de la dépense sont incohérentes. Vérifie le fournisseur, la date et le montant.",
+        "save": "Impossible d’enregistrer le brouillon. Vérifie les informations et réessaie."
+      }
+    }
   }
 }

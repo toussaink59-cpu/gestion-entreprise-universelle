@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 
 export type ExpenseCompany = {
@@ -31,6 +32,7 @@ const CREATE_ROLES = new Set([
 const UPDATE_ROLES = new Set(["owner", "company_admin", "finance"]);
 
 export async function getExpenseWorkspace(requestedCompanyId?: string) {
+  const t = await getTranslations("Expenses.Errors");
   const supabase = await createClient();
   const {
     data: { user },
@@ -49,7 +51,7 @@ export async function getExpenseWorkspace(requestedCompanyId?: string) {
     return {
       status: "error" as const,
       message:
-        "Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.",
+        t("membershipAccess"),
     };
   }
 
@@ -69,7 +71,7 @@ export async function getExpenseWorkspace(requestedCompanyId?: string) {
   if (companyError) {
     return {
       status: "error" as const,
-      message: "Impossible de charger les entreprises accessibles.",
+      message: t("companies"),
     };
   }
 
@@ -80,7 +82,7 @@ export async function getExpenseWorkspace(requestedCompanyId?: string) {
   if (companies.length === 0) {
     return {
       status: "error" as const,
-      message: "Aucune entreprise active n’est accessible pour les dépenses.",
+      message: t("noActiveCompanies"),
     };
   }
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { ExpenseCompanyChooser } from "./company-chooser";
@@ -33,13 +33,17 @@ const PRIMARY_LINK =
 function Message({
   title,
   message,
+  eyebrow,
+  backDashboard,
 }: {
   title: string;
   message: string;
+  eyebrow: string;
+  backDashboard: string;
 }) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <PageHeader eyebrow="PolyGest · Finance" title={title} />
+      <PageHeader eyebrow={eyebrow} title={title} />
       <p
         role="alert"
         className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
@@ -51,7 +55,7 @@ function Message({
           href="/dashboard"
           className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
         >
-          Retour au tableau de bord
+          {backDashboard}
         </Link>
       </p>
     </main>
@@ -62,16 +66,20 @@ export default async function ExpensesPage({ searchParams }: Props) {
   await connection();
   const params = await searchParams;
   const locale = (await getLocale()) as "fr" | "en";
+  const t = await getTranslations("Expenses.List");
+  const tErrors = await getTranslations("Expenses.Errors");
   const workspace = await getExpenseWorkspace(params.company);
 
   if (workspace.status === "error") {
-    return <Message title="Dépenses" message={workspace.message} />;
+    return <Message title={t("title")} eyebrow={t("eyebrow")} backDashboard={t("backDashboard")} message={workspace.message} />;
   }
   if (workspace.status === "denied") {
     return (
       <Message
-        title="Dépenses"
-        message="Cette entreprise n’est pas accessible avec ton compte."
+        title={t("title")}
+        eyebrow={t("eyebrow")}
+        backDashboard={t("backDashboard")}
+        message={tErrors("companyNotAccessible")}
       />
     );
   }
@@ -81,8 +89,10 @@ export default async function ExpensesPage({ searchParams }: Props) {
   if (!workspace.canRead) {
     return (
       <Message
-        title="Dépenses"
-        message="Ton rôle ne permet pas de consulter les dépenses de cette entreprise."
+        title={t("title")}
+        eyebrow={t("eyebrow")}
+        backDashboard={t("backDashboard")}
+        message={tErrors("readDenied")}
       />
     );
   }
@@ -101,8 +111,10 @@ export default async function ExpensesPage({ searchParams }: Props) {
     console.error("Expense list failed:", { code: error.code });
     return (
       <Message
-        title="Dépenses"
-        message="Impossible de charger les brouillons. Vérifie tes droits et réessaie."
+        title={t("title")}
+        eyebrow={t("eyebrow")}
+        backDashboard={t("backDashboard")}
+        message={tErrors("loadFailed")}
       />
     );
   }
@@ -140,17 +152,14 @@ export default async function ExpensesPage({ searchParams }: Props) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Finance"
-        title="Dépenses"
-        description={
-          (workspace.company.trade_name || workspace.company.legal_name) +
-          " · Registre des brouillons de dépenses."
-        }
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("description", { company: workspace.company.trade_name || workspace.company.legal_name })}
         actions={
           <>
             {workspace.canCreate ? (
               <Link href={"/dashboard/depenses/nouveau" + companyQuery} className={PRIMARY_LINK}>
-                Nouvelle dépense
+                {t("newExpense")}
               </Link>
             ) : null}
             {workspace.companies.length > 1 ? (
@@ -158,7 +167,7 @@ export default async function ExpensesPage({ searchParams }: Props) {
                 href="/dashboard/depenses"
                 className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
               >
-                Changer d’entreprise
+                {t("changeCompany")}
               </Link>
             ) : null}
           </>
@@ -171,33 +180,33 @@ export default async function ExpensesPage({ searchParams }: Props) {
           aria-live="polite"
           className="mb-5 rounded-md border border-[#CFE0D4] bg-[#EEF5F0] p-4 text-sm text-[#285C45]"
         >
-          Brouillon enregistré. Aucun paiement ni mouvement de trésorerie n’a été effectué.
+          {t("savedSuccess")}
         </p>
       ) : null}
 
       <section className="overflow-hidden rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)]">
         <div className="border-b border-[var(--pg-border)] p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-            Brouillons enregistrés
+            {t("sectionTitle")}
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            Ces éléments ne sont ni validés ni considérés comme payés. Aucun mouvement de caisse n’est associé.
+            {t("sectionDescription")}
           </p>
         </div>
 
         {expenses.length === 0 ? (
           <div className="p-5 sm:p-6">
             <EmptyState
-              title="Aucun brouillon de dépense"
+              title={t("emptyTitle")}
               description={
                 workspace.canCreate
-                  ? "Enregistre un premier brouillon pour préparer le suivi des dépenses de cette entreprise."
-                  : "Aucun brouillon n’est disponible pour cette entreprise."
+                  ? t("emptyCanCreate")
+                  : t("emptyReadOnly")
               }
               action={
                 workspace.canCreate ? (
                   <Link href={"/dashboard/depenses/nouveau" + companyQuery} className={PRIMARY_LINK}>
-                    Créer un brouillon
+                    {t("createDraft")}
                   </Link>
                 ) : undefined
               }
@@ -209,11 +218,11 @@ export default async function ExpensesPage({ searchParams }: Props) {
               <table className="w-full min-w-[850px] border-collapse text-left text-sm">
                 <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]">
                   <tr>
-                    <th scope="col" className="px-5 py-3 font-semibold">Date</th>
-                    <th scope="col" className="px-5 py-3 font-semibold">Catégorie et description</th>
-                    <th scope="col" className="px-5 py-3 font-semibold">Fournisseur</th>
-                    <th scope="col" className="px-5 py-3 text-right font-semibold">Montant</th>
-                    <th scope="col" className="px-5 py-3 font-semibold">Statut</th>
+                    <th scope="col" className="px-5 py-3 font-semibold">{t("columns.date")}</th>
+                    <th scope="col" className="px-5 py-3 font-semibold">{t("columns.categoryDescription")}</th>
+                    <th scope="col" className="px-5 py-3 font-semibold">{t("columns.supplier")}</th>
+                    <th scope="col" className="px-5 py-3 text-right font-semibold">{t("columns.amount")}</th>
+                    <th scope="col" className="px-5 py-3 font-semibold">{t("columns.status")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -227,12 +236,12 @@ export default async function ExpensesPage({ searchParams }: Props) {
                         <span className="mt-1 block break-words text-[var(--pg-text-muted)]">{expense.description}</span>
                       </td>
                       <td className="px-5 py-4 text-[var(--pg-text-muted)]">
-                        {expense.supplier_id ? supplierNames.get(expense.supplier_id) ?? "Fournisseur non disponible" : "Non renseigné"}
+                        {expense.supplier_id ? supplierNames.get(expense.supplier_id) ?? t("supplierUnavailable") : t("notSpecified")}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">
                         {formatExpenseCurrency(expense.amount, expense.currency_code, locale)}
                       </td>
-                      <td className="px-5 py-4 text-[var(--pg-text-muted)]">Brouillon</td>
+                      <td className="px-5 py-4 text-[var(--pg-text-muted)]">{t("draft")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -254,8 +263,8 @@ export default async function ExpensesPage({ searchParams }: Props) {
                   <p className="text-xs text-[var(--pg-text-muted)]">
                     {formatExpenseDate(expense.expense_date, locale)}
                     {" · "}
-                    {expense.supplier_id ? supplierNames.get(expense.supplier_id) ?? "Fournisseur non disponible" : "Fournisseur non renseigné"}
-                    {" · Brouillon"}
+                    {expense.supplier_id ? supplierNames.get(expense.supplier_id) ?? t("supplierUnavailable") : t("supplierNotSpecified")}
+                    {" · " + t("draft")}
                   </p>
                 </li>
               ))}
@@ -266,7 +275,7 @@ export default async function ExpensesPage({ searchParams }: Props) {
 
       {expenses.length > 0 ? (
         <p className="mt-3 text-xs text-[var(--pg-text-muted)]">
-          Affichage des 100 brouillons les plus récents.
+          {t("showingLimit")}
         </p>
       ) : null}
     </main>
