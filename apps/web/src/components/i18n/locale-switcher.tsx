@@ -1,11 +1,5 @@
-import Link from "next/link";
 import type { Locale } from "@/i18n/locale";
-
-function hrefForLocale(locale: Locale, path: string): string {
-  const normalized = path.startsWith("/") ? path : "/" + path;
-  if (locale === "fr") return normalized;
-  return normalized === "/" ? "/en" : "/en" + normalized;
-}
+import { setLocalePreference } from "@/app/auth/locale-actions";
 
 export function LocaleSwitcher({
   locale,
@@ -18,25 +12,33 @@ export function LocaleSwitcher({
 }) {
   return (
     <nav aria-label={label} className="flex items-center gap-2 text-sm">
-      <Link
-        href={hrefForLocale("fr", href)}
-        aria-current={locale === "fr" ? "page" : undefined}
-        className={locale === "fr"
+      <form action={setLocalePreference}>
+        <input type="hidden" name="locale" value="fr" />
+        <input type="hidden" name="route" value={href} />
+        <button
+          type="submit"
+          aria-pressed={locale === "fr"}
+          className={`inline-flex min-h-11 items-center rounded-sm px-1 ${locale === "fr"
           ? "font-semibold text-[var(--pg-text)]"
-          : "text-[var(--pg-text-muted)] underline-offset-4 hover:text-[var(--pg-text)] hover:underline"}
-      >
-        Français
-      </Link>
+          : "text-[var(--pg-text-muted)] underline-offset-4 hover:text-[var(--pg-text)] hover:underline"}`}
+        >
+          Français
+        </button>
+      </form>
       <span aria-hidden="true" className="text-[var(--pg-border)]">|</span>
-      <Link
-        href={hrefForLocale("en", href)}
-        aria-current={locale === "en" ? "page" : undefined}
-        className={locale === "en"
+      <form action={setLocalePreference}>
+        <input type="hidden" name="locale" value="en" />
+        <input type="hidden" name="route" value={href} />
+        <button
+          type="submit"
+          aria-pressed={locale === "en"}
+          className={`inline-flex min-h-11 items-center rounded-sm px-1 ${locale === "en"
           ? "font-semibold text-[var(--pg-text)]"
-          : "text-[var(--pg-text-muted)] underline-offset-4 hover:text-[var(--pg-text)] hover:underline"}
-      >
-        English
-      </Link>
+          : "text-[var(--pg-text-muted)] underline-offset-4 hover:text-[var(--pg-text)] hover:underline"}`}
+        >
+          English
+        </button>
+      </form>
     </nav>
   );
 }
