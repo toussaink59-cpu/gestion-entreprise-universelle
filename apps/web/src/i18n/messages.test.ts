@@ -36,6 +36,8 @@ describe("French and English message catalogs", () => {
     expect(en.Members.roles.owner).toBe("Owner");
     expect(fr.Members.errors.listPermission).toBeTruthy();
     expect(en.Members.errors.listPermission).toBeTruthy();
+    expect(fr.Members.errors.membershipAccess).toBeTruthy();
+    expect(en.Members.errors.membershipAccess).toBeTruthy();
     expect(fr.Companies.submit).toBe("Créer l’entreprise");
     expect(en.Companies.submit).toBe("Create company");
   });

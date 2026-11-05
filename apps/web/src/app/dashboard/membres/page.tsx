@@ -139,7 +139,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     .eq("status", "active");
 
   if (membershipError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Impossible de vérifier les appartenances. Réessaie plus tard.</p><p className="mt-4"><a className="text-blue-700 hover:underline" href="/dashboard">Retour au tableau de bord</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("errors.membershipAccess")}</p><p className="mt-4"><a className="text-blue-700 hover:underline" href="/dashboard">{t("backDashboard")}</a></p></main>;
   }
 
   const memberships = membershipData ?? [];
@@ -247,7 +247,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
           <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">{t("eyebrow")}</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{t("title")}</h1>
           <p className="mt-2 text-slate-600">{company.trade_name || company.legal_name}<span className="mx-2 text-slate-300">/</span>{t("subtitle")}</p>
-          <p className="mt-1 text-sm text-slate-500">Ton rôle : {roleLabel(actorRole, roleLabels)}</p>
+          <p className="mt-1 text-sm text-slate-500">{t("yourRole")}: {roleLabel(actorRole, roleLabels)}</p>
         </div>
         <nav aria-label="{t("moduleNavigation")}" className="flex flex-wrap gap-2">
           <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>{t("dashboard")}</a>

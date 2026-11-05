@@ -360,7 +360,8 @@
       "notFound": "This invitation is no longer pending or is not accessible.",
       "emailNotConfirmed": "The recipient must confirm their email address before activation.",
       "listPermission": "Your role does not allow you to view this company’s member list.",
-      "listFailed": "Unable to load members. Please try again later."
+      "listFailed": "Unable to load members. Please try again later.",
+      "membershipAccess": "Unable to verify company memberships. Please try again later."
     },
     "success": {
       "invited": "The invitation was saved and the confirmation email was sent.",

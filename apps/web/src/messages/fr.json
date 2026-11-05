@@ -360,7 +360,8 @@
       "notFound": "Cette invitation n’est plus en attente ou n’est plus accessible.",
       "emailNotConfirmed": "Le destinataire doit confirmer son adresse e-mail avant l’activation.",
       "listPermission": "Ton rôle ne permet pas de consulter la liste des membres de cette entreprise.",
-      "listFailed": "Impossible de charger les membres. Réessaie plus tard."
+      "listFailed": "Impossible de charger les membres. Réessaie plus tard.",
+      "membershipAccess": "Impossible de vérifier les appartenances. Réessaie plus tard."
     },
     "success": {
       "invited": "L’invitation a été enregistrée et l’e-mail de confirmation a été envoyé.",
