@@ -35,7 +35,7 @@ export function ExpenseDraftForm({
   cancelHref: string;
 }) {
   const t = useTranslations("Expenses.Form");
-  const [state, formAction, pending] = useActionState<ExpenseActionState>(saveExpenseDraft, {
+  const [state, formAction, pending] = useActionState<ExpenseActionState, FormData>(saveExpenseDraft, {
     error: null,
   });
   const [values, setValues] = useState<ExpenseFormValues>({
