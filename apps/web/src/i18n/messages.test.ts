@@ -31,4 +31,12 @@ describe("French and English message catalogs", () => {
     expect(fr.Dashboard.Home.noCompaniesTitle).toBe("Aucune entreprise accessible");
     expect(en.Dashboard.Home.noCompaniesTitle).toBe("No accessible company");
   });
+  it("provide member and company-management copy in both locales", () => {
+    expect(fr.Members.roles.owner).toBe("Propriétaire");
+    expect(en.Members.roles.owner).toBe("Owner");
+    expect(fr.Members.errors.listPermission).toBeTruthy();
+    expect(en.Members.errors.listPermission).toBeTruthy();
+    expect(fr.Companies.submit).toBe("Créer l’entreprise");
+    expect(en.Companies.submit).toBe("Create company");
+  });
 });

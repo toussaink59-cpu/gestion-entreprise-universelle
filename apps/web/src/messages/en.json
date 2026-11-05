@@ -291,5 +291,110 @@
       "completionFailed": "The file was transferred, but its upload session could not be completed.",
       "scanPending": "The file was uploaded. It will remain inaccessible until its security scan is complete."
     }
+  },
+  "Members": {
+    "title": "Members and access",
+    "eyebrow": "PolyGest · Team",
+    "loading": "Loading members…",
+    "selectCompany": "Choose the company you want to manage.",
+    "dashboard": "Dashboard",
+    "myCompanies": "My companies",
+    "manageMembers": "Manage members",
+    "companyNotAccessible": "This company is not accessible with your account.",
+    "subtitle": "Review access and invitations.",
+    "yourRole": "Your role",
+    "moduleNavigation": "Module navigation",
+    "customers": "Customers",
+    "suppliers": "Suppliers",
+    "changeCompany": "Change company",
+    "inviteExistingAccount": "Invite an existing account",
+    "inviteDescription": "Enter the email address of a user who is already registered on PolyGest and choose their role. A confirmation email will be sent. After confirmation, the owner can activate access following a review.",
+    "emailRequired": "Email address *",
+    "emailPlaceholder": "name@company.com",
+    "roleRequired": "Role to assign *",
+    "createInvitation": "Create invitation",
+    "privilegedRolesNotice": "Owner and administrator roles grant extended permissions. Assign them only to people you trust.",
+    "invitationDeliveryNotice": "A confirmation email valid for seven days will be sent. If email delivery fails, a link you can share yourself will be displayed.",
+    "membersTitle": "Company members",
+    "membersDescription": "Pending invitations remain separate from active access.",
+    "emptyTitle": "No members to display",
+    "emptyDescription": "This company’s member list is currently empty.",
+    "columns": {
+      "member": "Member",
+      "role": "Role",
+      "status": "Status",
+      "addedAt": "Added on",
+      "action": "Action"
+    },
+    "polygestUser": "PolyGest user",
+    "userId": "User ID: {id}",
+    "activateAccess": "Activate access",
+    "resendInvitation": "Resend invitation",
+    "confirmedOwnerActivation": "Email confirmed · owner activation required",
+    "noAction": "None",
+    "securityFooter": "Member access and invitation creation are rechecked by Supabase SQL functions and security policies.",
+    "roles": {
+      "employee": "Employee",
+      "finance": "Finance",
+      "salesPurchasing": "Sales / purchasing",
+      "auditor": "Auditor",
+      "companyAdmin": "Company administrator",
+      "owner": "Owner"
+    },
+    "statuses": {
+      "active": "Active",
+      "invitationConfirmed": "Invitation confirmed · activation pending",
+      "invitationPending": "Invitation pending",
+      "revoked": "Revoked"
+    },
+    "errors": {
+      "invalid": "Check the email address, company and selected role.",
+      "access": "This company is not accessible with your account.",
+      "permission": "Your role does not allow you to assign this role or manage members.",
+      "duplicate": "This account already has a membership in this company.",
+      "noAccount": "No active account was found for this address. The person must first create a PolyGest account.",
+      "emailConfig": "Email delivery is not configured. Check the server-side RESEND_API_KEY, RESEND_FROM_EMAIL and NEXT_PUBLIC_APP_URL settings.",
+      "emailFailed": "The invitation was saved, but the email was not sent. Check the Resend configuration and try again.",
+      "emailRateLimit": "Wait at least one minute before resending this email.",
+      "save": "The operation could not be saved. Check permissions and try again.",
+      "notFound": "This invitation is no longer pending or is not accessible.",
+      "emailNotConfirmed": "The recipient must confirm their email address before activation.",
+      "listPermission": "Your role does not allow you to view this company’s member list.",
+      "listFailed": "Unable to load members. Please try again later."
+    },
+    "success": {
+      "invited": "The invitation was saved and the confirmation email was sent.",
+      "invitedLink": "The invitation was saved, but the email was not sent. Share the link below with the invited person.",
+      "resent": "The invitation email was resent.",
+      "activated": "The member’s access was activated."
+    },
+    "linkRegion": "Invitation link",
+    "linkTitle": "Invitation link (valid for 7 days, single use)",
+    "copyLinkAria": "Invitation link to copy",
+    "linkInstructions": "Share this link only with the invited person (WhatsApp, SMS, etc.). It works only when they sign in with the invited email address. The link will no longer be shown after it is read."
+  },
+  "Companies": {
+    "eyebrow": "PolyGest · Companies",
+    "title": "Create a company",
+    "description": "Add a new independent management workspace to your account.",
+    "backDashboard": "Back to dashboard",
+    "informationTitle": "Company information",
+    "informationDescription": "Each company has its own members, directories and management data.",
+    "submit": "Create company",
+    "ownerNotice": "You will become the owner of this new workspace. There is no fixed company limit in the MVP scope.",
+    "form": {
+      "legalName": "Legal name *",
+      "legalPlaceholder": "Registered company name",
+      "tradeName": "Trading name",
+      "optional": "(optional)",
+      "tradePlaceholder": "Name used with your customers"
+    },
+    "errors": {
+      "missingName": "The legal name is required.",
+      "invalidName": "The legal name must contain between 2 and 200 characters.",
+      "invalidTradeName": "The trading name must contain between 2 and 200 characters.",
+      "invalidCompanyData": "The company information is invalid. Check the names you entered.",
+      "creationFailed": "Company creation failed. Check your permissions and try again."
+    }
   }
 }
