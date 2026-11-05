@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { saveQuoteDraft } from "./actions";
 import type {
   QuoteCustomerOption,
@@ -32,6 +33,8 @@ export function QuoteDraftForm({
   initial: QuoteDraftInitialValues;
   cancelHref: string;
 }) {
+  const t = useTranslations("Quotes.Form");
+  const locale = useLocale();
   const [state, formAction, pending] = useActionState(saveQuoteDraft, {
     error: null,
   });
@@ -63,7 +66,7 @@ export function QuoteDraftForm({
         key: String(nextKey),
         description: "",
         quantity: "1",
-        unit_label: "unité",
+        unit_label: locale === "en" ? "unit" : "unité",
         unit_price: "0",
         discount_type: "none",
         discount_value: "0",
@@ -76,6 +79,16 @@ export function QuoteDraftForm({
     if (lines.length <= 1) return;
     setLines((current) => current.filter((line) => line.key !== key));
   }
+
+  const actionError = state.error === "context" ? t("errors.context")
+    : state.error === "lines" ? t("errors.lines")
+    : state.error === "fields" ? t("errors.fields")
+    : state.error === "session" ? t("errors.session")
+    : state.error === "company" ? t("errors.company")
+    : state.error === "permission" ? t("errors.permission")
+    : state.error === "invalidData" ? t("errors.invalidData")
+    : state.error === "save" ? t("errors.save")
+    : state.error ? t("errors.generic") : null;
 
   const linesPayload = JSON.stringify(
     lines.map((line) => ({
@@ -104,23 +117,23 @@ export function QuoteDraftForm({
           aria-live="polite"
           className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]"
         >
-          {state.error}
+          {actionError}
         </p>
       ) : null}
 
       <section className="space-y-5">
         <div>
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-            Informations générales
+            {t("general")}
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            Le document reste un brouillon interne, sans numéro ni transmission.
+            {t("internalDraft")}
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Client *
+            {t("customer")}
             <select
               className={INPUT_CLASS}
               name="customer_id"
@@ -135,14 +148,14 @@ export function QuoteDraftForm({
                   value={customer.id}
                   disabled={!customer.active}
                 >
-                  {customer.name + (customer.active ? "" : " (archivé)")}
+                  {customer.name + (customer.active ? "" : " " + t("archived"))}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Date du devis *
+            {t("issueDate")}
             <input
               className={INPUT_CLASS}
               type="date"
@@ -160,7 +173,7 @@ export function QuoteDraftForm({
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Valable jusqu’au *
+            {t("validUntil")}
             <input
               className={INPUT_CLASS}
               type="date"
@@ -174,7 +187,7 @@ export function QuoteDraftForm({
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)] sm:col-span-2 xl:col-span-3">
-            Objet du devis
+            {t("subject")}
             <input
               className={INPUT_CLASS}
               type="text"
@@ -183,7 +196,7 @@ export function QuoteDraftForm({
               value={subject}
               onChange={(event) => setSubject(event.target.value)}
               disabled={pending}
-              placeholder="Ex. : Travaux d’aménagement"
+              placeholder={t("subjectPlaceholder")}
             />
           </label>
         </div>
@@ -193,11 +206,10 @@ export function QuoteDraftForm({
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--pg-border)] pb-3">
           <div>
             <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-              Lignes du devis
+              {t("lines")}
             </h2>
             <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-              Saisis les quantités, unités, prix et remises. Les montants seront
-              calculés et contrôlés par le serveur en {currencyCode}.
+              {t("linesDescription", { currency: currencyCode })}
             </p>
           </div>
           <button
@@ -206,7 +218,7 @@ export function QuoteDraftForm({
             onClick={addLine}
             disabled={pending || lines.length >= 100}
           >
-            Ajouter une ligne
+            {t("addLine")}
           </button>
         </div>
 
@@ -214,7 +226,7 @@ export function QuoteDraftForm({
           {lines.map((line, index) => (
             <fieldset key={line.key} className="py-5">
               <legend className="mb-3 font-semibold text-[var(--pg-text)]">
-                Ligne {index + 1}
+                {t("lineNumber", { number: index + 1 })}
               </legend>
               <div className="mb-3 flex justify-end">
                 <button
@@ -222,15 +234,15 @@ export function QuoteDraftForm({
                   className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-[var(--pg-text-muted)] underline underline-offset-4 hover:text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)] disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => removeLine(line.key)}
                   disabled={pending || lines.length <= 1}
-                  aria-label={"Supprimer la ligne " + (index + 1)}
+                  aria-label={t("removeLine", { number: index + 1 })}
                 >
-                  Retirer
+                  {t("remove")}
                 </button>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
                 <label className="text-sm font-medium text-[var(--pg-text)] sm:col-span-2 xl:col-span-3">
-                  Description *
+                  {t("description")}
                   <input
                     className={INPUT_CLASS}
                     type="text"
@@ -247,7 +259,7 @@ export function QuoteDraftForm({
                 </label>
 
                 <label className="text-sm font-medium text-[var(--pg-text)]">
-                  Quantité *
+                  {t("quantity")}
                   <input
                     className={INPUT_CLASS}
                     type="text"
@@ -264,7 +276,7 @@ export function QuoteDraftForm({
                 </label>
 
                 <label className="text-sm font-medium text-[var(--pg-text)]">
-                  Unité *
+                  {t("unit")}
                   <input
                     className={INPUT_CLASS}
                     type="text"
@@ -275,12 +287,12 @@ export function QuoteDraftForm({
                       updateLine(line.key, { unit_label: event.target.value })
                     }
                     disabled={pending}
-                    placeholder="unité, heure, jour…"
+                    placeholder={t("unitPlaceholder")}
                   />
                 </label>
 
                 <label className="text-sm font-medium text-[var(--pg-text)]">
-                  Prix unitaire *
+                  {t("unitPrice")}
                   <input
                     className={INPUT_CLASS}
                     type="text"
@@ -297,7 +309,7 @@ export function QuoteDraftForm({
                 </label>
 
                 <label className="text-sm font-medium text-[var(--pg-text)]">
-                  Type de remise
+                  {t("discountType")}
                   <select
                     className={INPUT_CLASS}
                     value={line.discount_type}
@@ -314,14 +326,14 @@ export function QuoteDraftForm({
                     }}
                     disabled={pending}
                   >
-                    <option value="none">Aucune</option>
-                    <option value="percentage">Pourcentage</option>
-                    <option value="fixed">Montant fixe</option>
+                    <option value="none">{t("discountNone")}</option>
+                    <option value="percentage">{t("discountPercentage")}</option>
+                    <option value="fixed">{t("discountFixed")}</option>
                   </select>
                 </label>
 
                 <label className="text-sm font-medium text-[var(--pg-text)]">
-                  Valeur de remise
+                  {t("discountValue")}
                   <input
                     className={INPUT_CLASS}
                     type="text"
@@ -338,10 +350,10 @@ export function QuoteDraftForm({
                   />
                   <span className="mt-1 block text-xs font-normal text-[var(--pg-text-muted)]">
                     {line.discount_type === "percentage"
-                      ? "Pourcentage, maximum 100."
+                      ? t("percentageHelp")
                       : line.discount_type === "fixed"
-                        ? "Montant dans la devise de l’entreprise."
-                        : "Aucune remise appliquée."}
+                        ? t("fixedHelp")
+                        : t("noneHelp")}
                   </span>
                 </label>
               </div>
@@ -351,14 +363,14 @@ export function QuoteDraftForm({
 
         {lines.length >= 100 ? (
           <p className="text-sm text-[var(--pg-text-muted)]">
-            La limite de 100 lignes par devis est atteinte.
+            {t("lineLimit")}
           </p>
         ) : null}
       </section>
 
       <section className="grid gap-4 border-t border-[var(--pg-border)] pt-6 sm:grid-cols-2">
         <label className="text-sm font-medium text-[var(--pg-text)]">
-          Conditions commerciales
+          {t("terms")}
           <textarea
             className={INPUT_CLASS}
             name="terms"
@@ -371,7 +383,7 @@ export function QuoteDraftForm({
         </label>
 
         <label className="text-sm font-medium text-[var(--pg-text)]">
-          Notes internes
+          {t("notes")}
           <textarea
             className={INPUT_CLASS}
             name="notes"
@@ -386,22 +398,21 @@ export function QuoteDraftForm({
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--pg-border)] pt-5">
         <p className="max-w-2xl text-xs leading-5 text-[var(--pg-text-muted)]">
-          Aucun taux de taxe n’est appliqué dans cette tranche. L’enregistrement
-          ne transmet pas le devis et ne crée pas de facture.
+          {t("taxNote")}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <a
             href={cancelHref}
             className={SECONDARY_BUTTON_CLASS}
           >
-            Annuler
+            {t("cancel")}
           </a>
           <button
             type="submit"
             className={PRIMARY_BUTTON_CLASS}
             disabled={pending || customers.filter((customer) => customer.active).length === 0}
           >
-            {pending ? "Enregistrement…" : "Enregistrer le brouillon"}
+            {pending ? t("saving") : t("saveDraft")}
           </button>
         </div>
       </div>

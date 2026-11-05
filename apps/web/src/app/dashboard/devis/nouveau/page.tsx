@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { QuoteDraftForm } from "../quote-draft-form";
@@ -16,16 +17,10 @@ type Props = {
 const SECONDARY_BUTTON =
   "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
 
-function Message({
-  title,
-  message,
-}: {
-  title: string;
-  message: string;
-}) {
+function Message({ title, message, eyebrow, back }: { title: string; message: string; eyebrow: string; back: string }) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <PageHeader eyebrow="PolyGest · Commercial" title={title} />
+      <PageHeader eyebrow={eyebrow} title={title} />
       <p
         role="alert"
         className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
@@ -37,7 +32,7 @@ function Message({
           href="/dashboard"
           className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
         >
-          Retour au tableau de bord
+          {back}
         </Link>
       </p>
     </main>
@@ -47,17 +42,19 @@ function Message({
 export default async function NewQuotePage({ searchParams }: Props) {
   await connection();
   const params = await searchParams;
+  const locale = (await getLocale()) as "fr" | "en";
+  const t = await getTranslations("Quotes.Form");
+  const eyebrow = t("eyebrow");
+  const title = t("newTitle");
+  const back = t("backDashboard");
   const workspace = await getQuoteWorkspace(params.company);
 
   if (workspace.status === "error") {
-    return <Message title="Nouveau devis" message={workspace.message} />;
+    return <Message title={title} eyebrow={eyebrow} back={back} message={t("workspaceError")} />;
   }
   if (workspace.status === "denied") {
     return (
-      <Message
-        title="Nouveau devis"
-        message="Cette entreprise n’est pas accessible avec ton compte."
-      />
+      <Message title={title} eyebrow={eyebrow} back={back} message={t("deniedCompany")} />
     );
   }
   if (workspace.status === "choose") {
@@ -70,18 +67,12 @@ export default async function NewQuotePage({ searchParams }: Props) {
   }
   if (!workspace.canRead) {
     return (
-      <Message
-        title="Nouveau devis"
-        message="Ton rôle ne permet pas de consulter les devis de cette entreprise."
-      />
+      <Message title={title} eyebrow={eyebrow} back={back} message={t("deniedRead")} />
     );
   }
   if (!workspace.canWrite) {
     return (
-      <Message
-        title="Nouveau devis"
-        message="Ton rôle permet de consulter les devis, mais pas de créer ou modifier un brouillon."
-      />
+      <Message title={title} eyebrow={eyebrow} back={back} message={t("deniedWrite")} />
     );
   }
 
@@ -95,10 +86,7 @@ export default async function NewQuotePage({ searchParams }: Props) {
   if (customerError) {
     console.error("Quote customer options failed:", { code: customerError.code });
     return (
-      <Message
-        title="Nouveau devis"
-        message="Impossible de charger les clients actifs. Vérifie tes permissions et réessaie."
-      />
+      <Message title={title} eyebrow={eyebrow} back={back} message={t("customerLoad")} />
     );
   }
 
@@ -120,27 +108,27 @@ export default async function NewQuotePage({ searchParams }: Props) {
     return (
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <PageHeader
-          eyebrow="PolyGest · Commercial"
-          title="Nouveau devis"
-          description="Un client actif de cette entreprise est nécessaire pour créer un brouillon."
+          eyebrow={eyebrow}
+          title={title}
+          description={t("requiresCustomer")}
           actions={
             <Link
               href={"/dashboard/devis?company=" + encodeURIComponent(workspace.company.id)}
               className={SECONDARY_BUTTON}
             >
-              Retour aux devis
+              {t("backQuotes")}
             </Link>
           }
         />
         <EmptyState
-          title="Aucun client actif disponible"
-          description="Ajoute ou réactive une fiche client dans le répertoire de cette entreprise avant de créer un devis."
+          title={t("noActiveCustomer")}
+          description={t("noActiveCustomerDescription")}
           action={
             <Link
               href={"/dashboard/clients?company=" + encodeURIComponent(workspace.company.id)}
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
             >
-              Ouvrir les clients
+              {t("openCustomers")}
             </Link>
           }
         />
@@ -158,15 +146,14 @@ export default async function NewQuotePage({ searchParams }: Props) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Commercial"
-        title="Nouveau devis"
+        eyebrow={eyebrow}
+        title={title}
         description={
-          (workspace.company.trade_name || workspace.company.legal_name) +
-          " · Création d’un brouillon non numéroté."
+          t("createDescription", { company: workspace.company.trade_name || workspace.company.legal_name })
         }
         actions={
           <Link href={cancelHref} className={SECONDARY_BUTTON}>
-            Retour aux devis
+            {t("backQuotes")}
           </Link>
         }
       />
@@ -187,7 +174,7 @@ export default async function NewQuotePage({ searchParams }: Props) {
             {
               description: "",
               quantity: "1",
-              unit_label: "unité",
+              unit_label: locale === "en" ? "unit" : "unité",
               unit_price: "0",
               discount_type: "none",
               discount_value: "0",

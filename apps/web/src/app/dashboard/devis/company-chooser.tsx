@@ -1,25 +1,27 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
+import { getTranslations } from "next-intl/server";
 import type { QuoteCompany } from "./workspace";
 
-export function QuoteCompanyChooser({
+export async function QuoteCompanyChooser({
   companies,
   destinationPath = "/dashboard/devis",
 }: {
   companies: QuoteCompany[];
   destinationPath?: string;
 }) {
+  const t = await getTranslations("Quotes.List");
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Commercial"
-        title="Devis"
-        description="Sélectionne l’entreprise concernée. Les devis restent strictement séparés entre les entreprises."
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("chooseCompanyDescription")}
       />
 
       <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-          Choisir une entreprise
+          {t("chooseCompanyTitle")}
         </h2>
         <div className="mt-4 divide-y divide-[var(--pg-border)]">
           {companies.map((company) => (
@@ -35,7 +37,7 @@ export function QuoteCompanyChooser({
                 {company.legal_name}
               </span>
               <span className="mt-2 block text-sm font-medium text-[var(--pg-accent)]">
-                Ouvrir
+                {t("open")}
               </span>
             </Link>
           ))}
@@ -45,7 +47,7 @@ export function QuoteCompanyChooser({
             href="/dashboard"
             className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
           >
-            Retour au tableau de bord
+            {t("accessBack")}
           </Link>
         </p>
       </section>

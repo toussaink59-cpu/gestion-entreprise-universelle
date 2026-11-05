@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -40,10 +40,10 @@ const LINK_BUTTON =
 const SECONDARY_BUTTON =
   "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
 
-function AccessMessage({ message }: { message: string }) {
+function AccessMessage({ message, title, eyebrow, back }: { message: string; title: string; eyebrow: string; back: string }) {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <PageHeader eyebrow="PolyGest · Commercial" title="Devis" />
+      <PageHeader eyebrow={eyebrow} title={title} />
       <p
         role="alert"
         className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
@@ -55,40 +55,26 @@ function AccessMessage({ message }: { message: string }) {
           href="/dashboard"
           className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
         >
-          Retour au tableau de bord
+          {back}
         </Link>
       </p>
     </main>
   );
 }
 
-function errorMessage(code: string | undefined): string | null {
-  switch (code) {
-    case "access":
-      return "Cette entreprise n’est pas accessible avec ton compte.";
-    case "invalid":
-      return "Les informations du devis sont invalides.";
-    case "save":
-      return "Impossible d’enregistrer le devis. Vérifie tes permissions et réessaie.";
-    case "not-found":
-      return "Ce devis n’est plus accessible ou ne peut pas être modifié.";
-    default:
-      return null;
-  }
-}
-
 export default async function QuotesPage({ searchParams }: Props) {
   await connection();
   const params = await searchParams;
   const locale = (await getLocale()) as "fr" | "en";
+  const t = await getTranslations("Quotes.List");
   const workspace = await getQuoteWorkspace(params.company);
 
   if (workspace.status === "error") {
-    return <AccessMessage message={workspace.message} />;
+    return <AccessMessage message={t("workspaceError")} title={t("title")} eyebrow={t("eyebrow")} back={t("accessBack")} />;
   }
   if (workspace.status === "denied") {
     return (
-      <AccessMessage message="Cette entreprise n’est pas accessible avec ton compte." />
+      <AccessMessage message={t("companyDenied")} title={t("title")} eyebrow={t("eyebrow")} back={t("accessBack")} />
     );
   }
   if (workspace.status === "choose") {
@@ -96,7 +82,7 @@ export default async function QuotesPage({ searchParams }: Props) {
   }
   if (!workspace.canRead) {
     return (
-      <AccessMessage message="Ton rôle ne permet pas de consulter les devis de cette entreprise." />
+      <AccessMessage message={t("readDenied")} title={t("title")} eyebrow={t("eyebrow")} back={t("accessBack")} />
     );
   }
 
@@ -142,18 +128,15 @@ export default async function QuotesPage({ searchParams }: Props) {
   }
 
   const companyQuery = "?company=" + encodeURIComponent(workspace.company.id);
-  const failure = errorMessage(params.error);
+  const failure = params.error === "access" ? t("errors.access") : params.error === "invalid" ? t("errors.invalid") : params.error === "save" ? t("errors.save") : params.error === "not-found" ? t("errors.notFound") : null;
   const hasMore = quotes.length === 100;
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Commercial"
-        title="Devis"
-        description={
-          (workspace.company.trade_name || workspace.company.legal_name) +
-          " · Devis commerciaux de cette entreprise."
-        }
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("description", { company: workspace.company.trade_name || workspace.company.legal_name })}
         actions={
           <>
             {workspace.canWrite ? (
@@ -161,7 +144,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                 href={"/dashboard/devis/nouveau" + companyQuery}
                 className={LINK_BUTTON}
               >
-                Nouveau devis
+                {t("newQuote")}
               </Link>
             ) : null}
             {workspace.companies.length > 1 ? (
@@ -169,7 +152,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                 href="/dashboard/devis"
                 className={SECONDARY_BUTTON}
               >
-                Changer d’entreprise
+                {t("changeCompany")}
               </Link>
             ) : null}
           </>
@@ -190,7 +173,7 @@ export default async function QuotesPage({ searchParams }: Props) {
           role="alert"
           className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
         >
-          Impossible de charger les brouillons. Vérifie tes droits de consultation.
+          {t("loadFailed")}
         </p>
       ) : null}
 
@@ -198,10 +181,10 @@ export default async function QuotesPage({ searchParams }: Props) {
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--pg-border)] p-5 sm:p-6">
           <div>
             <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-              Devis enregistrés
+              {t("sectionTitle")}
             </h2>
             <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-              Un devis reçoit un numéro provisoire (D-AAAA-NNNN) quand il est transmis. Ce n’est pas un numéro de facture.
+              {t("sectionDescription")}
             </p>
           </div>
 
@@ -219,7 +202,7 @@ export default async function QuotesPage({ searchParams }: Props) {
               htmlFor="quote-search"
               className="sr-only"
             >
-              Rechercher dans l’objet du devis
+              {t("searchLabel")}
             </label>
             <input
               id="quote-search"
@@ -227,11 +210,11 @@ export default async function QuotesPage({ searchParams }: Props) {
               type="search"
               name="q"
               maxLength={80}
-              placeholder="Rechercher un objet…"
+              placeholder={t("searchPlaceholder")}
               defaultValue={search}
             />
             <button type="submit" className={SECONDARY_BUTTON}>
-              Rechercher
+              {t("searchButton")}
             </button>
           </form>
         </div>
@@ -239,11 +222,11 @@ export default async function QuotesPage({ searchParams }: Props) {
         {quotes.length === 0 && !quoteError ? (
           <div className="p-5 sm:p-6">
             <EmptyState
-              title="Aucun devis brouillon"
+              title={t("emptyTitle")}
               description={
                 workspace.canWrite
-                  ? "Crée un premier brouillon pour préparer une proposition commerciale. Aucun numéro ne sera attribué à ce stade."
-                  : "Aucun brouillon n’est disponible pour cette entreprise."
+                  ? t("emptyWritable")
+                  : t("emptyReadOnly")
               }
               action={
                 workspace.canWrite ? (
@@ -251,7 +234,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                     href={"/dashboard/devis/nouveau" + companyQuery}
                     className={LINK_BUTTON}
                   >
-                    Créer un brouillon
+                    {t("createDraft")}
                   </Link>
                 ) : undefined
               }
@@ -265,13 +248,13 @@ export default async function QuotesPage({ searchParams }: Props) {
               <table className="w-full min-w-[900px] border-collapse text-left text-sm">
                 <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]">
                   <tr>
-                    <th className="px-5 py-3 font-semibold">Référence interne</th>
-                    <th className="px-5 py-3 font-semibold">Client</th>
-                    <th className="px-5 py-3 font-semibold">Objet</th>
-                    <th className="px-5 py-3 font-semibold">Date</th>
-                    <th className="px-5 py-3 font-semibold">Validité</th>
-                    <th className="px-5 py-3 text-right font-semibold">Total</th>
-                    <th className="px-5 py-3 font-semibold">Action</th>
+                    <th className="px-5 py-3 font-semibold">{t("columns.reference")}</th>
+                    <th className="px-5 py-3 font-semibold">{t("columns.customer")}</th>
+                    <th className="px-5 py-3 font-semibold">{t("columns.subject")}</th>
+                    <th className="px-5 py-3 font-semibold">{t("columns.date")}</th>
+                    <th className="px-5 py-3 font-semibold">{t("columns.validity")}</th>
+                    <th className="px-5 py-3 text-right font-semibold">{t("columns.total")}</th>
+                    <th className="px-5 py-3 font-semibold">{t("columns.action")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -282,20 +265,20 @@ export default async function QuotesPage({ searchParams }: Props) {
                     >
                       <td className="px-5 py-4">
                         <span className="block font-medium text-[var(--pg-text)]">
-                          {quote.quote_number ?? "Brouillon sans numéro"}
+                          {quote.quote_number ?? t("noNumber")}
                         </span>
                         <span className="mt-1 block text-xs text-[var(--pg-text-muted)]">
                           {quoteStatusLabel(quote.status, locale)}
                         </span>
                         <span className="mt-1 block font-mono text-xs text-[var(--pg-text-muted)]">
-                          ID {quote.id.slice(0, 8).toUpperCase()}
+                          {t("idPrefix")} {quote.id.slice(0, 8).toUpperCase()}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-[var(--pg-text)]">
-                        {customerNames.get(quote.customer_id) ?? "Client non consultable"}
+                        {customerNames.get(quote.customer_id) ?? t("customerUnavailable")}
                       </td>
                       <td className="max-w-64 px-5 py-4 text-[var(--pg-text)]">
-                        {quote.subject || "Sans objet"}
+                        {quote.subject || t("noSubject")}
                       </td>
                       <td className="whitespace-nowrap px-5 py-4 text-[var(--pg-text)]">
                         {formatQuoteDate(quote.issue_date, locale)}
@@ -311,7 +294,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                           href={"/dashboard/devis/" + quote.id + companyQuery}
                           className="inline-flex min-h-11 items-center font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
                         >
-                          Consulter
+                          {t("view")}
                         </Link>
                       </td>
                     </tr>
@@ -326,10 +309,10 @@ export default async function QuotesPage({ searchParams }: Props) {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="font-semibold text-[var(--pg-text)]">
-                        {customerNames.get(quote.customer_id) ?? "Client non consultable"}
+                        {customerNames.get(quote.customer_id) ?? t("customerUnavailable")}
                       </p>
                       <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-                        {quote.subject || "Sans objet"}
+                        {quote.subject || t("noSubject")}
                       </p>
                     </div>
                     <span className="shrink-0 rounded-md bg-[var(--pg-surface-subtle)] px-2 py-1 text-xs font-medium text-[var(--pg-text-muted)]">
@@ -348,7 +331,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                     href={"/dashboard/devis/" + quote.id + companyQuery}
                     className="mt-3 inline-flex min-h-11 items-center font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
                   >
-                    Consulter le devis
+                    {t("viewQuote")}
                   </Link>
                 </li>
               ))}
@@ -358,13 +341,13 @@ export default async function QuotesPage({ searchParams }: Props) {
 
         {hasMore ? (
           <p className="border-t border-[var(--pg-border)] px-5 py-3 text-xs text-[var(--pg-text-muted)]">
-            100 brouillons maximum sont affichés. Affine la recherche pour retrouver un document précis.
+            {t("limit")}
           </p>
         ) : null}
       </section>
 
       <footer className="mt-8 border-t border-[var(--pg-border)] pt-5 text-sm text-[var(--pg-text-muted)]">
-        Les accès sont contrôlés côté serveur et par les politiques RLS de l’entreprise. Les brouillons ne constituent pas des factures.
+        {t("footer")}
       </footer>
     </main>
   );

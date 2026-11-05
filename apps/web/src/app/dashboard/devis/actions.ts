@@ -19,16 +19,16 @@ export async function saveQuoteDraft(
   if (!parsed.ok) {
     if (parsed.reason === "context") {
       return {
-        error: "Le contexte de l’entreprise ou du client est invalide. Recharge la page.",
+        error: "context",
       };
     }
     if (parsed.reason === "lines") {
       return {
-        error: "Vérifie les lignes : description, unité, quantité, prix et remise sont obligatoires et doivent être valides.",
+        error: "lines",
       };
     }
     return {
-      error: "Vérifie les dates et la longueur des champs texte avant d’enregistrer.",
+      error: "fields",
     };
   }
 
@@ -40,7 +40,7 @@ export async function saveQuoteDraft(
 
   if (userError || !user) {
     return {
-      error: "Ta session a expiré. Reconnecte-toi avant de poursuivre.",
+      error: "session",
     };
   }
 
@@ -54,7 +54,7 @@ export async function saveQuoteDraft(
 
   if (membershipError || !membership) {
     return {
-      error: "Cette entreprise n’est pas accessible avec ton compte.",
+      error: "company",
     };
   }
 
@@ -80,18 +80,18 @@ export async function saveQuoteDraft(
 
     if (saveError?.code === "42501") {
       return {
-        error: "Ce brouillon n’est pas accessible ou ton rôle ne permet pas cette opération.",
+        error: "permission",
       };
     }
 
     if (saveError?.code === "22023") {
       return {
-        error: "Les informations du devis sont incohérentes. Vérifie les dates, les remises et les lignes.",
+        error: "invalidData",
       };
     }
 
     return {
-      error: "Impossible d’enregistrer le brouillon. Vérifie les informations et réessaie.",
+      error: "save",
     };
   }
 
