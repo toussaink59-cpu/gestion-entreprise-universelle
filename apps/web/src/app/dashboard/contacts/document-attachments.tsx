@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { detectDocumentMime, DOCUMENT_BUCKET } from "@/lib/security/document-validation";
 
@@ -24,21 +25,6 @@ type Props = {
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
-function formatFileSize(size: number): string {
-  if (size < 1024) return `${size} o`;
-  if (size < 1024 * 1024) return `${(size / 1024).toFixed(0)} Ko`;
-  return `${(size / (1024 * 1024)).toFixed(1)} Mio`;
-}
-
-function statusLabel(status: DocumentItem["scan_status"]): string {
-  switch (status) {
-    case "available": return "Contrôle terminé";
-    case "pending_upload": return "Téléversement en cours";
-    case "pending_scan": return "Analyse de sécurité en attente";
-    case "rejected": return "Fichier bloqué";
-  }
-}
-
 export function DocumentAttachments({
   companyId,
   moduleCode,
@@ -47,6 +33,16 @@ export function DocumentAttachments({
   canUpload,
   scannerEnabled,
 }: Props) {
+  const locale = useLocale();
+  const t = useTranslations("Documents");
+  const numberLocale = locale === "en" ? "en-GB" : "fr-FR";
+  const formatFileSize = (size: number) => {
+    const formatted = (value: number, digits: number) => new Intl.NumberFormat(numberLocale, { maximumFractionDigits: digits }).format(value);
+    if (size < 1024) return `${formatted(size, 0)} ${t("sizeBytes")}`;
+    if (size < 1024 * 1024) return `${formatted(size / 1024, 0)} ${t("sizeKilobytes")}`;
+    return `${formatted(size / (1024 * 1024), 1)} ${t("sizeMegabytes")}`;
+  };
+  const statusLabel = (status: DocumentItem["scan_status"]) => t(`status.${status}`);
   const [open, setOpen] = useState(false);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,13 +68,13 @@ export function DocumentAttachments({
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok || !payload || !Array.isArray(payload.documents)) {
-        setMessage("Impossible de charger les pièces jointes ou accès non autorisé.");
+        setMessage(t("messages.loadFailed"));
         setMessageIsError(true);
         return;
       }
       setDocuments(payload.documents as DocumentItem[]);
     } catch {
-      setMessage("Le service de documents est momentanément indisponible.");
+      setMessage(t("messages.serviceUnavailable"));
       setMessageIsError(true);
     } finally {
       setLoading(false);
@@ -95,12 +91,12 @@ export function DocumentAttachments({
     event.preventDefault();
     const form = event.currentTarget;
     if (!selectedFile) {
-      setMessage("Sélectionne un fichier avant de continuer.");
+      setMessage(t("messages.selectFile"));
       setMessageIsError(true);
       return;
     }
     if (selectedFile.size < 1 || selectedFile.size > MAX_FILE_SIZE) {
-      setMessage("Le fichier doit peser entre 1 octet et 20 Mio.");
+      setMessage(t("messages.invalidSize"));
       setMessageIsError(true);
       return;
     }
@@ -117,7 +113,7 @@ export function DocumentAttachments({
       );
       const detectedMime = detectDocumentMime(signature);
       if (!detectedMime) {
-        setMessage("Format refusé. Le contenu doit être un PDF, JPEG, PNG ou WebP valide.");
+        setMessage(t("messages.invalidFormat"));
         setMessageIsError(true);
         return;
       }
@@ -139,12 +135,12 @@ export function DocumentAttachments({
       if (!response.ok || !payload?.document?.id || !payload?.upload?.path || !payload?.upload?.token) {
         const code = typeof payload?.error === "string" ? payload.error : "upload_failed";
         const text = code === "permission_denied"
-          ? "Ton rôle ne permet pas d'ajouter un document à cette fiche."
+          ? t("messages.permissionDenied")
           : code === "storage_not_configured"
-            ? "Le stockage privé n'est pas encore configuré sur cet environnement."
+            ? t("messages.storageMissing")
             : code === "file_too_large"
-              ? "Le fichier dépasse la limite de 20 Mio."
-              : "La session de dépôt n'a pas pu être créée. Réessaie.";
+              ? t("messages.tooLarge")
+              : t("messages.sessionFailed");
         setMessage(text);
         setMessageIsError(true);
         return;
@@ -167,7 +163,7 @@ export function DocumentAttachments({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ documentId, action: "cancel" }),
         });
-        setMessage("Le stockage a refusé le fichier. Vérifie le réseau et réessaie.");
+        setMessage(t("messages.uploadFailed"));
         setMessageIsError(true);
         return;
       }
@@ -183,7 +179,7 @@ export function DocumentAttachments({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ documentId, action: "cancel" }),
         });
-        setMessage("Le fichier a été transféré mais sa session n'a pas pu être finalisée.");
+        setMessage(t("messages.completionFailed"));
         setMessageIsError(true);
         return;
       }
@@ -191,7 +187,7 @@ export function DocumentAttachments({
       setSelectedFile(null);
       form.reset();
       await loadDocuments();
-      setMessage("Le fichier est déposé. Il restera inaccessible jusqu'à la fin de son analyse de sécurité.");
+      setMessage(t("messages.scanPending"));
       setMessageIsError(false);
     } catch {
       if (documentId) {
@@ -217,24 +213,24 @@ export function DocumentAttachments({
         aria-controls={`documents-${entityId}`}
         onClick={togglePanel}
       >
-        Pièces jointes
+        {t("trigger")}
       </button>
 
       {open && (
         <section
           id={`documents-${entityId}`}
-          aria-label="Pièces jointes de la fiche"
+          aria-label={t("ariaLabel")}
           className="mt-3 w-[min(24rem,calc(100vw-3rem))] rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
         >
-          <h3 className="text-sm font-semibold text-slate-900">Documents associés</h3>
+          <h3 className="text-sm font-semibold text-slate-900">{t("title")}</h3>
           <p className="mt-1 text-xs leading-5 text-slate-600">
-            Les documents sont privés. Seuls les membres ayant le droit de consulter ce module peuvent les ouvrir.
+            {t("privacy")}
           </p>
 
           {canUpload && scannerEnabled && (
             <form onSubmit={submitUpload} className="mt-4 space-y-3">
               <label className="block text-xs font-medium text-slate-700">
-                Ajouter un fichier
+                {t("addFile")}
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
@@ -252,17 +248,17 @@ export function DocumentAttachments({
                 disabled={!selectedFile || uploading}
                 className="inline-flex min-h-10 items-center rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {uploading ? "Envoi en cours…" : "Déposer le fichier"}
+                {uploading ? t("uploadingFile") : t("uploadFile")}
               </button>
               <p className="text-xs text-slate-500">
-                PDF, JPEG, PNG ou WebP · 20 Mio maximum
+                {t("allowedTypes")}
               </p>
             </form>
           )}
 
           {!scannerEnabled && (
             <p role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-              Le dépôt de fichiers est suspendu jusqu&apos;à la configuration du moteur d&apos;analyse antivirus. Les pièces jointes existantes restent soumises à leurs autorisations.
+              {t("scannerDisabled")}
             </p>
           )}
 
@@ -276,11 +272,11 @@ export function DocumentAttachments({
           )}
 
           <div className="mt-4 border-t border-slate-100 pt-3">
-            <h4 className="text-xs font-semibold text-slate-700">Fichiers enregistrés</h4>
+            <h4 className="text-xs font-semibold text-slate-700">{t("storedFiles")}</h4>
             {loading ? (
-              <p role="status" className="mt-2 text-xs text-slate-500">Chargement des documents…</p>
+              <p role="status" className="mt-2 text-xs text-slate-500">{t("loading")}</p>
             ) : documents.length === 0 ? (
-              <p className="mt-2 text-xs text-slate-500">Aucune pièce jointe.</p>
+              <p className="mt-2 text-xs text-slate-500">{t("empty")}</p>
             ) : (
               <ul className="mt-2 divide-y divide-slate-100">
                 {documents.map((document) => (
