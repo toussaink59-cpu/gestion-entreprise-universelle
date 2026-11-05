@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -44,24 +45,23 @@ const INPUT_CLASS = "mt-1 block w-full rounded-lg border border-slate-300 bg-whi
 const BUTTON_CLASS = "inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
 const SECONDARY_BUTTON_CLASS = "inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50";
 
-const ROLE_LABELS: Record<MemberInvitationRole, string> = {
-  employee: "Employé",
-  finance: "Finance",
-  sales_purchasing: "Commercial / achats",
-  auditor: "Auditeur",
-  company_admin: "Administrateur d’entreprise",
-  owner: "Propriétaire",
+type RoleLabels = Record<MemberInvitationRole, string>;
+type StatusLabels = {
+  active: string;
+  invitationConfirmed: string;
+  invitationPending: string;
+  revoked: string;
 };
 
-function roleLabel(value: string): string {
-  return ROLE_LABELS[value as MemberInvitationRole] ?? value;
+function roleLabel(value: string, labels: RoleLabels): string {
+  return labels[value as MemberInvitationRole] ?? value;
 }
 
-function statusLabel(value: string, acceptedAt: string | null): string {
-  if (value === "active") return "Actif";
-  if (value === "invited" && acceptedAt) return "Invitation confirmée · activation en attente";
-  if (value === "invited") return "Invitation en attente";
-  if (value === "revoked") return "Révoqué";
+function statusLabel(value: string, acceptedAt: string | null, labels: StatusLabels): string {
+  if (value === "active") return labels.active;
+  if (value === "invited" && acceptedAt) return labels.invitationConfirmed;
+  if (value === "invited") return labels.invitationPending;
+  if (value === "revoked") return labels.revoked;
   return value;
 }
 
@@ -71,44 +71,20 @@ function statusClass(value: string): string {
   return "bg-slate-100 text-slate-600";
 }
 
-function errorMessage(code: string | undefined): string | null {
-  switch (code) {
-    case "invalid": return "Vérifie l’adresse e-mail, l’entreprise et le rôle sélectionné.";
-    case "access": return "Cette entreprise n’est pas accessible avec ton compte.";
-    case "permission": return "Ton rôle ne permet pas d’attribuer ce rôle ou de gérer les membres.";
-    case "duplicate": return "Ce compte possède déjà une appartenance à cette entreprise.";
-    case "no-account": return "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte PolyGest.";
-    case "email-config": return "L’envoi d’e-mails n’est pas configuré. Vérifie RESEND_API_KEY, RESEND_FROM_EMAIL et NEXT_PUBLIC_APP_URL côté serveur.";
-    case "email-failed": return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Vérifie la configuration Resend puis réessaie.";
-    case "email-rate-limit": return "Attends au moins une minute avant de renvoyer cet e-mail.";
-    case "save": return "L’opération n’a pas pu être enregistrée. Vérifie les permissions puis réessaie.";
-    case "not-found": return "Cette invitation n’est plus en attente ou n’est plus accessible.";
-    case "email-not-confirmed": return "Le destinataire doit confirmer son adresse e-mail avant l’activation.";
-    default: return null;
-  }
-}
-
-function successMessage(code: string | undefined): string | null {
-  if (code === "invited") return "L’invitation a été enregistrée et l’e-mail de confirmation a été envoyé.";
-  if (code === "invited-link") return "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Transmets le lien ci-dessous à la personne invitée.";
-  if (code === "resent") return "L’e-mail d’invitation a été renvoyé.";
-  if (code === "activated") return "L’accès du membre a été activé.";
-  return null;
-}
-
-function LoadingFallback() {
+function LoadingFallback({ loading }: { loading: string }) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div role="status" aria-live="polite" className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
-        Chargement des membres…
+        {loading}
       </div>
     </main>
   );
 }
 
-export default function MembersPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function MembersPage({ searchParams }: { searchParams: SearchParams }) {
+  const t = await getTranslations("Members");
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<LoadingFallback loading={t("loading")} />}>
       <MembersContent searchParams={searchParams} />
     </Suspense>
   );
@@ -116,6 +92,41 @@ export default function MembersPage({ searchParams }: { searchParams: SearchPara
 
 async function MembersContent({ searchParams }: { searchParams: SearchParams }) {
   await connection();
+  const t = await getTranslations("Members");
+  const locale = await getLocale();
+  const roleLabels: RoleLabels = {
+    employee: t("roles.employee"),
+    finance: t("roles.finance"),
+    sales_purchasing: t("roles.salesPurchasing"),
+    auditor: t("roles.auditor"),
+    company_admin: t("roles.companyAdmin"),
+    owner: t("roles.owner"),
+  };
+  const statusLabels: StatusLabels = {
+    active: t("statuses.active"),
+    invitationConfirmed: t("statuses.invitationConfirmed"),
+    invitationPending: t("statuses.invitationPending"),
+    revoked: t("statuses.revoked"),
+  };
+  const errorMessages: Record<string, string> = {
+    invalid: t("errors.invalid"),
+    access: t("errors.access"),
+    permission: t("errors.permission"),
+    duplicate: t("errors.duplicate"),
+    "no-account": t("errors.noAccount"),
+    "email-config": t("errors.emailConfig"),
+    "email-failed": t("errors.emailFailed"),
+    "email-rate-limit": t("errors.emailRateLimit"),
+    save: t("errors.save"),
+    "not-found": t("errors.notFound"),
+    "email-not-confirmed": t("errors.emailNotConfirmed"),
+  };
+  const successMessages: Record<string, string> = {
+    invited: t("success.invited"),
+    "invited-link": t("success.invitedLink"),
+    resent: t("success.resent"),
+    activated: t("success.activated"),
+  };
   const params = await searchParams;
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -128,7 +139,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     .eq("status", "active");
 
   if (membershipError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Impossible de vérifier les appartenances. Réessaie plus tard.</p><p className="mt-4"><a className="text-blue-700 hover:underline" href="/dashboard">Retour au tableau de bord</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("errors.membershipAccess")}</p><p className="mt-4"><a className="text-blue-700 hover:underline" href="/dashboard">{t("backDashboard")}</a></p></main>;
   }
 
   const memberships = membershipData ?? [];
@@ -142,7 +153,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     .order("legal_name");
 
   if (companiesError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Impossible de charger les entreprises accessibles.</p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("errors.companies")}</p></main>;
   }
 
   const companies = (companyData ?? []) as CompanyRow[];
@@ -155,8 +166,8 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     selectedCompanyId = companies[0].id;
   }
 
-  const currentError = errorMessage(params.error);
-  const currentSuccess = successMessage(params.success);
+  const currentError = params.error ? errorMessages[params.error] ?? null : null;
+  const currentSuccess = params.success ? successMessages[params.success] ?? null : null;
 
 
 
@@ -164,21 +175,21 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1><p className="mt-2 text-slate-600">Sélectionne l’entreprise concernée.</p></div>
-          <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
+          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">{t("eyebrow")}</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{t("title")}</h1><p className="mt-2 text-slate-600">{t("selectCompany")}</p></div>
+          <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>{t("dashboard")}</a>
         </header>
-        {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">Cette entreprise n’est pas accessible avec ton compte.</p>}
+        {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("companyNotAccessible")}</p>}
         {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
         {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
         {params.success === "invited-link" && <InvitationLinkReveal />}
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Mes entreprises</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{t("myCompanies")}</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {companies.map((company) => (
               <a key={company.id} href={`/dashboard/membres?company=${encodeURIComponent(company.id)}`} className="rounded-xl border border-slate-200 p-4 hover:border-blue-400 hover:bg-blue-50">
                 <span className="block font-semibold text-slate-900">{company.trade_name || company.legal_name}</span>
                 <span className="mt-1 block text-sm text-slate-600">{company.legal_name}</span>
-                <span className="mt-3 inline-block text-sm font-semibold text-blue-700">Gérer les membres →</span>
+                <span className="mt-3 inline-block text-sm font-semibold text-blue-700">{t("manageMembers")} →</span>
               </a>
             ))}
           </div>
@@ -224,8 +235,8 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
   }
   const memberListError = membersError
     ? membersError.code === "42501"
-      ? "Ton rôle ne permet pas de consulter la liste des membres de cette entreprise."
-      : "Impossible de charger les membres. Réessaie plus tard."
+      ? t("errors.listPermission")
+      : t("errors.listFailed")
     : null;
   const companyQuery = `?company=${encodeURIComponent(selectedCompanyId)}`;
 
@@ -233,16 +244,16 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">PolyGest · Équipe</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Membres et accès</h1>
-          <p className="mt-2 text-slate-600">{company.trade_name || company.legal_name}<span className="mx-2 text-slate-300">/</span>Consultation des accès et invitations.</p>
-          <p className="mt-1 text-sm text-slate-500">Ton rôle : {roleLabel(actorRole)}</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">{t("eyebrow")}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{t("title")}</h1>
+          <p className="mt-2 text-slate-600">{company.trade_name || company.legal_name}<span className="mx-2 text-slate-300">/</span>{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-slate-500">{t("yourRole")}: {roleLabel(actorRole, roleLabels)}</p>
         </div>
-        <nav aria-label="Navigation du module" className="flex flex-wrap gap-2">
-          <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>Tableau de bord</a>
-          <a href={`/dashboard/clients${companyQuery}`} className={SECONDARY_BUTTON_CLASS}>Clients</a>
-          <a href={`/dashboard/fournisseurs${companyQuery}`} className={SECONDARY_BUTTON_CLASS}>Fournisseurs</a>
-          {companies.length > 1 && <a href="/dashboard/membres" className={SECONDARY_BUTTON_CLASS}>Changer d’entreprise</a>}
+        <nav aria-label={t("moduleNavigation")} className="flex flex-wrap gap-2">
+          <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>{t("dashboard")}</a>
+          <a href={`/dashboard/clients${companyQuery}`} className={SECONDARY_BUTTON_CLASS}>{t("customers")}</a>
+          <a href={`/dashboard/fournisseurs${companyQuery}`} className={SECONDARY_BUTTON_CLASS}>{t("suppliers")}</a>
+          {companies.length > 1 && <a href="/dashboard/membres" className={SECONDARY_BUTTON_CLASS}>{t("changeCompany")}</a>}
         </nav>
       </header>
 
@@ -252,55 +263,55 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
 
       {canInvite && (
         <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">Inviter un compte existant</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur PolyGest et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.</p></div>
+          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">{t("inviteExistingAccount")}</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">{t("inviteDescription")}</p></div>
           <form action={inviteCompanyMember} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="company_id" value={selectedCompanyId} />
-            <label className="text-sm font-medium text-slate-700">Adresse e-mail *<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder="nom@entreprise.com" /></label>
-            <label className="text-sm font-medium text-slate-700">Rôle à attribuer *<select className={INPUT_CLASS} name="role_code" required defaultValue="employee">{invitationRoles.map((role) => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}</select></label>
-            <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>Créer l’invitation</button></div>
+            <label className="text-sm font-medium text-slate-700">{t("emailRequired")}<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder={t("emailPlaceholder")} /></label>
+            <label className="text-sm font-medium text-slate-700">{t("roleRequired")}<select className={INPUT_CLASS} name="role_code" required defaultValue="employee">{invitationRoles.map((role) => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}</select></label>
+            <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>{t("createInvitation")}</button></div>
           </form>
-          {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">Les rôles Propriétaire et Administrateur donnent des droits étendus. Attribue-les uniquement à des personnes de confiance.</p>}
-          <p className="mt-2 text-xs text-slate-500">Un e-mail de confirmation valable sept jours sera envoyé. Si l’e-mail ne peut pas partir, un lien à transmettre toi-même s’affichera.</p>
+          {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">{t("privilegedRolesNotice")}</p>}
+          <p className="mt-2 text-xs text-slate-500">{t("invitationDeliveryNotice")}</p>
         </section>
       )}
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 p-5 sm:p-6"><h2 className="text-xl font-semibold text-slate-900">Membres de l’entreprise</h2><p className="mt-1 text-sm text-slate-600">Les invitations en attente restent distinctes des accès actifs.</p></div>
+        <div className="border-b border-slate-200 p-5 sm:p-6"><h2 className="text-xl font-semibold text-slate-900">{t("membersTitle")}</h2><p className="mt-1 text-sm text-slate-600">{t("membersDescription")}</p></div>
         {memberListError ? (
           <p role="alert" className="m-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-950">{memberListError}</p>
         ) : members.length === 0 ? (
-          <div className="p-10 text-center"><p className="font-semibold text-slate-800">Aucun membre à afficher</p><p className="mt-1 text-sm text-slate-500">La liste de cette entreprise est actuellement vide.</p></div>
+          <div className="p-10 text-center"><p className="font-semibold text-slate-800">{t("emptyTitle")}</p><p className="mt-1 text-sm text-slate-500">{t("emptyDescription")}</p></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3 font-semibold">Membre</th><th className="px-5 py-3 font-semibold">Rôle</th><th className="px-5 py-3 font-semibold">Statut</th><th className="px-5 py-3 font-semibold">Ajouté le</th><th className="px-5 py-3 font-semibold">Action</th></tr></thead>
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3 font-semibold">{t("columns.member")}</th><th className="px-5 py-3 font-semibold">{t("columns.role")}</th><th className="px-5 py-3 font-semibold">{t("columns.status")}</th><th className="px-5 py-3 font-semibold">{t("columns.addedAt")}</th><th className="px-5 py-3 font-semibold">{t("columns.action")}</th></tr></thead>
               <tbody>
                 {members.map((member) => (
                   <tr key={member.membership_id} className="border-t border-slate-100 align-top hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || "Utilisateur PolyGest"}</p><p className="mt-1 text-xs text-slate-500">{member.email || `ID utilisateur : ${member.user_id}`}</p></td>
-                    <td className="px-5 py-4 text-slate-700">{roleLabel(member.role_code)}</td>
-                    <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status, member.accepted_at)}</span></td>
-                    <td className="px-5 py-4 text-slate-600">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
+                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || t("polygestUser")}</p><p className="mt-1 text-xs text-slate-500">{member.email || t("userId", { id: member.user_id })}</p></td>
+                    <td className="px-5 py-4 text-slate-700">{roleLabel(member.role_code, roleLabels)}</td>
+                    <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status, member.accepted_at, statusLabels)}</span></td>
+                    <td className="px-5 py-4 text-slate-600">{new Intl.DateTimeFormat(locale === "en" ? "en-US" : "fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
                     <td className="px-5 py-4">
                       <div className="flex flex-col items-start gap-2">
                         {canActivateMember(actorRole) && member.status === "invited" && member.accepted_at && (
                           <form action={activateCompanyMember}>
                             <input type="hidden" name="company_id" value={selectedCompanyId} />
                             <input type="hidden" name="membership_id" value={member.membership_id} />
-                            <button type="submit" className="text-sm font-semibold text-blue-700 underline decoration-blue-200 underline-offset-4 hover:text-blue-900">Activer l’accès</button>
+                            <button type="submit" className="text-sm font-semibold text-blue-700 underline decoration-blue-200 underline-offset-4 hover:text-blue-900">{t("activateAccess")}</button>
                           </form>
                         )}
                         {member.status === "invited" && !member.accepted_at && (actorRole === "owner" || member.invited_by === user.id) && (
                           <form action={resendCompanyMemberInvitation}>
                             <input type="hidden" name="company_id" value={selectedCompanyId} />
                             <input type="hidden" name="membership_id" value={member.membership_id} />
-                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">Renvoyer l’invitation</button>
+                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">{t("resendInvitation")}</button>
                           </form>
                         )}
                         {member.status === "invited" && member.accepted_at && (
-                          <span className="text-xs text-slate-500">Adresse confirmée · propriétaire requis</span>
+                          <span className="text-xs text-slate-500">{t("confirmedOwnerActivation")}</span>
                         )}
-                        {member.status !== "invited" && <span className="text-xs text-slate-400">—</span>}
+                        {member.status !== "invited" && <span className="text-xs text-slate-400">{t("noAction")}</span>}
                       </div>
                     </td>
                   </tr>
@@ -310,7 +321,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
           </div>
         )}
       </section>
-      <footer className="mt-8 text-sm text-slate-500">L’accès aux membres et la création des invitations sont revérifiés par les fonctions SQL et les politiques de sécurité Supabase.</footer>
+      <footer className="mt-8 text-sm text-slate-500">{t("securityFooter")}</footer>
     </main>
   );
 }

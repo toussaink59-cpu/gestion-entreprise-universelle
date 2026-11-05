@@ -498,5 +498,113 @@
       "notes": "Notes internes",
       "invoiceNote": "Ce document n’est pas une facture."
     }
+  },
+  "Members": {
+    "title": "Membres et accès",
+    "eyebrow": "PolyGest · Équipe",
+    "loading": "Chargement des membres…",
+    "selectCompany": "Sélectionne l’entreprise concernée.",
+    "dashboard": "Tableau de bord",
+    "backDashboard": "Retour au tableau de bord",
+    "myCompanies": "Mes entreprises",
+    "manageMembers": "Gérer les membres",
+    "companyNotAccessible": "Cette entreprise n’est pas accessible avec ton compte.",
+    "subtitle": "Consultation des accès et invitations.",
+    "yourRole": "Ton rôle",
+    "moduleNavigation": "Navigation du module",
+    "customers": "Clients",
+    "suppliers": "Fournisseurs",
+    "changeCompany": "Changer d’entreprise",
+    "inviteExistingAccount": "Inviter un compte existant",
+    "inviteDescription": "Saisis l’adresse e-mail d’un utilisateur déjà inscrit sur PolyGest et choisis son rôle. Un e-mail de confirmation sera envoyé. Après confirmation, le propriétaire pourra activer l’accès après vérification.",
+    "emailRequired": "Adresse e-mail *",
+    "emailPlaceholder": "nom@entreprise.com",
+    "roleRequired": "Rôle à attribuer *",
+    "createInvitation": "Créer l’invitation",
+    "privilegedRolesNotice": "Les rôles Propriétaire et Administrateur donnent des droits étendus. Attribue-les uniquement à des personnes de confiance.",
+    "invitationDeliveryNotice": "Un e-mail de confirmation valable sept jours sera envoyé. Si l’e-mail ne peut pas partir, un lien à transmettre toi-même s’affichera.",
+    "membersTitle": "Membres de l’entreprise",
+    "membersDescription": "Les invitations en attente restent distinctes des accès actifs.",
+    "emptyTitle": "Aucun membre à afficher",
+    "emptyDescription": "La liste de cette entreprise est actuellement vide.",
+    "columns": {
+      "member": "Membre",
+      "role": "Rôle",
+      "status": "Statut",
+      "addedAt": "Ajouté le",
+      "action": "Action"
+    },
+    "polygestUser": "Utilisateur PolyGest",
+    "userId": "ID utilisateur : {id}",
+    "activateAccess": "Activer l’accès",
+    "resendInvitation": "Renvoyer l’invitation",
+    "confirmedOwnerActivation": "Adresse confirmée · propriétaire requis",
+    "noAction": "Aucune",
+    "securityFooter": "L’accès aux membres et la création des invitations sont revérifiés par les fonctions SQL et les politiques de sécurité Supabase.",
+    "roles": {
+      "employee": "Employé",
+      "finance": "Finance",
+      "salesPurchasing": "Commercial / achats",
+      "auditor": "Auditeur",
+      "companyAdmin": "Administrateur d’entreprise",
+      "owner": "Propriétaire"
+    },
+    "statuses": {
+      "active": "Actif",
+      "invitationConfirmed": "Invitation confirmée · activation en attente",
+      "invitationPending": "Invitation en attente",
+      "revoked": "Révoqué"
+    },
+    "errors": {
+      "invalid": "Vérifie l’adresse e-mail, l’entreprise et le rôle sélectionné.",
+      "access": "Cette entreprise n’est pas accessible avec ton compte.",
+      "companies": "Impossible de charger les entreprises accessibles.",
+      "membershipAccess": "Impossible de vérifier les appartenances. Réessaie plus tard.",
+      "permission": "Ton rôle ne permet pas d’attribuer ce rôle ou de gérer les membres.",
+      "duplicate": "Ce compte possède déjà une appartenance à cette entreprise.",
+      "noAccount": "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte PolyGest.",
+      "emailConfig": "L’envoi d’e-mails n’est pas configuré. Vérifie RESEND_API_KEY, RESEND_FROM_EMAIL et NEXT_PUBLIC_APP_URL côté serveur.",
+      "emailFailed": "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Vérifie la configuration Resend puis réessaie.",
+      "emailRateLimit": "Attends au moins une minute avant de renvoyer cet e-mail.",
+      "save": "L’opération n’a pas pu être enregistrée. Vérifie les permissions puis réessaie.",
+      "notFound": "Cette invitation n’est plus en attente ou n’est plus accessible.",
+      "emailNotConfirmed": "Le destinataire doit confirmer son adresse e-mail avant l’activation.",
+      "listPermission": "Ton rôle ne permet pas de consulter la liste des membres de cette entreprise.",
+      "listFailed": "Impossible de charger les membres. Réessaie plus tard."
+    },
+    "success": {
+      "invited": "L’invitation a été enregistrée et l’e-mail de confirmation a été envoyé.",
+      "invitedLink": "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Transmets le lien ci-dessous à la personne invitée.",
+      "resent": "L’e-mail d’invitation a été renvoyé.",
+      "activated": "L’accès du membre a été activé."
+    },
+    "linkRegion": "Lien d’invitation",
+    "linkTitle": "Lien d’invitation (valable 7 jours, à usage unique)",
+    "copyLinkAria": "Lien d’invitation à copier",
+    "linkInstructions": "Transmets-le uniquement à la personne invitée (WhatsApp, SMS…). Il ne fonctionne que si elle se connecte avec l’adresse e-mail invitée. Le lien ne sera plus affiché après cette lecture."
+  },
+  "Companies": {
+    "eyebrow": "PolyGest · Entreprises",
+    "title": "Créer une entreprise",
+    "description": "Ajoute un nouvel espace de gestion indépendant à ton compte.",
+    "backDashboard": "Retour au tableau de bord",
+    "informationTitle": "Informations de l’entreprise",
+    "informationDescription": "Chaque entreprise possède ses propres membres, répertoires et données de gestion.",
+    "submit": "Créer l’entreprise",
+    "ownerNotice": "Tu deviendras propriétaire de ce nouvel espace. Aucun plafond fixe de création n’est appliqué au périmètre MVP.",
+    "form": {
+      "legalName": "Raison sociale *",
+      "legalPlaceholder": "Nom légal de l’entreprise",
+      "tradeName": "Nom commercial",
+      "optional": "(facultatif)",
+      "tradePlaceholder": "Nom utilisé auprès de tes clients"
+    },
+    "errors": {
+      "missingName": "La raison sociale est obligatoire.",
+      "invalidName": "La raison sociale doit contenir entre 2 et 200 caractères.",
+      "invalidTradeName": "Le nom commercial doit contenir entre 2 et 200 caractères.",
+      "invalidCompanyData": "Les informations de l’entreprise sont invalides. Vérifie les noms saisis.",
+      "creationFailed": "La création a échoué. Vérifie tes droits et réessaie."
+    }
   }
 }
