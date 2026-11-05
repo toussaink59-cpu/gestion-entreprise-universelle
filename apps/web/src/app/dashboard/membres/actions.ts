@@ -3,6 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { localeFrom } from "@/i18n/locale";
 import {
   createInvitationToken,
   isMemberInvitationEmailConfigured,
@@ -100,6 +101,7 @@ export async function inviteCompanyMember(formData: FormData) {
   if (companyError || !company) returnTo(parsed.companyId, { error: "access" });
 
   const { token, tokenHash } = createInvitationToken();
+  const emailLocale = localeFrom((await headers()).get("x-polygest-locale"));
   const { data: membershipId, error } = await supabase.rpc("create_company_member_invitation", {
     p_company_id: parsed.companyId,
     p_email: parsed.email,
@@ -117,6 +119,7 @@ export async function inviteCompanyMember(formData: FormData) {
         companyName: company.trade_name || company.legal_name,
         roleCode: parsed.roleCode,
         inviterName: String(user.user_metadata?.full_name || user.email || "PolyGest"),
+        locale: emailLocale,
         token,
         idempotencyKey: `member-invitation/${membershipId}/${tokenHash.slice(0, 16)}`,
       })
@@ -153,6 +156,7 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
   }
 
   const { token, tokenHash } = createInvitationToken();
+  const emailLocale = localeFrom((await headers()).get("x-polygest-locale"));
   const { data, error } = await supabase.rpc("prepare_company_member_invitation_resend", {
     p_company_id: companyField,
     p_membership_id: membershipField,
@@ -170,6 +174,7 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
         companyName: row.company_name,
         roleCode: row.role_code,
         inviterName: String(user.user_metadata?.full_name || user.email || "PolyGest"),
+        locale: emailLocale,
         token,
         idempotencyKey: `member-invitation/${membershipField}/${tokenHash.slice(0, 16)}`,
       })

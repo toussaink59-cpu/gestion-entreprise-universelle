@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { getLocale } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { QuoteDraftForm } from "../quote-draft-form";
 import {
@@ -104,12 +105,13 @@ function discountLabel(
   type: QuoteLineRecord["discount_type"],
   value: string,
   currencyCode: string,
+  locale: "fr" | "en",
 ): string {
   if (type === "percentage") {
-    return formatQuoteQuantity(value) + " %";
+    return formatQuoteQuantity(value, locale) + " %";
   }
   if (type === "fixed") {
-    return formatQuoteCurrency(value, currencyCode);
+    return formatQuoteCurrency(value, currencyCode, locale);
   }
   return "Aucune";
 }
@@ -119,6 +121,7 @@ export default async function QuoteDetailPage({
   searchParams,
 }: Props) {
   await connection();
+  const locale = (await getLocale()) as "fr" | "en";
   const [routeParams, queryParams] = await Promise.all([
     params,
     searchParams,
@@ -336,7 +339,7 @@ export default async function QuoteDetailPage({
           quote.id.slice(0, 8).toUpperCase() +
           (isDraft
             ? " · Aucun numéro attribué."
-            : " · " + quoteStatusLabel(quote.status) + ".")
+            : " · " + quoteStatusLabel(quote.status, locale) + ".")
         }
         actions={
           <Link href={cancelHref} className={SECONDARY_BUTTON}>
@@ -369,7 +372,7 @@ export default async function QuoteDetailPage({
               Date du devis
             </p>
             <p className="mt-1 font-medium text-[var(--pg-text)]">
-              {formatQuoteDate(quote.issue_date)}
+              {formatQuoteDate(quote.issue_date, locale)}
             </p>
           </div>
           <div>
@@ -377,7 +380,7 @@ export default async function QuoteDetailPage({
               Valable jusqu’au
             </p>
             <p className="mt-1 font-medium text-[var(--pg-text)]">
-              {formatQuoteDate(quote.valid_until)}
+              {formatQuoteDate(quote.valid_until, locale)}
             </p>
           </div>
           <div>
@@ -385,7 +388,7 @@ export default async function QuoteDetailPage({
               {isDraft ? "Total du brouillon" : "Total"}
             </p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-[var(--pg-text)]">
-              {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
+              {formatQuoteCurrency(quote.total_amount, quote.currency_code, locale)}
             </p>
           </div>
         </div>
@@ -407,7 +410,7 @@ export default async function QuoteDetailPage({
 
       {quote.status === "accepted" ? (
         <p className="mb-5 rounded-md border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-sm text-[#285C45]">
-          Accepté le {quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10)) : "—"}
+          Accepté le {quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10, locale)) : "—"}
           {quote.acceptance_method && quote.acceptance_method in QUOTE_RESPONSE_METHOD_LABELS
             ? " · " + QUOTE_RESPONSE_METHOD_LABELS[quote.acceptance_method as keyof typeof QUOTE_RESPONSE_METHOD_LABELS]
             : ""}
@@ -417,13 +420,13 @@ export default async function QuoteDetailPage({
 
       {quote.status === "rejected" ? (
         <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Refusé par le client le {quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10)) : "—"}.
+          Refusé par le client le {quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10, locale)) : "—"}.
         </p>
       ) : null}
 
       {quote.status === "cancelled" ? (
         <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Annulé le {quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10)) : "—"}
+          Annulé le {quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10, locale)) : "—"}
           {quote.cancellation_reason ? " · Motif : " + quote.cancellation_reason : ""}
         </p>
       ) : null}
@@ -632,23 +635,24 @@ export default async function QuoteDetailPage({
                         {line.description}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">
-                        {formatQuoteQuantity(line.quantity)}
+                        {formatQuoteQuantity(line.quantity, locale)}
                       </td>
                       <td className="px-4 py-4 text-[var(--pg-text)]">
                         {line.unit_label}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">
-                        {formatQuoteCurrency(line.unit_price, quote.currency_code)}
+                        {formatQuoteCurrency(line.unit_price, quote.currency_code, locale)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4 text-[var(--pg-text)]">
                         {discountLabel(
                           line.discount_type,
                           line.discount_value,
                           quote.currency_code,
+                          locale,
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">
-                        {formatQuoteCurrency(line.total_amount, quote.currency_code)}
+                        {formatQuoteCurrency(line.total_amount, quote.currency_code, locale)}
                       </td>
                     </tr>
                   ))}
@@ -660,17 +664,17 @@ export default async function QuoteDetailPage({
           <dl className="ml-auto grid max-w-md grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--pg-border)] pt-4 text-sm">
             <dt className="text-[var(--pg-text-muted)]">Sous-total</dt>
             <dd className="text-right tabular-nums text-[var(--pg-text)]">
-              {formatQuoteCurrency(quote.subtotal_amount, quote.currency_code)}
+              {formatQuoteCurrency(quote.subtotal_amount, quote.currency_code, locale)}
             </dd>
             <dt className="text-[var(--pg-text-muted)]">Remises</dt>
             <dd className="text-right tabular-nums text-[var(--pg-text)]">
-              {formatQuoteCurrency(quote.discount_amount, quote.currency_code)}
+              {formatQuoteCurrency(quote.discount_amount, quote.currency_code, locale)}
             </dd>
             <dt className="font-semibold text-[var(--pg-text)]">
               {isDraft ? "Total du brouillon" : "Total"}
             </dt>
             <dd className="text-right font-semibold tabular-nums text-[var(--pg-text)]">
-              {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
+              {formatQuoteCurrency(quote.total_amount, quote.currency_code, locale)}
             </dd>
           </dl>
 

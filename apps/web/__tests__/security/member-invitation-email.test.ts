@@ -37,6 +37,8 @@ describe("jetons d’invitation e-mail", () => {
   it("utilise les libellés connus sans exposer le code interne", () => {
     expect(roleLabelForEmail("sales_purchasing")).toBe("Commercial / achats");
     expect(roleLabelForEmail("unlisted_role")).toBe("Membre");
+    expect(roleLabelForEmail("sales_purchasing", "en")).toBe("Sales / purchasing");
+    expect(roleLabelForEmail("unlisted_role", "en")).toBe("Member");
   });
 
   it("échappe les données dynamiques dans le modèle d’e-mail", () => {
@@ -50,6 +52,11 @@ describe("jetons d’invitation e-mail", () => {
     expect(email.html).toContain("Employé &lt;script&gt;");
     expect(email.html).not.toContain("<script>");
     expect(email.text).toContain("https://example.test/invitations/accept?token=Abc");
+    const englishEmail = buildInvitationEmail({ companyName: "Example Ltd", roleLabel: "Employee", inviterName: "Alice", acceptUrl: "https://example.test/invitations/accept?token=Abc", locale: "en" });
+    expect(englishEmail.subject).toContain("Invitation to join");
+    expect(englishEmail.html).toContain('<html lang="en">');
+    expect(englishEmail.html).toContain("Confirm invitation");
+    expect(englishEmail.text).toContain("Alice invited you to join Example Ltd");
   });
 
   it("ne permet au redirect de retour que des chemins internes", () => {
