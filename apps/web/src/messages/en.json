@@ -1,0 +1,29 @@
+{
+  "Auth": {
+    "Shell": {
+      "homeLabel": "PolyGest sign-in home",
+      "eyebrow": "Business management",
+      "headline": "A clear workspace to manage your business.",
+      "description": "Access your company workspaces and the management tools linked to your account, with permissions organized by company.",
+      "footer": "PolyGest Â· For business owners and teams.",
+      "languageLabel": "Choose language"
+    },
+    "Login": {
+      "title": "Sign in",
+      "description": "Enter the credentials associated with your account to access your workspace.",
+      "email": "Email address",
+      "password": "Password",
+      "emailPlaceholder": "name@company.com",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign in",
+      "pending": "Signing inâ€¦",
+      "noAccount": "Don't have an account yet?",
+      "registerLink": "Create an account",
+      "checkEmail": "If this address can be registered, a confirmation message has been sent. Check your inbox and spam folder.",
+      "errors": {
+        "missing-fields": "Enter your email address and password.",
+        "invalid-email": "The email address format is invalid.",
+        "password-too-long": "The password exceeds the maximum allowed length.",
+        "email-not-confirmed": "This email address has not been confirmed yet. Check the message sent when you registered.",
+        "invalid-credentials": "The email address or password is incorrect.",
+        "confirmation-failed": "The confirmation link is¶»§q«^

@@ -1,0 +1,27 @@
+{
+  "Auth": {
+    "Shell": {
+      "homeLabel": "PolyGest, accueil de connexion",
+      "eyebrow": "Gestion d’entreprise",
+      "headline": "Un espace de travail clair pour piloter votre activité.",
+      "description": "Retrouvez vos espaces d’entreprise et les outils de gestion associés à votre compte, avec des accès organisés par entreprise.",
+      "footer": "PolyGest · Pour les entrepreneurs et les équipes.",
+      "languageLabel": "Choisir la langue"
+    },
+    "Login": {
+      "title": "Se connecter",
+      "description": "Accède à ton espace de travail en renseignant les identifiants associés à ton compte.",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "emailPlaceholder": "nom@entreprise.com",
+      "passwordPlaceholder": "Ton mot de passe",
+      "submit": "Se connecter",
+      "pending": "Connexion en cours…",
+      "noAccount": "Tu n’as pas encore de compte ?",
+      "registerLink": "Créer un compte",
+      "checkEmail": "Si cette adresse peut être inscrite, un message de confirmation a été envoyé. Vérifie ta boîte de réception et tes courriers indésirables.",
+      "errors": {
+        "missing-fields": "Renseigne ton adresse e-mail et ton mot de passe.",
+        "invalid-email": "Le format de l’adresse e-mail est invalide.",
+        "password-too-long": "Le mot de passe dépasse la longueur maximale autorisée.",
+        "email-not-confirmed": "Cette adresse e-mail n’a pas encore été confirmée. Consul���q�^
