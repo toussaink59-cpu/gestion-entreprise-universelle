@@ -8,7 +8,11 @@ import {
   formatQuoteQuantity,
   quoteStatusLabel,
 } from "../formatting";
-import { sendQuote } from "../actions";
+import { cancelQuote, recordQuoteResponse, sendQuote } from "../actions";
+import {
+  QUOTE_RESPONSE_METHODS,
+  QUOTE_RESPONSE_METHOD_LABELS,
+} from "@/lib/security/quote-response-validation";
 import { QuoteCompanyChooser } from "../company-chooser";
 import { getQuoteWorkspace, isQuoteUuid } from "../workspace";
 import type {
@@ -24,6 +28,7 @@ type Props = {
     company?: string;
     success?: string;
     send_error?: string;
+    action_error?: string;
   }>;
 };
 
@@ -42,6 +47,12 @@ type QuoteRecord = {
   subtotal_amount: string;
   discount_amount: string;
   total_amount: string;
+  accepted_at: string | null;
+  acceptance_method: string | null;
+  acceptance_reference: string | null;
+  rejected_at: string | null;
+  cancelled_at: string | null;
+  cancellation_reason: string | null;
 };
 
 type QuoteLineRecord = {
@@ -153,7 +164,7 @@ export default async function QuoteDetailPage({
   const { data: quoteData, error: quoteError } = await workspace.supabase
     .from("quotes")
     .select(
-      "id, company_id, customer_id, quote_number, status, issue_date, valid_until, currency_code, subject, terms, notes, subtotal_amount, discount_amount, total_amount",
+      "id, company_id, customer_id, quote_number, status, issue_date, valid_until, currency_code, subject, terms, notes, subtotal_amount, discount_amount, total_amount, accepted_at, acceptance_method, acceptance_reference, rejected_at, cancelled_at, cancellation_reason",
     )
     .eq("id", routeParams.quoteId)
     .eq("company_id", workspace.company.id)
@@ -254,7 +265,29 @@ export default async function QuoteDetailPage({
       ? "Le brouillon a été enregistré."
       : queryParams.success === "sent"
         ? "Le devis a été transmis et numéroté. Il n’est plus modifiable."
-        : null;
+        : queryParams.success === "accepted"
+          ? "L’acceptation du client est enregistrée."
+          : queryParams.success === "rejected"
+            ? "Le refus du client est enregistré."
+            : queryParams.success === "cancelled"
+              ? "Le devis est annulé."
+              : null;
+  const actionErrorMessage = (() => {
+    switch (queryParams.action_error) {
+      case "permission":
+        return "Ton rôle ne permet pas cette opération.";
+      case "state":
+        return "L’état du devis a changé : recharge la page.";
+      case "invalid":
+        return "Vérifie la méthode et la référence de preuve (obligatoires pour une acceptation), et que le devis n’est pas expiré.";
+      case "reason":
+        return "Indique un motif d’annulation de 3 à 500 caractères.";
+      case undefined:
+        return null;
+      default:
+        return "L’opération a échoué. Réessaie, ou contacte l’administrateur si le problème continue.";
+    }
+  })();
   const sendErrorMessage = (() => {
     switch (queryParams.send_error) {
       case "permission":
@@ -362,6 +395,144 @@ export default async function QuoteDetailPage({
             : "Numéro provisoire interne aux devis, sans valeur de numéro de facture. Ce document n’est pas une facture."}
         </p>
       </section>
+
+      {actionErrorMessage ? (
+        <p
+          role="alert"
+          className="mb-5 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]"
+        >
+          {actionErrorMessage}
+        </p>
+      ) : null}
+
+      {quote.status === "accepted" ? (
+        <p className="mb-5 rounded-md border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-sm text-[#285C45]">
+          Accepté le {quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10)) : "—"}
+          {quote.acceptance_method && quote.acceptance_method in QUOTE_RESPONSE_METHOD_LABELS
+            ? " · " + QUOTE_RESPONSE_METHOD_LABELS[quote.acceptance_method as keyof typeof QUOTE_RESPONSE_METHOD_LABELS]
+            : ""}
+          {quote.acceptance_reference ? " · Preuve : " + quote.acceptance_reference : ""}
+        </p>
+      ) : null}
+
+      {quote.status === "rejected" ? (
+        <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
+          Refusé par le client le {quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10)) : "—"}.
+        </p>
+      ) : null}
+
+      {quote.status === "cancelled" ? (
+        <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
+          Annulé le {quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10)) : "—"}
+          {quote.cancellation_reason ? " · Motif : " + quote.cancellation_reason : ""}
+        </p>
+      ) : null}
+
+      {quote.status === "sent" && workspace.canSend ? (
+        <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">
+            Réponse du client
+          </h2>
+          <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
+            Une acceptation exige une méthode et une référence de preuve (par exemple
+            la date d’un courriel ou d’un message). Une réponse enregistrée est définitive.
+          </p>
+          <form action={recordQuoteResponse} className="mt-4 grid gap-4 sm:grid-cols-2">
+            <input type="hidden" name="company_id" value={workspace.company.id} />
+            <input type="hidden" name="quote_id" value={quote.id} />
+            <div>
+              <label htmlFor="decision" className="block text-sm font-medium text-[var(--pg-text)]">
+                Décision du client
+              </label>
+              <select
+                id="decision"
+                name="decision"
+                required
+                defaultValue=""
+                className="mt-1 min-h-11 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)]"
+              >
+                <option value="" disabled>Choisir…</option>
+                <option value="accepted">Devis accepté</option>
+                <option value="rejected">Devis refusé</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="method" className="block text-sm font-medium text-[var(--pg-text)]">
+                Méthode (obligatoire si accepté)
+              </label>
+              <select
+                id="method"
+                name="method"
+                defaultValue=""
+                className="mt-1 min-h-11 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)]"
+              >
+                <option value="">—</option>
+                {QUOTE_RESPONSE_METHODS.map((method) => (
+                  <option key={method} value={method}>
+                    {QUOTE_RESPONSE_METHOD_LABELS[method]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label htmlFor="reference" className="block text-sm font-medium text-[var(--pg-text)]">
+                Référence de preuve (obligatoire si accepté)
+              </label>
+              <input
+                id="reference"
+                name="reference"
+                type="text"
+                maxLength={200}
+                className="mt-1 min-h-11 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)]"
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
+              >
+                Enregistrer la réponse
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
+      {quote.status === "sent" && workspace.canCancel ? (
+        <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">
+            Annuler le devis
+          </h2>
+          <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
+            Réservé au propriétaire et à l’administrateur. Le devis annulé reste consultable
+            et son numéro n’est jamais réattribué.
+          </p>
+          <form action={cancelQuote} className="mt-4 flex flex-wrap items-end gap-3">
+            <input type="hidden" name="company_id" value={workspace.company.id} />
+            <input type="hidden" name="quote_id" value={quote.id} />
+            <div className="min-w-64 flex-1">
+              <label htmlFor="cancellation_reason" className="block text-sm font-medium text-[var(--pg-text)]">
+                Motif de l’annulation
+              </label>
+              <input
+                id="cancellation_reason"
+                name="cancellation_reason"
+                type="text"
+                required
+                minLength={3}
+                maxLength={500}
+                className="mt-1 min-h-11 w-full rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-base text-[var(--pg-text)]"
+              />
+            </div>
+            <button
+              type="submit"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
+            >
+              Annuler le devis
+            </button>
+          </form>
+        </section>
+      ) : null}
 
       {sendErrorMessage ? (
         <p

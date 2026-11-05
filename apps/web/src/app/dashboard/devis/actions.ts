@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { parseQuoteDraftForm } from "@/lib/security/quote-draft-validation";
+import {
+  parseQuoteCancellationForm,
+  parseQuoteResponseForm,
+} from "@/lib/security/quote-response-validation";
 import type { QuoteActionState } from "./types";
 
 export async function saveQuoteDraft(
@@ -158,4 +162,83 @@ export async function sendQuote(formData: FormData) {
   revalidatePath("/dashboard/devis");
   revalidatePath("/dashboard/devis/" + quoteField);
   redirect(quoteDetailUrl(quoteField, companyField, "success=sent"));
+}
+
+function actionErrorFlag(code: string | undefined): string {
+  if (code === "42501") return "permission";
+  if (code === "55000") return "state";
+  if (code === "22023") return "invalid";
+  return "failed";
+}
+
+export async function recordQuoteResponse(formData: FormData) {
+  const parsed = parseQuoteResponseForm(formData);
+  if (!parsed.ok) {
+    if (parsed.reason === "context") redirect("/dashboard/devis");
+    const raw = formData.get("quote_id");
+    const company = formData.get("company_id");
+    if (typeof raw === "string" && typeof company === "string" && QUOTE_UUID.test(raw) && QUOTE_UUID.test(company)) {
+      redirect(quoteDetailUrl(raw, company, "action_error=invalid"));
+    }
+    redirect("/dashboard/devis");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) redirect("/login");
+
+  const { error } = await supabase.rpc("record_quote_response", {
+    p_company_id: parsed.companyId,
+    p_quote_id: parsed.quoteId,
+    p_decision: parsed.decision,
+    p_method: parsed.method,
+    p_reference: parsed.reference,
+  });
+
+  if (error) {
+    console.error("Quote response failed:", { code: error.code });
+    redirect(quoteDetailUrl(parsed.quoteId, parsed.companyId, "action_error=" + actionErrorFlag(error.code)));
+  }
+
+  revalidatePath("/dashboard/devis");
+  revalidatePath("/dashboard/devis/" + parsed.quoteId);
+  redirect(quoteDetailUrl(parsed.quoteId, parsed.companyId, "success=" + parsed.decision));
+}
+
+export async function cancelQuote(formData: FormData) {
+  const parsed = parseQuoteCancellationForm(formData);
+  if (!parsed.ok) {
+    if (parsed.reason === "context") redirect("/dashboard/devis");
+    const raw = formData.get("quote_id");
+    const company = formData.get("company_id");
+    if (typeof raw === "string" && typeof company === "string" && QUOTE_UUID.test(raw) && QUOTE_UUID.test(company)) {
+      redirect(quoteDetailUrl(raw, company, "action_error=reason"));
+    }
+    redirect("/dashboard/devis");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) redirect("/login");
+
+  const { error } = await supabase.rpc("cancel_quote", {
+    p_company_id: parsed.companyId,
+    p_quote_id: parsed.quoteId,
+    p_reason: parsed.reason,
+  });
+
+  if (error) {
+    console.error("Quote cancellation failed:", { code: error.code });
+    redirect(quoteDetailUrl(parsed.quoteId, parsed.companyId, "action_error=" + actionErrorFlag(error.code)));
+  }
+
+  revalidatePath("/dashboard/devis");
+  revalidatePath("/dashboard/devis/" + parsed.quoteId);
+  redirect(quoteDetailUrl(parsed.quoteId, parsed.companyId, "success=cancelled"));
 }
