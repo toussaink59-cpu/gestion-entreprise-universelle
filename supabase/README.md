@@ -22,6 +22,7 @@ Les migrations sont appliquées dans l'ordre chronologique de leur nom. Les migr
 | `20261104130000_devis_brouillons.sql` | Devis et lignes en brouillon, permissions `quotes`, écriture uniquement par `save_quote_draft`, calculs côté serveur, aucune taxe |
 | `20261104140000_depenses_brouillons.sql` | Dépenses en brouillon, écriture uniquement par `save_expense_draft` |
 | `20261105100000_devis_transmission.sql` | Transmission des devis par `send_quote` : numéro provisoire interne `D-AAAA-NNNN` (compteur par entreprise et par année), copie figée du client et de l'émetteur, garde de cohérence des devis non brouillons. Pas une numérotation de facture |
+| `20261105110000_devis_reponse_client.sql` | Réponse du client (`record_quote_response` : acceptation avec méthode et référence de preuve obligatoires, refus) et annulation d'un devis transmis (`cancel_quote`, propriétaire et administrateur, motif obligatoire) ; contraintes de cohérence des états |
 
 **Règle actuelle de création d'entreprise :** aucun plafond fixe de nombre d'entreprises par propriétaire n'est appliqué au MVP. La migration du 24 octobre est conservée pour l'historique, mais la migration du 4 novembre remplace la fonction `public.create_company()` et retire ce plafond. Les quotas éventuels seront conçus ultérieurement dans le cadre des formules d'abonnement.
 

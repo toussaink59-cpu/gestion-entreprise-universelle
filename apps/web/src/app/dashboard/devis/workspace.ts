@@ -113,6 +113,8 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
   // Les rôles qui modifient les devis sont aussi ceux qui détiennent quotes:validate ;
   // la fonction SQL send_quote() reste l'autorité.
   const canSend = canWrite;
+  // quotes:cancel est réservé au propriétaire et à l'administrateur.
+  const canCancel = roleCode === "owner" || roleCode === "company_admin";
 
   return {
     status: "ready" as const,
@@ -124,5 +126,6 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
     canRead,
     canWrite,
     canSend,
+    canCancel,
   };
 }
