@@ -57,6 +57,7 @@ describe("jetons d’invitation e-mail", () => {
     expect(englishEmail.html).toContain('<html lang="en">');
     expect(englishEmail.html).toContain("Confirm invitation");
     expect(englishEmail.text).toContain("Alice invited you to join Example Ltd");
+    expect(englishEmail.text).toContain("\\n\\nThe owner must still review");
   });
 
   it("ne permet au redirect de retour que des chemins internes", () => {

@@ -77,12 +77,14 @@ export function buildInvitationEmail(params: {
   const confirmation = french ? "Confirme que tu as accès à cette adresse e-mail. Pour des raisons de sécurité, le propriétaire devra encore activer ton accès après vérification." : "Confirm that you have access to this email address. For security, the owner must still review and activate your access.";
   const button = french ? "Confirmer l’invitation" : "Confirm invitation";
   const expiry = french ? "Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message." : "This one-time link expires in 7 days. If you were not expecting this invitation, you can ignore this message.";
+  const teamLabel = french ? "ÉQUIPE" : "TEAM";
+  const footerLabel = french ? "Gestion d’entreprise" : "Business management";
   const text = french
     ? `${params.inviterName} t’invite à rejoindre ${params.companyName} sur PolyGest avec le rôle ${params.roleLabel}. Confirme l’accès à ton adresse e-mail : ${params.acceptUrl}\n\nLe propriétaire devra encore activer ton accès après vérification. Ce lien est à usage unique et expire dans 7 jours. Si tu n’attendais pas cette invitation, ignore ce message.`
     : `${params.inviterName} invited you to join ${params.companyName} on PolyGest as ${params.roleLabel}. Confirm access to your email address: ${params.acceptUrl}\n\nThe owner must still review and activate your access. This one-time link expires in 7 days. If you were not expecting this invitation, ignore this message.`;
   return {
     subject,
-    html: `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a"><main style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px"><p style="font-size:12px;font-weight:bold;letter-spacing:2px;color:#1d4ed8">POLYGEST · TEAM</p><h1 style="font-size:24px">${heading}</h1><p>${invitation}</p><p>${confirmation}</p><p style="margin:28px 0"><a href="${urlHtml}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:bold;display:inline-block">${button}</a></p><p style="font-size:13px;color:#64748b">${expiry}</p><p style="font-size:12px;color:#94a3b8">PolyGest · Business management</p></main></body></html>`,
+    html: `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a"><main style="max-width:600px;margin:32px auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:32px"><p style="font-size:12px;font-weight:bold;letter-spacing:2px;color:#1d4ed8">POLYGEST · ${teamLabel}</p><h1 style="font-size:24px">${heading}</h1><p>${invitation}</p><p>${confirmation}</p><p style="margin:28px 0"><a href="${urlHtml}" style="background:#1d4ed8;color:#fff;text-decoration:none;padding:13px 20px;border-radius:8px;font-weight:bold;display:inline-block">${button}</a></p><p style="font-size:13px;color:#64748b">${expiry}</p><p style="font-size:12px;color:#94a3b8">PolyGest · ${footerLabel}</p></main></body></html>`,
     text,
   };
 }
