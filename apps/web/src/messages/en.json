@@ -1,0 +1,87 @@
+{
+  "Auth": {
+    "Shell": {
+      "homeLabel": "PolyGest sign-in home",
+      "eyebrow": "Business management",
+      "headline": "A clear workspace to manage your business.",
+      "description": "Access your company workspaces and the management tools linked to your account, with permissions organized by company.",
+      "footer": "PolyGest · For business owners and teams.",
+      "languageLabel": "Choose language"
+    },
+    "Login": {
+      "title": "Sign in",
+      "description": "Enter the credentials associated with your account to access your workspace.",
+      "email": "Email address",
+      "password": "Password",
+      "emailPlaceholder": "name@company.com",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign in",
+      "pending": "Signing in…",
+      "noAccount": "Don't have an account yet?",
+      "registerLink": "Create an account",
+      "checkEmail": "If this address can be registered, a confirmation message has been sent. Check your inbox and spam folder.",
+      "errors": {
+        "missing-fields": "Enter your email address and password.",
+        "invalid-email": "The email address format is invalid.",
+        "password-too-long": "The password exceeds the maximum allowed length.",
+        "email-not-confirmed": "This email address has not been confirmed yet. Check the message sent when you registered.",
+        "invalid-credentials": "The email address or password is incorrect.",
+        "confirmation-failed": "The confirmation link is invalid or has expired. Restart registration or contact support.",
+        "generic": "Sign-in could not be completed. Please try again."
+      }
+    },
+    "Register": {
+      "title": "Create an account",
+      "description": "Create your PolyGest access to set up your first company workspace.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your first and last name",
+      "email": "Email address",
+      "emailPlaceholder": "name@company.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "passwordHint": "Use at least 8 characters. You can set up your company next.",
+      "submit": "Create account",
+      "pending": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "errors": {
+        "missing-fields": "All fields are required.",
+        "invalid-name": "Your full name must contain between 2 and 100 characters.",
+        "invalid-email": "The email address format is invalid.",
+        "password-too-long": "The password must not exceed 128 characters.",
+        "password-too-short": "The password must contain at least 8 characters.",
+        "signup-failed": "The account could not be created. Check your details and try again.",
+        "generic": "Registration could not be completed. Please try again."
+      }
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "PolyGest · Welcome",
+    "title": "Create your company workspace",
+    "description": "Enter your company details to start organizing your business with PolyGest.",
+    "legalName": "Legal company name *",
+    "legalPlaceholder": "Registered legal name",
+    "tradeName": "Trading name",
+    "optional": "(optional)",
+    "tradePlaceholder": "Name used with your customers",
+    "submit": "Create my company",
+    "errorTitle": "Set up your company",
+    "securityError": "A security check is required before your first workspace can be created.",
+    "verificationFailed": "We could not verify the companies linked to this account. To avoid creating a duplicate, the form is temporarily unavailable.",
+    "retry": "Try again",
+    "errors": {
+      "missing-name": "The legal company name is required.",
+      "invalid-name": "The legal company name must contain between 2 and 200 characters.",
+      "invalid-trade-name": "The trading name must contain between 2 and 200 characters.",
+      "invalid-company-data": "The company details are invalid. Check the names you entered.",
+      "creation-failed": "The company could not be created. Check the details and try again."
+    },
+    "languageLabel": "Choose language"
+  },
+  "WorkspaceNotice": {
+    "title": "Your workspace is ready",
+    "description": "The English translation of the dashboard and management modules is in progress. For this first step, those screens remain available in French.",
+    "continue": "Continue to the workspace in French",
+    "languageLabel": "Choose language"
+  }
+}

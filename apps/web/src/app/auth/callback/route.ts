@@ -1,31 +1,12 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { getSafeRedirectPath } from "@/lib/security/safe-redirect";
-import { createClient } from "@/lib/supabase/server";
-
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  // Use a configured canonical origin, never the untrusted request Host.
-  const configuredAppUrl =
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const redirectOrigin = new URL(configuredAppUrl).origin;
-
-  const code = url.searchParams.get("code");
-  const next = getSafeRedirectPath(url.searchParams.get("next"));
-
-  if (!code) {
-    return NextResponse.redirect(
-      new URL("/login?error=confirmation-failed", redirectOrigin),
-    );
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-  if (error) {
-    return NextResponse.redirect(
-      new URL("/login?error=confirmation-failed", redirectOrigin),
-    );
-  }
-
-  return NextResponse.redirect(new URL(next, redirectOrigin));
+import {NextResponse,type NextRequest} from "next/server";
+import {getSafeRedirectPath} from "@/lib/security/safe-redirect";
+import {createClient} from "@/lib/supabase/server";
+import {localeFrom,localePath,postAuthDestination} from "@/i18n/locale";
+export async function GET(request:NextRequest){
+const url=new URL(request.url);const origin=new URL(process.env.NEXT_PUBLIC_APP_URL??"http://localhost:3000").origin;
+const locale=localeFrom(url.searchParams.get("locale"));const next=getSafeRedirectPath(url.searchParams.get("next"));
+const failure=new URL(localePath(locale,"/login")+"?error=confirmation-failed",origin);const code=url.searchParams.get("code");
+if(!code)return NextResponse.redirect(failure);
+const supabase=await createClient();const {error}=await supabase.auth.exchangeCodeForSession(code);if(error)return NextResponse.redirect(failure);
+return NextResponse.redirect(new URL(postAuthDestination(locale,next),origin));
 }
