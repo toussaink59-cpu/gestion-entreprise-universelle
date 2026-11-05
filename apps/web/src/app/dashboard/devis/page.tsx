@@ -309,10 +309,10 @@ export default async function QuotesPage({ searchParams }: Props) {
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="font-semibold text-[var(--pg-text)]">
-                        {customerNames.get(quote.customer_id) ?? "Client non consultable"}
+                        {customerNames.get(quote.customer_id) ?? t("customerUnavailable")}
                       </p>
                       <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-                        {quote.subject || "Sans objet"}
+                        {quote.subject || t("noSubject")}
                       </p>
                     </div>
                     <span className="shrink-0 rounded-md bg-[var(--pg-surface-subtle)] px-2 py-1 text-xs font-medium text-[var(--pg-text-muted)]">

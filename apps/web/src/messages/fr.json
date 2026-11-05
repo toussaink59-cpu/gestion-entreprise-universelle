@@ -335,7 +335,12 @@
       "viewQuote": "Consulter le devis",
       "idPrefix": "ID",
       "limit": "100 brouillons maximum sont affichés. Affine la recherche pour retrouver un document précis.",
-      "footer": "Les accès sont contrôlés côté serveur et par les politiques RLS de l’entreprise. Les brouillons ne constituent pas des factures."
+      "footer": "Les accès sont contrôlés côté serveur et par les politiques RLS de l’entreprise. Les brouillons ne constituent pas des factures.",
+      "chooseCompanyTitle": "Choisir une entreprise",
+      "chooseCompanyDescription": "Sélectionne l’entreprise concernée. Les devis restent strictement séparés entre les entreprises.",
+      "open": "Ouvrir",
+      "loadingDescription": "Chargement des brouillons de l’entreprise…",
+      "loading": "Chargement des devis…"
     },
     "Form": {
       "eyebrow": "PolyGest · Commercial",
@@ -396,7 +401,8 @@
       "taxNote": "Aucun taux de taxe n’est appliqué dans cette tranche. L’enregistrement ne transmet pas le devis et ne crée pas de facture.",
       "cancel": "Annuler",
       "saving": "Enregistrement…",
-      "saveDraft": "Enregistrer le brouillon"
+      "saveDraft": "Enregistrer le brouillon",
+      "workspaceError": "Impossible de charger l’espace de travail des devis."
     },
     "Detail": {
       "eyebrow": "PolyGest · Commercial",

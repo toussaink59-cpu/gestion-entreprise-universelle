@@ -335,7 +335,12 @@
       "viewQuote": "View quote",
       "idPrefix": "ID",
       "limit": "A maximum of 100 drafts is shown. Refine your search to find a specific document.",
-      "footer": "Access is controlled on the server and by the company’s RLS policies. Drafts are not invoices."
+      "footer": "Access is controlled on the server and by the company’s RLS policies. Drafts are not invoices.",
+      "chooseCompanyTitle": "Choose a company",
+      "chooseCompanyDescription": "Select the company you want to work with. Quotes remain strictly separated by company.",
+      "open": "Open",
+      "loadingDescription": "Loading company quote drafts…",
+      "loading": "Loading quotes…"
     },
     "Form": {
       "eyebrow": "PolyGest · Sales",
@@ -396,7 +401,8 @@
       "taxNote": "No tax rate is applied in this phase. Saving does not send the quote or create an invoice.",
       "cancel": "Cancel",
       "saving": "Saving…",
-      "saveDraft": "Save draft"
+      "saveDraft": "Save draft",
+      "workspaceError": "Unable to load the quotes workspace."
     },
     "Detail": {
       "eyebrow": "PolyGest · Sales",
