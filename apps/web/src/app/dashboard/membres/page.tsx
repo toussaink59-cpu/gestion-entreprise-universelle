@@ -267,7 +267,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
           <form action={inviteCompanyMember} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="company_id" value={selectedCompanyId} />
             <label className="text-sm font-medium text-slate-700">{t("emailRequired")}<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder={t("emailPlaceholder")} /></label>
-            <label className="text-sm font-medium text-slate-700">{t("roleRequired")}<select className={INPUT_CLASS} name="role_code" required defaultValue="employee">{invitationRoles.map((role) => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}</select></label>
+            <label className="text-sm font-medium text-slate-700">{t("roleRequired")}<select className={INPUT_CLASS} name="role_code" required defaultValue="employee">{invitationRoles.map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select></label>
             <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>{t("createInvitation")}</button></div>
           </form>
           {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">{t("privilegedRolesNotice")}</p>}
