@@ -410,7 +410,7 @@ export default async function QuoteDetailPage({
 
       {quote.status === "accepted" ? (
         <p className="mb-5 rounded-md border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-sm text-[#285C45]">
-          Accepté le {quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10, locale)) : "—"}
+          Accepté le {quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10), locale) : "—"}
           {quote.acceptance_method && quote.acceptance_method in QUOTE_RESPONSE_METHOD_LABELS
             ? " · " + QUOTE_RESPONSE_METHOD_LABELS[quote.acceptance_method as keyof typeof QUOTE_RESPONSE_METHOD_LABELS]
             : ""}
@@ -420,13 +420,13 @@ export default async function QuoteDetailPage({
 
       {quote.status === "rejected" ? (
         <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Refusé par le client le {quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10, locale)) : "—"}.
+          Refusé par le client le {quote.rejected_at ? formatQuoteDate(quote.rejected_at.slice(0, 10), locale) : "—"}.
         </p>
       ) : null}
 
       {quote.status === "cancelled" ? (
         <p className="mb-5 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          Annulé le {quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10, locale)) : "—"}
+          Annulé le {quote.cancelled_at ? formatQuoteDate(quote.cancelled_at.slice(0, 10), locale) : "—"}
           {quote.cancellation_reason ? " · Motif : " + quote.cancellation_reason : ""}
         </p>
       ) : null}
