@@ -14,4 +14,8 @@ if(!validLength(legal)||!isValidCompanyName(legal))redirect(dest+"?error=invalid
 if(trade&&(!validLength(trade)||!isValidCompanyName(trade)))redirect(dest+"?error=invalid-trade-name");
 const supabase=await createClient();const {data:{user},error:userError}=await supabase.auth.getUser();if(userError||!user)redirect(localePath(locale,"/login"));
 const {error}=await supabase.rpc("create_company",{p_legal_name:legal,p_trade_name:trade||null,p_country_code:"BF",p_currency:"XOF",p_timezone:"Africa/Ouagadougou"});
-if(error){console.error("create_company failed:",error.code);if(error.c¶»§q«^
+if(error){console.error("create_company failed:",error.code);if(error.code==="22023")redirect(dest+"?error=invalid-company-data");redirect(dest+"?error=creation-failed");}
+redirect(path==="/onboarding"?postAuthDestination(locale,"/dashboard"):"/dashboard");
+}
+export async function createCompany(formData:FormData){await create(formData,"/onboarding");}
+export async function createAdditionalCompany(formData:FormData){await create(formData,"/dashboard/entreprises/nouvelle");}

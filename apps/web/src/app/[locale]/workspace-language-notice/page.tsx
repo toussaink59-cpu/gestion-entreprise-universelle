@@ -32,4 +32,7 @@ export default async function Page({
         className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-5 py-3 text-sm font-semibold text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
       >
         {t("continue")}
-      ¶»§q«^
+      </Link>
+    </main>
+  );
+}

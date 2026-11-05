@@ -24,4 +24,64 @@
         "missing-fields": "Renseigne ton adresse e-mail et ton mot de passe.",
         "invalid-email": "Le format de l’adresse e-mail est invalide.",
         "password-too-long": "Le mot de passe dépasse la longueur maximale autorisée.",
-        "email-not-confirmed": "Cette adresse e-mail n’a pas encore été confirmée. Consul���q�^
+        "email-not-confirmed": "Cette adresse e-mail n’a pas encore été confirmée. Consulte le message reçu lors de ton inscription.",
+        "invalid-credentials": "Adresse e-mail ou mot de passe incorrect.",
+        "confirmation-failed": "Le lien de confirmation est invalide ou a expiré. Recommence la procédure d’inscription ou contacte l’assistance.",
+        "generic": "La connexion n’a pas pu aboutir. Réessaie."
+      }
+    },
+    "Register": {
+      "title": "Créer un compte",
+      "description": "Crée ton accès PolyGest pour configurer ton premier espace d’entreprise.",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Ton nom et prénom",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "nom@entreprise.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "8 caractères minimum",
+      "passwordHint": "Utilise au moins 8 caractères. Tu pourras ensuite configurer ton entreprise.",
+      "submit": "Créer mon compte",
+      "pending": "Création du compte…",
+      "haveAccount": "Tu as déjà un compte ?",
+      "loginLink": "Se connecter",
+      "errors": {
+        "missing-fields": "Tous les champs sont obligatoires.",
+        "invalid-name": "Le nom complet doit contenir entre 2 et 100 caractères.",
+        "invalid-email": "Le format de l’adresse e-mail est invalide.",
+        "password-too-long": "Le mot de passe ne doit pas dépasser 128 caractères.",
+        "password-too-short": "Le mot de passe doit contenir au moins 8 caractères.",
+        "signup-failed": "Impossible de créer le compte. Vérifie les informations et réessaie.",
+        "generic": "L’inscription n’a pas pu aboutir. Réessaie."
+      }
+    }
+  },
+  "Onboarding": {
+    "eyebrow": "PolyGest · Bienvenue",
+    "title": "Créer ton espace d’entreprise",
+    "description": "Renseigne les informations de ton entreprise pour commencer à organiser ton activité dans PolyGest.",
+    "legalName": "Raison sociale *",
+    "legalPlaceholder": "Nom légal de l’entreprise",
+    "tradeName": "Nom commercial",
+    "optional": "(facultatif)",
+    "tradePlaceholder": "Nom utilisé auprès de tes clients",
+    "submit": "Créer mon entreprise",
+    "errorTitle": "Configurer ton entreprise",
+    "securityError": "Une vérification de sécurité est nécessaire avant de créer ton premier espace.",
+    "verificationFailed": "Impossible de vérifier les entreprises associées à ce compte. Pour éviter une création en double, le formulaire reste temporairement indisponible.",
+    "retry": "Réessayer",
+    "errors": {
+      "missing-name": "La raison sociale est obligatoire.",
+      "invalid-name": "La raison sociale doit contenir entre 2 et 200 caractères.",
+      "invalid-trade-name": "Le nom commercial doit contenir entre 2 et 200 caractères.",
+      "invalid-company-data": "Les informations de l’entreprise sont invalides. Vérifie les noms saisis.",
+      "creation-failed": "La création a échoué. Vérifie les informations et réessaie."
+    },
+    "languageLabel": "Choisir la langue"
+  },
+  "WorkspaceNotice": {
+    "title": "Votre espace de travail est prêt",
+    "description": "La traduction du tableau de bord et des modules de gestion est en cours. Pour cette première étape, ces écrans restent disponibles en français.",
+    "continue": "Continuer vers l’espace de travail en français",
+    "languageLabel": "Choisir la langue"
+  }
+}

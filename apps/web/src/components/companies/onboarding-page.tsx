@@ -13,4 +13,7 @@ if(!user)redirect(locale==="en"?"/en/login":"/login");
 const {data:memberships,error}=await supabase.from("company_memberships").select("company_id").eq("user_id",user.id).eq("status","active").limit(1);
 const decision=decideOnboardingAccess(Boolean(error),memberships);if(decision==="dashboard")redirect(postAuthDestination(locale,"/dashboard"));
 return <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 lg:px-8"><div className="mb-8 flex justify-end"><LocaleSwitcher locale={locale} href="/onboarding" label={t("languageLabel")}/></div>
-<PageHeader eyebrow={decision==="error"?"PolyGest Â· Configuration":t("eyebrow")} title={decision==="error"?t("errorTitle"):t("title")} description={decision==="error"?t("securityError"):t("descrip¶»§q«^
+<PageHeader eyebrow={decision==="error"?"PolyGest Â· Configuration":t("eyebrow")} title={decision==="error"?t("errorTitle"):t("title")} description={decision==="error"?t("securityError"):t("description")}/>
+{decision==="error"?<><p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm leading-6 text-[#963F3F]">{t("verificationFailed")}</p><p className="mt-5 text-sm"><a href={locale==="en"?"/en/onboarding":"/onboarding"} className="font-semibold text-[var(--pg-accent)] underline-offset-4 hover:underline">{t("retry")}</a></p></>:<CompanyCreationForm action={createCompany} submitLabel={t("submit")} locale={locale} labels={{legalName:t("legalName"),legalPlaceholder:t("legalPlaceholder"),tradeName:t("tradeName"),optional:t("optional"),tradePlaceholder:t("tradePlaceholder")}}/>}
+</main>;
+}

@@ -33,4 +33,24 @@ export async function proxy(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request: { headers: requestHeaders },
           });
-          for (const { name, value, options } of cookiesToSe¶»§q«^
+          for (const { name, value, options } of cookiesToSet) {
+            supabaseResponse.cookies.set(name, value, options);
+          }
+          for (const [key, value] of Object.entries(headers)) {
+            supabaseResponse.headers.set(key, value);
+          }
+        },
+      },
+    });
+
+    await supabase.auth.getClaims();
+  }
+
+  return supabaseResponse;
+}
+
+export const config = {
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
+};
