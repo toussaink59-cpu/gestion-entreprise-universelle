@@ -15,10 +15,10 @@ type FournisseursPageProps = {
   }>;
 };
 
-function FournisseursPageFallback({ title, description, loading }: { title: string; description: string; loading: string }) {
+function FournisseursPageFallback({ eyebrow, title, description, loading }: { eyebrow: string; title: string; description: string; loading: string }) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <PageHeader eyebrow="PolyGest · Répertoires" title={title} description={description} />
+      <PageHeader eyebrow={eyebrow} title={title} description={description} />
       <div role="status" aria-live="polite" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 text-sm text-[var(--pg-text-muted)]">{loading}</div>
     </main>
   );
@@ -28,7 +28,7 @@ export default async function FournisseursPage({ searchParams }: FournisseursPag
   const t = await getTranslations("Contacts");
   const title = t("titleSuppliers");
   return (
-    <Suspense fallback={<FournisseursPageFallback title={title} description={t("loadingSuppliers")} loading={t("loading")} />}>
+    <Suspense fallback={<FournisseursPageFallback eyebrow={t("eyebrow")} title={title} description={t("loadingSuppliers")} loading={t("loading")} />}>
       <ContactsPage kind="supplier" searchParams={searchParams} />
     </Suspense>
   );

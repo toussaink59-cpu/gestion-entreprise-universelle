@@ -42,7 +42,14 @@ export function DocumentAttachments({
     if (size < 1024 * 1024) return `${formatted(size / 1024, 0)} ${t("sizeKilobytes")}`;
     return `${formatted(size / (1024 * 1024), 1)} ${t("sizeMegabytes")}`;
   };
-  const statusLabel = (status: DocumentItem["scan_status"]) => t(`status.${status}`);
+  const statusLabel = (status: DocumentItem["scan_status"]) => {
+    switch (status) {
+      case "available": return t("status.available");
+      case "pending_upload": return t("status.pending_upload");
+      case "pending_scan": return t("status.pending_scan");
+      case "rejected": return t("status.rejected");
+    }
+  };
   const [open, setOpen] = useState(false);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(false);
