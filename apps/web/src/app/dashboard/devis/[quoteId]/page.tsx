@@ -170,10 +170,7 @@ export default async function QuoteDetailPage({
   }
   if (!quoteData) {
     return (
-      <Notice
-        title="Devis introuvable"
-        message="Ce brouillon n’est pas accessible dans l’entreprise sélectionnée."
-      />
+      <Notice title={t("notFoundTitle")} message={t("notFound")} eyebrow={eyebrow} back={back} />
     );
   }
 
@@ -384,8 +381,8 @@ export default async function QuoteDetailPage({
       {quote.status === "accepted" ? (
         <p className="mb-5 rounded-md border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-sm text-[#285C45]">
           {t("acceptedOn", { date: quote.accepted_at ? formatQuoteDate(quote.accepted_at.slice(0, 10), locale) : "—" })}
-          {quote.acceptance_method && quote.acceptance_method in QUOTE_RESPONSE_METHOD_LABELS
-            ? " · " + QUOTE_RESPONSE_METHOD_LABELS[quote.acceptance_method as keyof typeof QUOTE_RESPONSE_METHOD_LABELS]
+          {quote.acceptance_method && quote.acceptance_method in methodLabels
+            ? " · " + methodLabels[quote.acceptance_method as keyof typeof methodLabels]
             : ""}
           {quote.acceptance_reference ? " · " + t("proof") + ": " + quote.acceptance_reference : ""}
         </p>
@@ -476,7 +473,7 @@ export default async function QuoteDetailPage({
       {quote.status === "sent" && workspace.canCancel ? (
         <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-            Annuler le devis
+            {t("cancelTitle")}
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
             {t("cancelDescription")}
@@ -502,7 +499,7 @@ export default async function QuoteDetailPage({
               type="submit"
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
             >
-              Annuler le devis
+              {t("confirmCancel")}
             </button>
           </form>
         </section>
@@ -520,7 +517,7 @@ export default async function QuoteDetailPage({
       {isDraft && workspace.canSend ? (
         <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-            Transmettre le devis
+            {t("sendTitle")}
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
             {t("sendDescription")}
