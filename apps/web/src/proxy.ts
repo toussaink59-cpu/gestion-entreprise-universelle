@@ -10,48 +10,80 @@ const preferenceAwareRoutes = new Set([
   "/onboarding",
 ]);
 
+const supabaseCacheHeaders = ["cache-control", "expires", "pragma"] as const;
+
+type SupabaseCacheHeader = (typeof supabaseCacheHeaders)[number];
+
+function copySupabaseResponseState(
+  target: NextResponse,
+  source: NextResponse,
+): void {
+  for (const cookie of source.cookies.getAll()) {
+    target.cookies.set(cookie);
+  }
+
+  for (const header of supabaseCacheHeaders) {
+    const value = source.headers.get(header);
+    if (value) target.headers.set(header, value);
+  }
+}
+
+function responseWithSupabaseState(
+  requestHeaders: Headers,
+  previousResponse?: NextResponse,
+): NextResponse {
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  if (previousResponse) {
+    copySupabaseResponseState(response, previousResponse);
+  }
+
+  return response;
+}
+
+function redirectWithSupabaseState(
+  destination: URL,
+  supabaseResponse: NextResponse,
+): NextResponse {
+  const response = NextResponse.redirect(destination);
+  copySupabaseResponseState(response, supabaseResponse);
+  return response;
+}
+
+function applySupabaseCacheHeaders(
+  response: NextResponse,
+  headers: Record<string, string>,
+): void {
+  for (const [name, value] of Object.entries(headers)) {
+    const normalizedName = name.toLowerCase();
+
+    if (
+      supabaseCacheHeaders.includes(normalizedName as SupabaseCacheHeader)
+    ) {
+      response.headers.set(normalizedName, value);
+    }
+  }
+}
+
 function localeInPath(pathname: string): "fr" | "en" | null {
   if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
   if (pathname === "/fr" || pathname.startsWith("/fr/")) return "fr";
   return null;
 }
 
-function responseWithCookies(
-  requestHeaders: Headers,
-  previousResponse?: NextResponse,
-): NextResponse {
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
-  if (previousResponse) {
-    for (const cookie of previousResponse.cookies.getAll()) {
-      response.cookies.set(cookie);
-    }
-    for (const [name, value] of previousResponse.headers) {
-      if (name.toLowerCase() !== "set-cookie") response.headers.set(name, value);
-    }
-  }
-  return response;
-}
-
-function redirectWithCookies(
-  destination: URL,
-  previousResponse: NextResponse,
-): NextResponse {
-  const response = NextResponse.redirect(destination);
-  for (const cookie of previousResponse.cookies.getAll()) {
-    response.cookies.set(cookie);
-  }
-  return response;
-}
-
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const explicitLocale = localeInPath(pathname);
-  let locale = explicitLocale ?? localeFrom(request.cookies.get("polygest-locale")?.value);
+  let locale =
+    explicitLocale ?? localeFrom(request.cookies.get("polygest-locale")?.value);
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-polygest-locale", locale);
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  let supabaseResponse = responseWithCookies(requestHeaders);
+
+  let supabaseResponse = responseWithSupabaseState(requestHeaders);
   let authenticatedUserId: string | null = null;
 
   if (supabaseUrl && publishableKey) {
@@ -64,28 +96,42 @@ export async function proxy(request: NextRequest) {
           for (const { name, value } of cookiesToSet) {
             request.cookies.set(name, value);
           }
-          // Keep the forwarded request cookie header synchronized with the
-          // refreshed Supabase cookie jar and retain the validated locale.
+
+          // Keep forwarded request cookies and locale headers synchronized.
           requestHeaders.set("cookie", request.cookies.toString());
           requestHeaders.set("x-polygest-locale", locale);
-          supabaseResponse = responseWithCookies(requestHeaders, supabaseResponse);
+
+          const previousResponse = supabaseResponse;
+          supabaseResponse = responseWithSupabaseState(
+            requestHeaders,
+            previousResponse,
+          );
+
           for (const { name, value, options } of cookiesToSet) {
             supabaseResponse.cookies.set(name, value, options);
           }
-          for (const [key, value] of Object.entries(headers)) {
-            supabaseResponse.headers.set(key, value);
-          }
+
+          // @supabase/ssr supplies cache-control, expires and pragma here.
+          // Do not forward arbitrary headers from this callback.
+          applySupabaseCacheHeaders(supabaseResponse, headers);
         },
       },
     });
 
     const { data } = await supabase.auth.getClaims();
     const subject = data?.claims?.sub;
-    if (typeof subject === "string") authenticatedUserId = subject;
+
+    if (typeof subject === "string") {
+      authenticatedUserId = subject;
+    }
 
     // Read the persisted preference only on localized authentication routes.
     // This avoids a profile query on every application request.
-    if (!explicitLocale && authenticatedUserId && preferenceAwareRoutes.has(pathname)) {
+    if (
+      !explicitLocale &&
+      authenticatedUserId &&
+      preferenceAwareRoutes.has(pathname)
+    ) {
       const { data: profile } = await supabase
         .from("users")
         .select("preferred_locale")
@@ -95,19 +141,19 @@ export async function proxy(request: NextRequest) {
       if (isLocale(profile?.preferred_locale)) {
         locale = profile.preferred_locale;
         requestHeaders.set("x-polygest-locale", locale);
-        supabaseResponse = responseWithCookies(requestHeaders, supabaseResponse);
+        supabaseResponse = responseWithSupabaseState(
+          requestHeaders,
+          supabaseResponse,
+        );
       }
     }
   }
 
-  if (
-    !explicitLocale &&
-    locale === "en" &&
-    preferenceAwareRoutes.has(pathname)
-  ) {
+  if (!explicitLocale && locale === "en" && preferenceAwareRoutes.has(pathname)) {
     const destination = request.nextUrl.clone();
     destination.pathname = `/en${pathname}`;
-    return redirectWithCookies(destination, supabaseResponse);
+
+    return redirectWithSupabaseState(destination, supabaseResponse);
   }
 
   return supabaseResponse;
