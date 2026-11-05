@@ -35,7 +35,7 @@ export function QuoteDraftForm({
 }) {
   const t = useTranslations("Quotes.Form");
   const locale = useLocale();
-  const [state, formAction, pending] = useActionState(saveQuoteDraft,
+  const [state, formAction, pending] = useActionState(saveQuoteDraft, {
     error: null,
   });
 

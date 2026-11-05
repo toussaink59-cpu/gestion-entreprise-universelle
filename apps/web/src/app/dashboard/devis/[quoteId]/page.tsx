@@ -637,7 +637,7 @@ export default async function QuoteDetailPage({
               {formatQuoteCurrency(quote.discount_amount, quote.currency_code, locale)}
             </dd>
             <dt className="font-semibold text-[var(--pg-text)]">
-              {isDraft ? "Total du brouillon" : "Total"}
+              {isDraft ? t("draftTotal") : t("total")}
             </dt>
             <dd className="text-right font-semibold tabular-nums text-[var(--pg-text)]">
               {formatQuoteCurrency(quote.total_amount, quote.currency_code, locale)}
