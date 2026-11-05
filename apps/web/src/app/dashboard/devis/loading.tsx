@@ -1,19 +1,21 @@
 import { PageHeader } from "@/components/ui/page-header";
+import { getTranslations } from "next-intl/server";
 
-export default function QuotesLoading() {
+export default async function QuotesLoading() {
+  const t = await getTranslations("Quotes.List");
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Commercial"
-        title="Devis"
-        description="Chargement des brouillons de l’entreprise…"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("loadingDescription")}
       />
       <div
         role="status"
         aria-live="polite"
         className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 text-sm text-[var(--pg-text-muted)]"
       >
-        Chargement des devis…
+        {t("loading")}
       </div>
     </main>
   );
