@@ -9,11 +9,11 @@ type DashboardShellProps = { children: ReactNode };
 
 const navigation = [
   { href: "/dashboard", key: "overview", exact: true },
-  { href: "/dashboard/clients", key: "clients" },
-  { href: "/dashboard/fournisseurs", key: "suppliers" },
-  { href: "/dashboard/devis", key: "quotes" },
-  { href: "/dashboard/depenses", key: "expenses" },
-  { href: "/dashboard/membres", key: "members" },
+  { href: "/dashboard/clients", key: "clients", exact: false },
+  { href: "/dashboard/fournisseurs", key: "suppliers", exact: false },
+  { href: "/dashboard/devis", key: "quotes", exact: false },
+  { href: "/dashboard/depenses", key: "expenses", exact: false },
+  { href: "/dashboard/membres", key: "members", exact: false },
 ] as const;
 
 export function DashboardShell({ children }: DashboardShellProps) {
