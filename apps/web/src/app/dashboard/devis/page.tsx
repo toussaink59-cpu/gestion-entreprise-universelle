@@ -2,7 +2,11 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { formatQuoteCurrency, formatQuoteDate } from "./formatting";
+import {
+  formatQuoteCurrency,
+  formatQuoteDate,
+  quoteStatusLabel,
+} from "./formatting";
 import { QuoteCompanyChooser } from "./company-chooser";
 import { getQuoteWorkspace } from "./workspace";
 
@@ -101,7 +105,6 @@ export default async function QuotesPage({ searchParams }: Props) {
       "id, customer_id, quote_number, status, issue_date, valid_until, currency_code, total_amount, subject, updated_at",
     )
     .eq("company_id", workspace.company.id)
-    .eq("status", "draft")
     .order("updated_at", { ascending: false })
     .limit(100);
 
@@ -147,7 +150,7 @@ export default async function QuotesPage({ searchParams }: Props) {
         title="Devis"
         description={
           (workspace.company.trade_name || workspace.company.legal_name) +
-          " · Brouillons commerciaux de cette entreprise."
+          " · Devis commerciaux de cette entreprise."
         }
         actions={
           <>
@@ -193,10 +196,10 @@ export default async function QuotesPage({ searchParams }: Props) {
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[var(--pg-border)] p-5 sm:p-6">
           <div>
             <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-              Brouillons enregistrés
+              Devis enregistrés
             </h2>
             <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-              Les brouillons ne portent pas de numéro commercial et ne sont pas transmis.
+              Un devis reçoit un numéro provisoire (D-AAAA-NNNN) quand il est transmis. Ce n’est pas un numéro de facture.
             </p>
           </div>
 
@@ -265,7 +268,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                     <th className="px-5 py-3 font-semibold">Objet</th>
                     <th className="px-5 py-3 font-semibold">Date</th>
                     <th className="px-5 py-3 font-semibold">Validité</th>
-                    <th className="px-5 py-3 text-right font-semibold">Total du brouillon</th>
+                    <th className="px-5 py-3 text-right font-semibold">Total</th>
                     <th className="px-5 py-3 font-semibold">Action</th>
                   </tr>
                 </thead>
@@ -277,7 +280,10 @@ export default async function QuotesPage({ searchParams }: Props) {
                     >
                       <td className="px-5 py-4">
                         <span className="block font-medium text-[var(--pg-text)]">
-                          Brouillon sans numéro
+                          {quote.quote_number ?? "Brouillon sans numéro"}
+                        </span>
+                        <span className="mt-1 block text-xs text-[var(--pg-text-muted)]">
+                          {quoteStatusLabel(quote.status)}
                         </span>
                         <span className="mt-1 block font-mono text-xs text-[var(--pg-text-muted)]">
                           ID {quote.id.slice(0, 8).toUpperCase()}
@@ -325,7 +331,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                       </p>
                     </div>
                     <span className="shrink-0 rounded-md bg-[var(--pg-surface-subtle)] px-2 py-1 text-xs font-medium text-[var(--pg-text-muted)]">
-                      Brouillon
+                      {quote.quote_number ?? quoteStatusLabel(quote.status)}
                     </span>
                   </div>
                   <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -340,7 +346,7 @@ export default async function QuotesPage({ searchParams }: Props) {
                     href={"/dashboard/devis/" + quote.id + companyQuery}
                     className="mt-3 inline-flex min-h-11 items-center font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
                   >
-                    Consulter le brouillon
+                    Consulter le devis
                   </Link>
                 </li>
               ))}
