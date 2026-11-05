@@ -1,4 +1,5 @@
 import { isValidInvitationToken } from "./member-invitation";
+import type { Locale } from "@/i18n/locale";
 
 /**
  * Lien d'invitation transmis à la main (quand l'envoi d'e-mail n'est pas configuré ou échoue).
@@ -8,9 +9,10 @@ export const INVITATION_LINK_COOKIE = "polygest_invitation_link";
 export const INVITATION_LINK_COOKIE_PATH = "/dashboard/membres";
 export const INVITATION_LINK_COOKIE_MAX_AGE_SECONDS = 120;
 
-export function invitationAcceptPath(token: string): string {
+export function invitationAcceptPath(token: string, locale?: Locale): string {
   if (!isValidInvitationToken(token)) throw new Error("invalid invitation token");
-  return `/invitations/accept?token=${token}`;
+  const localeQuery = locale ? `&locale=${locale}` : "";
+  return `/invitations/accept?token=${token}${localeQuery}`;
 }
 
 /** Relit le cookie en refusant tout ce qui n'est pas exactement un chemin d'acceptation valide. */
@@ -19,7 +21,7 @@ export function parseInvitationLinkCookie(value: string | undefined, expectedUse
   const separator = value.indexOf("|");
   if (separator < 0 || value.slice(0, separator).toLowerCase() !== expectedUserId.toLowerCase()) return null;
   const path = value.slice(separator + 1);
-  return /^\/invitations\/accept\?token=[A-Za-z0-9_-]{43}$/.test(path) ? path : null;
+  return /^\/invitations\/accept\?token=[A-Za-z0-9_-]{43}(?:&locale=(?:fr|en))?$/.test(path) ? path : null;
 }
 
 function validOrigin(raw: string | undefined): string | null {

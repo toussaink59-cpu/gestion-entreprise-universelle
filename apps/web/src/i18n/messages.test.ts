@@ -45,6 +45,12 @@ describe("French and English message catalogs", () => {
     expect(fr.Companies.submit).toBe("Créer l’entreprise");
     expect(en.Companies.submit).toBe("Create company");
   });
+  it("provide invitation acceptance copy in both locales", () => {
+    expect(fr.Invitations.Accept.confirmTitle).toBe("Confirmer ton invitation");
+    expect(en.Invitations.Accept.confirmTitle).toBe("Confirm your invitation");
+    expect(fr.Invitations.Accept.invalidTitle).toBeTruthy();
+    expect(en.Invitations.Accept.invalidTitle).toBeTruthy();
+  });
   it("provide expense management copy and errors in both locales", () => {
     expect(fr.Expenses.List.title).toBe("Dépenses");
     expect(en.Expenses.List.title).toBe("Expenses");

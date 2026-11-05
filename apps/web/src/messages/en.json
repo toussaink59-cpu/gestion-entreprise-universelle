@@ -687,5 +687,24 @@
         "save": "Unable to save the draft. Check the information and try again."
       }
     }
+  },
+  "Invitations": {
+    "Accept": {
+      "metadataTitle": "Confirm an invitation · PolyGest",
+      "eyebrow": "PolyGest · Team",
+      "confirmedTitle": "Email confirmed",
+      "confirmedDescription": "Your invitation has been confirmed. The owner must still review and activate your access to the company.",
+      "backToLogin": "Back to sign in",
+      "invalidTitle": "Invalid invitation link",
+      "invalidDescription": "This link may have expired, already been used or may not match the signed-in account. Ask the company to send a new invitation.",
+      "login": "Sign in",
+      "confirmTitle": "Confirm your invitation",
+      "signedInAs": "You are signed in as",
+      "accountFallback": "PolyGest account",
+      "confirmAccess": "Confirm that you have access to this email address.",
+      "oneTimeExpiry": "This is a one-time link and it expires after seven days.",
+      "ownerActivationNotice": "This confirmation does not grant immediate access to the company: the owner must still activate your membership.",
+      "confirmButton": "Confirm invitation"
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildInvitationEmail,
   createInvitationToken,
@@ -6,6 +6,7 @@ import {
   hashInvitationToken,
   isValidInvitationToken,
   roleLabelForEmail,
+  sendMemberInvitationEmail,
 } from "../../src/lib/email/member-invitation";
 import { getSafeRedirectPath } from "../../src/lib/security/safe-redirect";
 
@@ -58,6 +59,38 @@ describe("jetons d’invitation e-mail", () => {
     expect(englishEmail.html).toContain("Confirm invitation");
     expect(englishEmail.text).toContain("Alice invited you to join Example Ltd");
     expect(englishEmail.text).toContain("The owner must still review and activate your access.");
+  });
+
+  it("inclut la langue demandée dans le lien e-mail", async () => {
+    vi.stubEnv("RESEND_API_KEY", "test-api-key");
+    vi.stubEnv("RESEND_FROM_EMAIL", "PolyGest <no-reply@example.test>");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://polygest.example");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ id: "email-test-id" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      const token = createInvitationToken().token;
+      const result = await sendMemberInvitationEmail({
+        to: "member@example.test",
+        companyName: "Example Ltd",
+        roleCode: "employee",
+        inviterName: "Alice",
+        locale: "en",
+        token,
+        idempotencyKey: "test-invitation-locale",
+      });
+      expect(result).toEqual({ ok: true, emailId: "email-test-id" });
+      const payload = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+      expect(payload.text).toContain(`/invitations/accept?token=${token}&locale=en`);
+      expect(payload.html).toContain(`/invitations/accept?token=${token}&amp;locale=en`);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.unstubAllEnvs();
+    }
   });
 
   it("ne permet au redirect de retour que des chemins internes", () => {

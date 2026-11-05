@@ -146,6 +146,28 @@ describe("proxy locale and Supabase response handling", () => {
     );
   });
 
+  it("uses the allowlisted locale on an invitation link ahead of a stale cookie", async () => {
+    configureSupabase({ claims: null });
+
+    const response = await proxy(
+      makeRequest("/invitations/accept?token=" + "A".repeat(43) + "&locale=en", "polygest-locale=fr"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-request-x-polygest-locale")).toBe("en");
+  });
+
+  it("ignores an invalid invitation locale and falls back to the preference cookie", async () => {
+    configureSupabase({ claims: null });
+
+    const response = await proxy(
+      makeRequest("/invitations/accept?token=" + "A".repeat(43) + "&locale=de", "polygest-locale=en"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-request-x-polygest-locale")).toBe("en");
+  });
+
   it("preserves refreshed auth cookies and cache headers across a redirect only", async () => {
     configureSupabase({
       claims: null,

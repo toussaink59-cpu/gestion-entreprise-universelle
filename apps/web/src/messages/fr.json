@@ -687,5 +687,24 @@
         "save": "Impossible d’enregistrer le brouillon. Vérifie les informations et réessaie."
       }
     }
+  },
+  "Invitations": {
+    "Accept": {
+      "metadataTitle": "Confirmer une invitation · PolyGest",
+      "eyebrow": "PolyGest · Équipe",
+      "confirmedTitle": "Adresse confirmée",
+      "confirmedDescription": "Ton invitation a été confirmée. Le propriétaire doit encore vérifier puis activer ton accès à l’entreprise.",
+      "backToLogin": "Retour à la connexion",
+      "invalidTitle": "Lien d’invitation invalide",
+      "invalidDescription": "Ce lien a peut-être expiré, a déjà été utilisé ou ne correspond pas au compte connecté. Demande à l’entreprise de renvoyer l’invitation.",
+      "login": "Se connecter",
+      "confirmTitle": "Confirmer ton invitation",
+      "signedInAs": "Tu es connecté en tant que",
+      "accountFallback": "compte PolyGest",
+      "confirmAccess": "Confirme que tu as accès à cette adresse e-mail.",
+      "oneTimeExpiry": "Le lien est à usage unique et expire après sept jours.",
+      "ownerActivationNotice": "Cette confirmation ne donne pas immédiatement accès à l’entreprise : le propriétaire devra encore activer ton appartenance.",
+      "confirmButton": "Confirmer l’invitation"
+    }
   }
 }
