@@ -198,7 +198,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
   const selectedCompany = companies.find((company) => company.id === selectedCompanyId);
   const membership = membershipRows.find((row) => row.company_id === selectedCompanyId);
   if (!selectedCompany || !membership) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">{t("companyNotAccessible")}</p><p className="mt-4"><a href={baseRoute} className="text-[var(--pg-accent)] hover:underline">{t("chooseAnotherCompany")}</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">Cette entreprise n’est pas accessible avec ton compte.</p><p className="mt-4"><a href={baseRoute} className="text-[var(--pg-accent)] hover:underline">{t("chooseAnotherCompany")}</a></p></main>;
   }
 
   const roleCode = String(membership.role_code);
