@@ -15,6 +15,18 @@ export function localePath(locale: Locale, path: string): string {
   return normalized === "/" ? "/en" : "/en" + normalized;
 }
 
+export function localeSwitcherPath(locale: Locale, path: string): string {
+  const normalized = path.startsWith("/") ? path : "/" + path;
+
+  // The language notice exists only under the explicit [locale] segment;
+  // unlike the auth pages, it has no French unprefixed route alias.
+  if (locale === "fr" && normalized === "/workspace-language-notice") {
+    return "/fr/workspace-language-notice";
+  }
+
+  return localePath(locale, normalized);
+}
+
 /** Keep translated auth routes localized; untranslated workspace pages stay French. */
 export function postAuthDestination(locale: Locale, safePath: string): string {
   if (locale === "fr") return safePath;
