@@ -110,6 +110,9 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
   const roleCode = String(membership?.role_code ?? "");
   const canRead = READ_ROLES.has(roleCode);
   const canWrite = WRITE_ROLES.has(roleCode);
+  // Les rôles qui modifient les devis sont aussi ceux qui détiennent quotes:validate ;
+  // la fonction SQL send_quote() reste l'autorité.
+  const canSend = canWrite;
 
   return {
     status: "ready" as const,
@@ -120,5 +123,6 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
     roleCode,
     canRead,
     canWrite,
+    canSend,
   };
 }

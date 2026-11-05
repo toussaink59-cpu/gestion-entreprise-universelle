@@ -19,6 +19,9 @@ Les migrations sont appliquées dans l'ordre chronologique de leur nom. Les migr
 | `20261104100000_confirmation_avant_activation_membre.sql` | Blocage des créations directes de membres actifs hors du parcours sécurisé confirmé |
 | `20261104110000_supprimer_plafond_fixe_entreprises_mvp.sql` | Suppression du plafond fixe de cinq entreprises dans le MVP, sans réécriture de la migration historique |
 | `20261104120000_stockage_prive_documents.sql` | Métadonnées des documents privés, RLS du module parent, autorisation atomique du dépôt et finalisation sécurisée après analyse |
+| `20261104130000_devis_brouillons.sql` | Devis et lignes en brouillon, permissions `quotes`, écriture uniquement par `save_quote_draft`, calculs côté serveur, aucune taxe |
+| `20261104140000_depenses_brouillons.sql` | Dépenses en brouillon, écriture uniquement par `save_expense_draft` |
+| `20261105100000_devis_transmission.sql` | Transmission des devis par `send_quote` : numéro provisoire interne `D-AAAA-NNNN` (compteur par entreprise et par année), copie figée du client et de l'émetteur, garde de cohérence des devis non brouillons. Pas une numérotation de facture |
 
 **Règle actuelle de création d'entreprise :** aucun plafond fixe de nombre d'entreprises par propriétaire n'est appliqué au MVP. La migration du 24 octobre est conservée pour l'historique, mais la migration du 4 novembre remplace la fonction `public.create_company()` et retire ce plafond. Les quotas éventuels seront conçus ultérieurement dans le cadre des formules d'abonnement.
 

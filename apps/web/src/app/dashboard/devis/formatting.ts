@@ -44,3 +44,20 @@ export function formatQuoteQuantity(value: string): string {
     maximumFractionDigits: 4,
   }).format(numericValue);
 }
+
+export function quoteStatusLabel(status: string): string {
+  switch (status) {
+    case "draft":
+      return "Brouillon";
+    case "sent":
+      return "Transmis";
+    case "accepted":
+      return "Accepté";
+    case "rejected":
+      return "Refusé";
+    case "cancelled":
+      return "Annulé";
+    default:
+      return "Statut inconnu";
+  }
+}

@@ -6,7 +6,9 @@ import {
   formatQuoteCurrency,
   formatQuoteDate,
   formatQuoteQuantity,
+  quoteStatusLabel,
 } from "../formatting";
+import { sendQuote } from "../actions";
 import { QuoteCompanyChooser } from "../company-chooser";
 import { getQuoteWorkspace, isQuoteUuid } from "../workspace";
 import type {
@@ -18,7 +20,11 @@ export const instant = false;
 
 type Props = {
   params: Promise<{ quoteId: string }>;
-  searchParams: Promise<{ company?: string; success?: string }>;
+  searchParams: Promise<{
+    company?: string;
+    success?: string;
+    send_error?: string;
+  }>;
 };
 
 type QuoteRecord = {
@@ -246,7 +252,24 @@ export default async function QuoteDetailPage({
   const successMessage =
     queryParams.success === "saved"
       ? "Le brouillon a été enregistré."
-      : null;
+      : queryParams.success === "sent"
+        ? "Le devis a été transmis et numéroté. Il n’est plus modifiable."
+        : null;
+  const sendErrorMessage = (() => {
+    switch (queryParams.send_error) {
+      case "permission":
+        return "Ton rôle ne permet pas de transmettre ce devis.";
+      case "not-draft":
+        return "Ce devis a déjà été transmis.";
+      case "invalid":
+        return "Le devis ne peut pas être transmis : vérifie qu’il a au moins une ligne, que sa date de validité n’est pas dépassée et que le client est actif.";
+      case undefined:
+        return null;
+      default:
+        return "La transmission a échoué. Réessaie, ou contacte l’administrateur si le problème continue.";
+    }
+  })();
+  const isDraft = quote.status === "draft";
 
   const initial: QuoteDraftInitialValues = {
     quoteId: quote.id,
@@ -273,12 +296,14 @@ export default async function QuoteDetailPage({
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
         eyebrow="PolyGest · Commercial"
-        title="Devis brouillon"
+        title={isDraft ? "Devis brouillon" : "Devis " + (quote.quote_number ?? "")}
         description={
           (workspace.company.trade_name || workspace.company.legal_name) +
           " · ID interne " +
           quote.id.slice(0, 8).toUpperCase() +
-          " · Aucun numéro commercial attribué."
+          (isDraft
+            ? " · Aucun numéro attribué."
+            : " · " + quoteStatusLabel(quote.status) + ".")
         }
         actions={
           <Link href={cancelHref} className={SECONDARY_BUTTON}>
@@ -324,7 +349,7 @@ export default async function QuoteDetailPage({
           </div>
           <div>
             <p className="text-xs font-medium text-[var(--pg-text-muted)]">
-              Total du brouillon
+              {isDraft ? "Total du brouillon" : "Total"}
             </p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-[var(--pg-text)]">
               {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
@@ -332,10 +357,43 @@ export default async function QuoteDetailPage({
           </div>
         </div>
         <p className="mt-4 text-sm text-[var(--pg-text-muted)]">
-          Ce document est encore en préparation. Il n’est ni numéroté, ni transmis,
-          ni utilisable comme facture.
+          {isDraft
+            ? "Ce document est encore en préparation. Il n’est ni numéroté, ni transmis, ni utilisable comme facture."
+            : "Numéro provisoire interne aux devis, sans valeur de numéro de facture. Ce document n’est pas une facture."}
         </p>
       </section>
+
+      {sendErrorMessage ? (
+        <p
+          role="alert"
+          className="mb-5 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]"
+        >
+          {sendErrorMessage}
+        </p>
+      ) : null}
+
+      {isDraft && workspace.canSend ? (
+        <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">
+            Transmettre le devis
+          </h2>
+          <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
+            La transmission attribue un numéro provisoire (D-AAAA-NNNN) et conserve
+            une copie des informations du client. Le devis ne sera plus modifiable.
+            Enregistre d’abord tes modifications en cours.
+          </p>
+          <form action={sendQuote} className="mt-4">
+            <input type="hidden" name="company_id" value={workspace.company.id} />
+            <input type="hidden" name="quote_id" value={quote.id} />
+            <button
+              type="submit"
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
+            >
+              Transmettre et numéroter
+            </button>
+          </form>
+        </section>
+      ) : null}
 
       {canEditDraft && customerError ? (
         <p
@@ -438,7 +496,7 @@ export default async function QuoteDetailPage({
               {formatQuoteCurrency(quote.discount_amount, quote.currency_code)}
             </dd>
             <dt className="font-semibold text-[var(--pg-text)]">
-              Total du brouillon
+              {isDraft ? "Total du brouillon" : "Total"}
             </dt>
             <dd className="text-right font-semibold tabular-nums text-[var(--pg-text)]">
               {formatQuoteCurrency(quote.total_amount, quote.currency_code)}
