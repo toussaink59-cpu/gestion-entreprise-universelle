@@ -46,9 +46,9 @@ function mapRpcError(code: string, companyId: string): never {
  * Quand l'e-mail ne part pas (Resend non configuré, échec, limite), le lien est montré une seule
  * fois à l'invitant, via un cookie court, httpOnly, limité à la page des membres.
  */
-async function keepInvitationLinkForInviter(token: string, userId: string) {
+async function keepInvitationLinkForInviter(token: string, userId: string, locale: "fr" | "en") {
   const store = await cookies();
-  store.set(INVITATION_LINK_COOKIE, `${userId}|${invitationAcceptPath(token)}`, {
+  store.set(INVITATION_LINK_COOKIE, `${userId}|${invitationAcceptPath(token, locale)}`, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
@@ -126,7 +126,7 @@ export async function inviteCompanyMember(formData: FormData) {
     : null;
   if (!sent || !sent.ok) {
     console.error("Member invitation email not delivered:", { reason: sent ? sent.reason : "not-configured" });
-    await keepInvitationLinkForInviter(token, user.id);
+    await keepInvitationLinkForInviter(token, user.id, emailLocale);
     returnTo(parsed.companyId, { success: "invited-link" });
   }
   await markEmailSent(supabase, membershipId, tokenHash, sent.emailId);
@@ -181,7 +181,7 @@ export async function resendCompanyMemberInvitation(formData: FormData) {
     : null;
   if (!sent || !sent.ok) {
     console.error("Member invitation resend not delivered:", { reason: sent ? sent.reason : "not-configured" });
-    await keepInvitationLinkForInviter(token, user.id);
+    await keepInvitationLinkForInviter(token, user.id, emailLocale);
     returnTo(companyField, { success: "invited-link" });
   }
   await markEmailSent(supabase, membershipField, tokenHash, sent.emailId);

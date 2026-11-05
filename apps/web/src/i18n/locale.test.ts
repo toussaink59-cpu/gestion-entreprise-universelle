@@ -6,4 +6,5 @@ it("keeps French unprefixed and prefixes English",()=>{expect(localePath("fr","/
 it("returns from the English workspace notice to its existing explicit French route",()=>{expect(localeSwitcherPath("fr","/workspace-language-notice")).toBe("/fr/workspace-language-notice");});
 it("keeps existing unprefixed French auth routes in the language switcher",()=>{expect(localeSwitcherPath("fr","/login")).toBe("/login");expect(localeSwitcherPath("en","/login")).toBe("/en/login");});
 it("localizes onboarding but warns before untranslated workspace",()=>{expect(postAuthDestination("en","/onboarding")).toBe("/en/onboarding");expect(postAuthDestination("en","/dashboard")).toBe("/en/workspace-language-notice?continue=%2Fdashboard");});
+it("keeps translated invitation acceptance in its locale-aware route after login",()=>{expect(postAuthDestination("en","/invitations/accept?token=abc&locale=en")).toBe("/invitations/accept?token=abc&locale=en");expect(postAuthDestination("en","/invitations/accept?token=abc")).toBe("/invitations/accept?token=abc&locale=en");});
 });

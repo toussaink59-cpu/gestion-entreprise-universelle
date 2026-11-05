@@ -74,8 +74,15 @@ function localeInPath(pathname: string): "fr" | "en" | null {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const explicitLocale = localeInPath(pathname);
+  const invitationLocale =
+    pathname === "/invitations/accept"
+      ? request.nextUrl.searchParams.get("locale")
+      : null;
   let locale =
-    explicitLocale ?? localeFrom(request.cookies.get("polygest-locale")?.value);
+    explicitLocale ??
+    (isLocale(invitationLocale)
+      ? invitationLocale
+      : localeFrom(request.cookies.get("polygest-locale")?.value));
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-polygest-locale", locale);

@@ -15,6 +15,13 @@ describe("lien d’invitation transmis à la main", () => {
     expect(parseInvitationLinkCookie(`${inviterId}|${path}`, inviterId)).toBe(path);
   });
 
+  it("transporte la langue dans le lien manuel et conserve le cookie associé", () => {
+    const { token } = createInvitationToken();
+    const path = invitationAcceptPath(token, "en");
+    expect(path).toBe(`/invitations/accept?token=${token}&locale=en`);
+    expect(parseInvitationLinkCookie(`${inviterId}|${path}`, inviterId)).toBe(path);
+  });
+
   it("refuse un jeton mal formé", () => {
     expect(() => invitationAcceptPath("abc")).toThrow();
   });
@@ -26,6 +33,8 @@ describe("lien d’invitation transmis à la main", () => {
     "//evil.example/x",
     "/invitations/accept?token=" + "A".repeat(42),
     "/invitations/accept?token=" + "A".repeat(43) + "&next=//evil.example",
+    "/invitations/accept?token=" + "A".repeat(43) + "&locale=de",
+    "/invitations/accept?token=" + "A".repeat(43) + "&locale=en&next=//evil.example",
     "/dashboard",
   ])("ignore un cookie falsifié (%s)", (value) => {
     expect(parseInvitationLinkCookie(value, inviterId)).toBeNull();

@@ -30,6 +30,11 @@ export function localeSwitcherPath(locale: Locale, path: string): string {
 /** Keep translated auth routes localized; untranslated workspace pages stay French. */
 export function postAuthDestination(locale: Locale, safePath: string): string {
   if (locale === "fr") return safePath;
+  if (safePath === "/invitations/accept" || safePath.startsWith("/invitations/accept?")) {
+    return /[?&]locale=(fr|en)(?:&|$)/.test(safePath)
+      ? safePath
+      : `${safePath}${safePath.includes("?") ? "&" : "?"}locale=en`;
+  }
   const localizedPaths = ["/onboarding", "/reset-password"];
   if (localizedPaths.some((path) => safePath === path || safePath.startsWith(path + "?"))) {
     return localePath("en", safePath);

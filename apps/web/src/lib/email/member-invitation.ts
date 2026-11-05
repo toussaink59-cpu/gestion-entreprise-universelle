@@ -104,14 +104,16 @@ export async function sendMemberInvitationEmail(params: {
   const apiKey = process.env.RESEND_API_KEY!.trim();
   const from = process.env.RESEND_FROM_EMAIL!.trim();
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!.trim();
+  const locale = params.locale ?? "fr";
   const url = new URL("/invitations/accept", baseUrl);
   url.searchParams.set("token", params.token);
+  url.searchParams.set("locale", locale);
   const email = buildInvitationEmail({
     companyName: params.companyName,
     roleLabel: roleLabelForEmail(params.roleCode, params.locale),
     inviterName: params.inviterName || (params.locale === "en" ? "A PolyGest administrator" : "Un administrateur PolyGest"),
     acceptUrl: url.toString(),
-    locale: params.locale,
+    locale,
   });
   try {
     const response = await fetch("https://api.resend.com/emails", {
