@@ -125,5 +125,49 @@
     "description": "The English translation of the dashboard and management modules is in progress. For this first step, those screens remain available in French.",
     "continue": "Continue to the workspace in French",
     "languageLabel": "Choose language"
+  },
+  "Dashboard": {
+    "Navigation": {
+      "ariaLabel": "Main navigation",
+      "workspace": "Workspace",
+      "overview": "Overview",
+      "clients": "Customers",
+      "suppliers": "Suppliers",
+      "quotes": "Quotes",
+      "expenses": "Expenses",
+      "members": "Members",
+      "footer": "Business management"
+    },
+    "Home": {
+      "eyebrow": "PolyGest · Workspace",
+      "title": "Dashboard",
+      "loadingEyebrow": "PolyGest",
+      "loadingDescription": "Loading your workspaces…",
+      "loadingLabel": "Loading dashboard",
+      "welcome": "Welcome.",
+      "welcomeNamed": "Welcome, {name}.",
+      "account": "Account: {email}.",
+      "emailUnavailable": "email address not provided",
+      "createCompany": "Create a company",
+      "signOut": "Sign out",
+      "myCompanies": "My companies",
+      "directoryDescription": "Each company has its own customer and supplier directories.",
+      "membershipError": "Unable to load company memberships.",
+      "membershipErrorHelp": "Check the Supabase schema and access policies.",
+      "companiesError": "Unable to load company information.",
+      "noCompaniesTitle": "No accessible company",
+      "noCompaniesDescription": "Create a company or ask its owner to invite you to get started.",
+      "legalName": "Legal name: {name}",
+      "currency": "Currency: {currency}",
+      "companyBadge": "Company",
+      "manageMembers": "Manage members",
+      "customerDirectory": "Customer directory",
+      "supplierDirectory": "Supplier directory",
+      "recentCount": "Up to {count} recent active records.",
+      "previewError": "Unable to load records from this directory.",
+      "customerEmpty": "No active customer records are visible for this company.",
+      "supplierEmpty": "No active supplier records are visible for this company.",
+      "openDirectory": "Open directory"
+    }
   }
 }
