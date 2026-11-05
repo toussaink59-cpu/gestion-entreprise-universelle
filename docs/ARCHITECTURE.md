@@ -9,15 +9,15 @@
 5. **Documents** : stockage privé, accès temporaire autorisé et validation du type/taille de fichier.
 6. **Exploitation** : environnements distincts, logs, alertes, sauvegardes et restauration testée.
 
-## 2. Technologies candidates
+## 2. Socle technique en place et options d'évolution
 
 - Next.js et TypeScript pour l’application web.
 - PostgreSQL pour la base relationnelle.
-- Supabase comme option pour base de données, authentification et stockage.
+- Supabase pour PostgreSQL géré, authentification et stockage privé dans l'architecture actuellement déployée.
 - Tests unitaires, tests d’intégration et tests de bout en bout.
 - Intégration continue pour lancer les contrôles sur chaque modification.
 
-Cette liste est une décision proposée, pas une exigence irréversible. Les choix finaux doivent considérer coût, portabilité, maîtrise opérationnelle, résidence et traitement des données, exigences contractuelles et continuité de service.
+La stack actuellement utilisée est Next.js, React, TypeScript, PostgreSQL et Supabase. Toute évolution doit préserver portabilité SQL, RLS, coûts, maîtrise opérationnelle, résidence et traitement des données, exigences contractuelles et continuité de service.
 
 ## 3. Isolation multi-entreprises
 
@@ -66,3 +66,30 @@ Séparer développement, test/staging et production. Utiliser des données ficti
 - Monnaie, multi-devises et fuseaux horaires.
 - Choix des bibliothèques d’interface et de validation.
 - Politique de versions API et migrations de schéma.
+
+
+## 9. Internationalisation et architecture multi-pays
+
+Cette section applique le cahier des charges v0.1 complété par l'avenant n°1 v0.2 et par [ADR-002](adr/0002-internationalisation-fr-en-multi-pays.md).
+
+### 9.1 Séparation régionale
+L'architecture distingue la langue utilisateur, le pays/juridiction de l'entreprise, la devise de référence, la devise d'un document lorsque le module le permet, le fuseau IANA et les règles fiscales/sociales/comptables applicables selon la période. Ces paramètres sont indépendants.
+
+### 9.2 Routage et messages
+- `next-intl` est la solution de référence, sous réserve de validation dans la version Next.js en place.
+- Le français reste sans préfixe et l'anglais est exposé sous `/en` (`localePrefix: 'as-needed'`).
+- Le routage est composé avec `src/proxy.ts`, qui gère déjà Supabase SSR ; un seul proxy préserve cookies, headers, redirections et sessions.
+- Les catalogues FR/EN sont centralisés ; les erreurs métier utilisent des codes stables, présentés dans la langue de l'utilisateur.
+- La préférence utilisateur est persistée après audit des privilèges et de RLS.
+
+### 9.3 Données et formatage
+- Pays : ISO 3166-1 alpha-2 ; devises : ISO 4217 ; fuseaux : IANA.
+- Réutiliser `companies.country_code`, `default_currency` et `timezone` avant toute nouvelle migration.
+- Les montants sont calculés en décimal exact en base ; `Intl.NumberFormat` sert à l'affichage seulement, avec locale et devise explicites.
+- Les devises différentes ne sont pas additionnées sans conversion demandée, datée, sourcée et auditée.
+- Les documents transmis/émis conservent langue, devise et snapshots nécessaires ; une préférence modifiée ne réécrit pas l'historique.
+
+### 9.4 Adaptateurs nationaux et sécurité
+Le noyau métier reste commun. Les règles de fiscalité, facturation légale, comptabilité, paie et protection des données sont isolées par juridiction, régime et date d'effet. Le Burkina Faso est le premier adaptateur de référence. Un nouveau pays n'est pas déclaré conforme avant vérification de sources officielles et validation professionnelle lorsque requise.
+
+Le routage et les traductions ne changent ni les permissions, ni RLS, ni l'isolation multi-entreprises. Aucune migration destructive, réplication multi-région ou modification de région d'hébergement n'est autorisée par cette section ; les décisions de résidence restent soumises à l'ADR-001.

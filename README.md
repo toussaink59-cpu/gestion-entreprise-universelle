@@ -4,7 +4,7 @@
 
 Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME. Le projet vise à réunir dans un espace sécurisé les principales opérations d’une entreprise : ventes, facturation, dépenses, trésorerie, budgets, personnel, paie, stocks et rapports.
 
-**Marché de départ :** Burkina Faso. **Ambition :** concevoir une base commune extensible à d’autres pays et secteurs d’activité.
+**Marché de référence initial :** Burkina Faso. **Ambition produit :** logiciel international dès sa conception, avec une interface française et anglaise dès le départ, un noyau métier commun et des adaptateurs réglementaires ajoutés pays par pays.
 
 ## Statut réel du projet
 
@@ -21,16 +21,19 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 - des tests automatisés d’isolation entre entreprises, de permissions par rôle, de révocation et d’audit, exécutés sur les migrations ;
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
 - un socle de stockage documentaire privé livré et intégré aux fiches clients/fournisseurs : bucket privé, métadonnées isolées, permissions héritées du module, dépôt direct signé et liens de téléchargement de 120 secondes ; le dépôt reste désactivé par défaut (`DOCUMENT_SCANNER_ENABLED=false`) tant que le scanner antivirus n'est pas branché ;
-- des modules **en brouillon seulement** pour les devis et les dépenses : enregistrement/listage de brouillons, sans transmission de devis, émission de factures, paiement ni mouvement de trésorerie ;
+- un premier flux de devis : brouillons, transmission avec numérotation interne provisoire `D-AAAA-NNNN`, réponse client (acceptation/refus) et annulation d’un devis transmis non répondu ; ce numéro reste distinct d’un numéro légal de facture et ne constitue aucune certification fiscale ;
+- les dépenses sont encore limitées aux brouillons ;
 - une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit de toutes les dépendances (runtime et développement), ShellCheck, lint SQL et tests sur une pile Supabase locale réelle.
 
-**Limites actuelles :** les devis et dépenses ne couvrent que des brouillons ; la transmission des devis, les factures, règlements, trésorerie, budgets, stocks et paie ne sont pas implémentés. Le scanner antivirus n’est pas intégré. Les migrations et paramètres n’ont pas été validés sur le projet Supabase hébergé ; la région, la politique de sauvegarde et les objectifs RPO/RTO restent à formaliser. Les scripts de sauvegarde ne remplacent pas un dispositif opérationnel de production.
+**Limites actuelles :** le flux de devis couvre les brouillons, la transmission interne, la réponse client et l’annulation dans les limites du module actuel ; l’émission de factures, les règlements, la trésorerie, les budgets, les stocks et la paie ne sont pas encore implémentés. Les dépenses restent limitées aux brouillons. L’internationalisation FR/EN est spécifiée dans l’avenant v0.2 mais n’est pas encore implémentée. Le scanner antivirus n’est pas intégré. Les migrations et paramètres n’ont pas été validés sur le projet Supabase hébergé ; la région, la politique de sauvegarde et les objectifs RPO/RTO restent à formaliser. Les scripts de sauvegarde ne remplacent pas un dispositif opérationnel de production.
 
 Le détail des constats vérifiés et des risques restants se trouve dans [l’audit Phase 1 du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md). La [checklist historique](docs/PHASE1_CHECKLIST.md) conserve le relevé du 23 octobre et n’est pas la source de statut actuelle.
 
 ## Documents du projet
 
-- [Cahier des charges PDF](docs/CAHIER_DES_CHARGES.pdf)
+- [Cahier des charges initial v0.1 (PDF)](docs/CAHIER_DES_CHARGES.pdf)
+- [Avenant n°1 v0.2 — Internationalisation et architecture multi-pays](docs/CAHIER_DES_CHARGES_AVENANT_INTERNATIONAL_V0.2.md)
+- [ADR-002 — Internationalisation FR/EN et architecture multi-pays](docs/adr/0002-internationalisation-fr-en-multi-pays.md)
 - [Feuille de route](docs/ROADMAP.md)
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
@@ -102,7 +105,7 @@ Le MVP ne doit pas tout inclure dès le lancement. La priorisation proposée est
 - **Paramètres datés :** les règles de paie, taxes et comptabilité doivent être configurables par pays, période et régime, et vérifiées avant usage réel.
 - **Confidentialité par défaut :** accès minimal, stockage privé des pièces sensibles, sauvegardes et tests de restauration.
 - **Mobile-first pragmatique :** les tâches courantes doivent être utilisables sur un smartphone.
-- **Internationalisation :** devise, langue, fuseau horaire et paramètres réglementaires ne doivent pas être figés dans le code métier.
+- **Internationalisation :** PolyGest est international dès sa conception ; les langues initiales sont le français et l’anglais. Langue utilisateur, pays légal, devise, fuseau horaire et paramètres réglementaires restent indépendants et ne sont jamais déduits les uns des autres.
 
 ## Architecture technique proposée
 
@@ -127,7 +130,7 @@ Le premier incrément vise à permettre à une entreprise de :
 - suivre quelques comptes de trésorerie et budgets ;
 - consulter un tableau de bord réel et exporter des rapports de base.
 
-La paie de base fait partie du MVP P0, mais sera développée après la fondation commerciale et financière et restera en simulation tant que les règles locales ne seront pas validées par un professionnel compétent. La comptabilité complète, les intégrations de paiement et les fonctions multi-pays sont des évolutions ultérieures.
+La paie de base fait partie du MVP P0, mais sera développée après la fondation commerciale et financière et restera en simulation tant que les règles locales ne seront pas validées par un professionnel compétent. L’internationalisation de l’interface FR/EN et les fondations régionales sont transversales et doivent être préparées tôt ; les adaptateurs réglementaires de nouveaux pays, la comptabilité complète, les conversions de devises avancées et les intégrations de paiement restent des évolutions progressives.
 
 ## Sécurité et conformité
 
