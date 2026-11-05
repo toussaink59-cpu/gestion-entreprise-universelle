@@ -37,4 +37,12 @@ describe("French and English message catalogs", () => {
     expect(fr.Quotes.Detail.sendButton).toBe("Transmettre et numéroter");
     expect(en.Quotes.Detail.sendButton).toBe("Send and number");
   });
+  it("provide member and company-management copy in both locales", () => {
+    expect(fr.Members.roles.owner).toBe("Propriétaire");
+    expect(en.Members.roles.owner).toBe("Owner");
+    expect(fr.Members.errors.companies).toBeTruthy();
+    expect(en.Members.errors.companies).toBeTruthy();
+    expect(fr.Companies.submit).toBe("Créer l’entreprise");
+    expect(en.Companies.submit).toBe("Create company");
+  });
 });
