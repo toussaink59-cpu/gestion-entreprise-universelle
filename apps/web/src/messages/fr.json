@@ -28,7 +28,8 @@
         "invalid-credentials": "Adresse e-mail ou mot de passe incorrect.",
         "confirmation-failed": "Le lien de confirmation est invalide ou a expiré. Recommence la procédure d’inscription ou contacte l’assistance.",
         "generic": "La connexion n’a pas pu aboutir. Réessaie."
-      }
+      },
+      "forgotPasswordLink": "Mot de passe oublié ?"
     },
     "Register": {
       "title": "Créer un compte",
@@ -52,6 +53,47 @@
         "password-too-short": "Le mot de passe doit contenir au moins 8 caractères.",
         "signup-failed": "Impossible de créer le compte. Vérifie les informations et réessaie.",
         "generic": "L’inscription n’a pas pu aboutir. Réessaie."
+      }
+    },
+    "ForgotPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "description": "Indique l’adresse e-mail associée à ton compte. Si un compte peut recevoir un lien de récupération, un message sera envoyé.",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "nom@entreprise.com",
+      "submit": "Envoyer le lien",
+      "pending": "Envoi en cours…",
+      "checkEmail": "Si un compte est associé à cette adresse, un lien de récupération sera envoyé. Vérifie ta boîte de réception et tes courriers indésirables.",
+      "loginPrompt": "Tu te souviens de ton mot de passe ?",
+      "loginLink": "Retour à la connexion",
+      "errors": {
+        "missing-email": "Renseigne ton adresse e-mail.",
+        "invalid-email": "Le format de l’adresse e-mail est invalide.",
+        "generic": "La demande n’a pas pu être traitée. Réessaie."
+      }
+    },
+    "ResetPassword": {
+      "title": "Choisir un nouveau mot de passe",
+      "description": "Définis un nouveau mot de passe pour sécuriser ton compte PolyGest.",
+      "password": "Nouveau mot de passe",
+      "passwordPlaceholder": "8 caractères minimum",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "confirmPasswordPlaceholder": "Saisis à nouveau le mot de passe",
+      "passwordHint": "Utilise au moins 8 caractères. Les règles de sécurité du compte restent appliquées par Supabase.",
+      "submit": "Enregistrer le nouveau mot de passe",
+      "pending": "Mise à jour en cours…",
+      "success": "Ton mot de passe a été mis à jour.",
+      "successDescription": "Tu peux maintenant accéder à ton espace de travail.",
+      "continue": "Continuer vers PolyGest",
+      "invalidSession": "Cette session de récupération est invalide ou a expiré. Demande un nouveau lien de récupération.",
+      "requestNewLink": "Demander un nouveau lien",
+      "errors": {
+        "missing-fields": "Renseigne les deux champs.",
+        "password-too-short": "Le mot de passe doit contenir au moins 8 caractères.",
+        "password-too-long": "Le mot de passe ne doit pas dépasser 128 caractères.",
+        "password-mismatch": "Les deux mots de passe ne correspondent pas.",
+        "invalid-session": "La session de récupération est invalide ou a expiré. Demande un nouveau lien.",
+        "update-failed": "Le mot de passe n’a pas pu être mis à jour. Vérifie les règles de sécurité et réessaie.",
+        "generic": "La modification n’a pas pu aboutir. Réessaie."
       }
     }
   },

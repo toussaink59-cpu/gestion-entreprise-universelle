@@ -13,7 +13,7 @@ export function LocaleSwitcher({
   label,
 }: {
   locale: Locale;
-  href: "/login" | "/register" | "/onboarding" | "/workspace-language-notice";
+  href: "/login" | "/register" | "/forgot-password" | "/reset-password" | "/onboarding" | "/workspace-language-notice";
   label: string;
 }) {
   return (

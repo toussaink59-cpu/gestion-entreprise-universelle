@@ -28,7 +28,8 @@
         "invalid-credentials": "The email address or password is incorrect.",
         "confirmation-failed": "The confirmation link is invalid or has expired. Restart registration or contact support.",
         "generic": "Sign-in could not be completed. Please try again."
-      }
+      },
+      "forgotPasswordLink": "Forgot your password?"
     },
     "Register": {
       "title": "Create an account",
@@ -52,6 +53,47 @@
         "password-too-short": "The password must contain at least 8 characters.",
         "signup-failed": "The account could not be created. Check your details and try again.",
         "generic": "Registration could not be completed. Please try again."
+      }
+    },
+    "ForgotPassword": {
+      "title": "Reset your password",
+      "description": "Enter the email address associated with your account. If an account can receive a recovery link, a message will be sent.",
+      "email": "Email address",
+      "emailPlaceholder": "name@company.com",
+      "submit": "Send recovery link",
+      "pending": "Sending…",
+      "checkEmail": "If an account is associated with this address, a recovery link will be sent. Check your inbox and spam folder.",
+      "loginPrompt": "Remember your password?",
+      "loginLink": "Back to sign in",
+      "errors": {
+        "missing-email": "Enter your email address.",
+        "invalid-email": "The email address format is invalid.",
+        "generic": "The request could not be processed. Please try again."
+      }
+    },
+    "ResetPassword": {
+      "title": "Choose a new password",
+      "description": "Set a new password to secure your PolyGest account.",
+      "password": "New password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Enter the password again",
+      "passwordHint": "Use at least 8 characters. Your account's Supabase security rules still apply.",
+      "submit": "Save new password",
+      "pending": "Updating…",
+      "success": "Your password has been updated.",
+      "successDescription": "You can now continue to your workspace.",
+      "continue": "Continue to PolyGest",
+      "invalidSession": "This password recovery session is invalid or has expired. Request a new recovery link.",
+      "requestNewLink": "Request a new link",
+      "errors": {
+        "missing-fields": "Enter both password fields.",
+        "password-too-short": "The password must contain at least 8 characters.",
+        "password-too-long": "The password must not exceed 128 characters.",
+        "password-mismatch": "The passwords do not match.",
+        "invalid-session": "The recovery session is invalid or has expired. Request a new link.",
+        "update-failed": "The password could not be updated. Check the security requirements and try again.",
+        "generic": "The password could not be changed. Please try again."
       }
     }
   },

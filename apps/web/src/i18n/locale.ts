@@ -1,6 +1,26 @@
-export const locales=["fr","en"] as const;
-export type Locale=(typeof locales)[number];
-export function isLocale(v:string|null|undefined):v is Locale{return v==="fr"||v==="en";}
-export function localeFrom(v:string|null|undefined):Locale{return isLocale(v)?v:"fr";}
-export function localePath(l:Locale,p:string){const n=p.startsWith("/")?p:"/"+p;return l==="fr"?n:(n==="/"?"/en":"/en"+n);}
-export function postAuthDestination(l:Locale,p:string){if(l==="fr")return p;if(p==="/onboarding"||p.startsWith("/onboarding?"))return localePath("en",p);return localePath("en","/workspace-language-notice")+"?continue="+encodeURIComponent(p);}
+export const locales = ["fr", "en"] as const;
+export type Locale = (typeof locales)[number];
+
+export function isLocale(value: string | null | undefined): value is Locale {
+  return value === "fr" || value === "en";
+}
+
+export function localeFrom(value: string | null | undefined): Locale {
+  return isLocale(value) ? value : "fr";
+}
+
+export function localePath(locale: Locale, path: string): string {
+  const normalized = path.startsWith("/") ? path : "/" + path;
+  if (locale === "fr") return normalized;
+  return normalized === "/" ? "/en" : "/en" + normalized;
+}
+
+/** Keep translated auth routes localized; untranslated workspace pages stay French. */
+export function postAuthDestination(locale: Locale, safePath: string): string {
+  if (locale === "fr") return safePath;
+  const localizedPaths = ["/onboarding", "/reset-password"];
+  if (localizedPaths.some((path) => safePath === path || safePath.startsWith(path + "?"))) {
+    return localePath("en", safePath);
+  }
+  return localePath("en", "/workspace-language-notice") + "?continue=" + encodeURIComponent(safePath);
+}
