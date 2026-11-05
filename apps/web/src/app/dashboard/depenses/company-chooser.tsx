@@ -1,23 +1,25 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
+import { getTranslations } from "next-intl/server";
 import type { ExpenseCompany } from "./workspace";
 
-export function ExpenseCompanyChooser({
+export async function ExpenseCompanyChooser({
   companies,
 }: {
   companies: ExpenseCompany[];
 }) {
+  const t = await getTranslations("Expenses.List");
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow="PolyGest · Finance"
-        title="Dépenses"
-        description="Sélectionne l’entreprise concernée. Les données de dépenses restent strictement séparées entre les entreprises."
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("chooseCompanyDescription")}
       />
 
       <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
         <h2 className="text-lg font-semibold text-[var(--pg-text)]">
-          Choisir une entreprise
+          {t("chooseCompany")}
         </h2>
         <div className="mt-4 divide-y divide-[var(--pg-border)]">
           {companies.map((company) => (
@@ -33,7 +35,7 @@ export function ExpenseCompanyChooser({
                 {company.legal_name}
               </span>
               <span className="mt-2 block text-sm font-medium text-[var(--pg-accent)]">
-                Ouvrir
+                {t("open")}
               </span>
             </Link>
           ))}
@@ -43,7 +45,7 @@ export function ExpenseCompanyChooser({
             href="/dashboard"
             className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
           >
-            Retour au tableau de bord
+            {t("backDashboard")}
           </Link>
         </p>
       </section>

@@ -36,5 +36,9 @@ describe("French and English message catalogs", () => {
     expect(en.Quotes.Form.saveDraft).toBe("Save draft");
     expect(fr.Quotes.Detail.sendButton).toBe("Transmettre et numéroter");
     expect(en.Quotes.Detail.sendButton).toBe("Send and number");
+    expect(fr.Expenses.List.title).toBe("Dépenses");
+    expect(en.Expenses.List.title).toBe("Expenses");
+    expect(fr.Expenses.Form.draftOnly).toContain("Aucun paiement");
+    expect(en.Expenses.Form.draftOnly).toContain("No payment");
   });
 });

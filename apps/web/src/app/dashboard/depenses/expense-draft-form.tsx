@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import { useTranslations } from "next-intl";
 import { saveExpenseDraft } from "./actions";
 
 type SupplierOption = { id: string; name: string };
@@ -33,6 +34,7 @@ export function ExpenseDraftForm({
   expenseDate: string;
   cancelHref: string;
 }) {
+  const t = useTranslations("Expenses.Form");
   const [state, formAction, pending] = useActionState(saveExpenseDraft, {
     error: null,
   });
@@ -58,21 +60,21 @@ export function ExpenseDraftForm({
 
       {state.error ? (
         <p role="alert" aria-live="polite" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">
-          {state.error}
+          {state.error ? t(`errors.${state.error}`) : null}
         </p>
       ) : null}
 
       <section className="space-y-4">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--pg-text)]">Informations sur la dépense</h2>
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("sectionTitle")}</h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            Le brouillon est enregistré dans la devise de l’entreprise ({currencyCode}).
+            {t("currencyHelp", { currency: currencyCode })}
           </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Date de la dépense *
+            {t("expenseDate")}
             <input
               className={INPUT_CLASS}
               type="date"
@@ -85,7 +87,7 @@ export function ExpenseDraftForm({
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Catégorie *
+            {t("category")}
             <input
               className={INPUT_CLASS}
               type="text"
@@ -95,13 +97,13 @@ export function ExpenseDraftForm({
               required
               value={values.category}
               onChange={(event) => update("category", event.target.value)}
-              placeholder="Ex. : Transport, fournitures, maintenance"
+              placeholder={t("categoryPlaceholder")}
               disabled={pending}
             />
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)] sm:col-span-2">
-            Description *
+            {t("description")}
             <input
               className={INPUT_CLASS}
               type="text"
@@ -111,13 +113,13 @@ export function ExpenseDraftForm({
               required
               value={values.description}
               onChange={(event) => update("description", event.target.value)}
-              placeholder="Décris l’objet de la dépense"
+              placeholder={t("descriptionPlaceholder")}
               disabled={pending}
             />
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Montant ({currencyCode}) *
+            {t("amount", { currency: currencyCode })}
             <input
               className={INPUT_CLASS}
               type="text"
@@ -129,16 +131,16 @@ export function ExpenseDraftForm({
               value={values.amount}
               onChange={(event) => update("amount", event.target.value)}
               aria-describedby="expense-amount-help"
-              placeholder="0"
+              placeholder={t("amountPlaceholder")}
               disabled={pending}
             />
             <span id="expense-amount-help" className="mt-1 block text-xs font-normal text-[var(--pg-text-muted)]">
-              Montant positif, jusqu’à quatre décimales. Les taxes ne sont pas calculées dans cette étape.
+              {t("amountHelp")}
             </span>
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)]">
-            Fournisseur
+            {t("supplier")}
             <select
               className={INPUT_CLASS}
               name="supplier_id"
@@ -146,7 +148,7 @@ export function ExpenseDraftForm({
               onChange={(event) => update("supplierId", event.target.value)}
               disabled={pending}
             >
-              <option value="">Non renseigné</option>
+              <option value="">{t("supplierNone")}</option>
               {suppliers.map((supplier) => (
                 <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
               ))}
@@ -154,7 +156,7 @@ export function ExpenseDraftForm({
           </label>
 
           <label className="text-sm font-medium text-[var(--pg-text)] sm:col-span-2">
-            Notes internes
+            {t("notes")}
             <textarea
               className={INPUT_CLASS + " min-h-28"}
               name="notes"
@@ -170,17 +172,17 @@ export function ExpenseDraftForm({
 
       <div className="border-t border-[var(--pg-border)] pt-5">
         <p className="mb-4 text-sm leading-6 text-[var(--pg-text-muted)]">
-          L’enregistrement crée uniquement un brouillon. Aucun paiement, mouvement de caisse, calcul fiscal ou écriture comptable n’est déclenché.
+          {t("draftOnly")}
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" className={PRIMARY_BUTTON_CLASS} disabled={pending}>
-            {pending ? "Enregistrement…" : "Enregistrer le brouillon"}
+            {pending ? t("saving") : t("saveDraft")}
           </button>
           <Link
             href={cancelHref}
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
           >
-            Annuler
+            {t("cancel")}
           </Link>
         </div>
       </div>
