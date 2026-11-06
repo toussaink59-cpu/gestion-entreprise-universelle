@@ -1,11 +1,13 @@
 # Stockage privé des documents d'entreprise
 
-**Statut :** fondation technique fusionnée dans `main` via la PR #65 le 4 novembre 2026 ; intégration antivirus et validation de l'environnement hébergé encore requises.  
+**Statut :** fonctionnalité documentaire différée pour la Phase 1 afin de maîtriser les coûts. Dépôts et téléchargements désactivés jusqu'à l'intégration ultérieure d'un scanner serveur.  
 **Référence :** cahier des charges v0.1, exigences FR-DOC-01 et SEC-07.  
 **Édition :** 4 novembre 2026 — TTL de téléchargement approuvé : 120 secondes.  
 **Politique approuvée :** 4 novembre 2026.
 
 ## 1. Politique produit approuvée
+
+> **Décision Phase 1 :** le module de pièces jointes n'est pas ouvert à l'utilisation. Aucun service antivirus payant ne sera ajouté au MVP. Le verrou serveur doit rester fermé ; cette décision ne constitue pas une validation de fichiers sans scan.
 
 - Un bucket privé distinct des fichiers publics.
 - Accès par entreprise, limité aux permissions du module métier auquel la pièce est rattachée.
@@ -71,16 +73,16 @@ Les états possibles sont :
 
 Seule la clé serveur `SUPABASE_SERVICE_ROLE_KEY` peut appeler `complete_document_upload` et `complete_document_scan`. Elle n'est jamais importée dans un composant navigateur. Le navigateur peut effectuer un contrôle préliminaire de signature pour améliorer l'expérience, mais ce contrôle n'est pas une preuve de sécurité.
 
-**Limite volontaire actuelle : aucun moteur antivirus / scanner n'est encore branché.** La variable serveur `DOCUMENT_SCANNER_ENABLED` vaut `false` par défaut ; la réservation et le dépôt de nouveaux fichiers sont donc refusés côté interface et côté API. Elle ne doit passer à `true` qu'après installation et test du scanner. Les documents existants restent `pending_scan` et aucun lien de téléchargement ne leur est délivré. La RPC de finalisation exige le type réellement détecté, la taille réelle et l'empreinte SHA-256 ; elle est réservée au service serveur. Il ne faut pas marquer un fichier comme propre sur la seule base de son nom, de son extension, de son en-tête HTTP ou du résultat du navigateur.
+**Limite volontaire et décision de périmètre : aucun moteur antivirus / scanner n'est branché, et le module documentaire est différé pour la Phase 1.** La variable serveur `DOCUMENT_SCANNER_ENABLED` doit rester à `false` dans tous les environnements ; la réservation et le dépôt de nouveaux fichiers doivent être refusés côté interface et côté API. Ne jamais activer cette variable seule, ni exposer un chemin alternatif de dépôt. Les documents existants restent `pending_scan` et aucun lien de téléchargement ne leur est délivré. La RPC de finalisation exige le type réellement détecté, la taille réelle et l'empreinte SHA-256 ; elle est réservée au service serveur. Il ne faut pas marquer un fichier comme propre sur la seule base de son nom, de son extension, de son en-tête HTTP ou du résultat du navigateur.
 
-Avant ouverture du dépôt documentaire à l'usage réel, un moteur de scan doit :
+Lors d'une future réactivation du dépôt documentaire, un moteur de scan doit :
 - récupérer le fichier dans un environnement isolé ;
 - inspecter le contenu réel et rechercher les contenus malveillants ;
 - retourner le type, la taille et l'empreinte calculés sur les octets reçus ;
 - appeler la RPC de finalisation en tant que service serveur ;
 - placer les résultats douteux ou non pris en charge en état `rejected`.
 
-Le nettoyage planifié des réservations `pending_upload` abandonnées et la quarantaine/rétention des fichiers rejetés restent également à mettre en place.
+Le nettoyage planifié des réservations `pending_upload` abandonnées et la quarantaine/rétention des fichiers rejetés sont également différés avec le module. Ils devront être livrés avant toute réactivation.
 
 ## 4. Périmètre d'interface actuel
 

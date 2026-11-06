@@ -4,7 +4,7 @@
 **Dépôt :** `toussaink59-cpu/gestion-entreprise-universelle`  
 **Date de l’audit :** 6 novembre 2026  
 **Branche inspectée :** `main`  
-**Commit inspecté :** `18c04d04053e383f60fe7384e893286c73d48074`  
+**Commit inspecté :** `f4f179570bdb0c23b2aed31d1579e29bf55adff6`  
 **Référence fonctionnelle :** cahier des charges v0.1 et avenant international v0.2  
 **État général :** fondation renforcée, CI et déploiement Production vérifiés ; Phase 1 non clôturée ; aucun feu vert pour les données réelles.
 
@@ -73,19 +73,20 @@ La CI de `main` est verte sur le commit inspecté. Le déploiement Vercel Produc
 
 Le contrôle d’en-têtes confirme les réponses publiques vérifiées, pas une validation exhaustive des parcours métier, de la CSP avec nonce ou d’un environnement distinct de préproduction.
 
-### 4.3 Stockage privé — fondation présente, scanner toujours absent
+### 4.3 Stockage privé — fondation présente, fonctionnalité documentaire différée
 
 La spécification `docs/STOCKAGE_DOCUMENTS_PRIVES.md` et la migration `20261104120000_stockage_prive_documents.sql` confirment le bucket privé, les métadonnées, les contrôles d’accès et les états `pending_upload`, `pending_scan`, `available` et `rejected`.
 
-**Bloquant avant activation réelle :**
-- aucun moteur antivirus/scanner n’est connecté ;
-- `DOCUMENT_SCANNER_ENABLED=false` reste la valeur par défaut ;
-- les documents finalisés restent en attente d’analyse et ne doivent pas être téléchargeables ;
-- le nettoyage planifié des réservations `pending_upload` abandonnées n’est pas livré ;
-- la quarantaine et la rétention des fichiers rejetés doivent être formalisées ;
-- le bucket et les secrets Storage sur un projet Supabase hébergé n’ont pas été vérifiés.
+**Décision économique pour la Phase 1 : le dépôt et la consultation de documents sont différés.** Aucun abonnement ni service antivirus payant ne sera ajouté au MVP à ce stade.
 
-Ne pas activer les dépôts de documents en production sans analyse serveur réelle et validation des paramètres de l’environnement cible.
+- `DOCUMENT_SCANNER_ENABLED=false` doit rester la valeur par défaut dans tous les environnements.
+- Les dépôts doivent rester refusés côté interface et côté API ; ne pas exposer de parcours permettant de contourner ce verrou.
+- Les fichiers en attente (`pending_upload` ou `pending_scan`) et rejetés ne doivent jamais être téléchargeables.
+- Aucun document ne doit être marqué `available` sans analyse réelle côté serveur.
+- Le nettoyage des réservations abandonnées, la quarantaine et la rétention des fichiers rejetés sont reportés avec la fonctionnalité documentaire.
+- Le bucket et les secrets Storage hébergés ne sont pas à provisionner tant que cette fonctionnalité reste désactivée.
+
+**Critère de clôture Phase 1 :** le scanner antivirus n'est plus un travail à financer ou à intégrer maintenant, à condition que l'inaccessibilité des dépôts soit démontrée par des tests côté serveur et que la fonctionnalité reste explicitement hors périmètre de la mise en service initiale. Toute réactivation future exige une analyse serveur réelle, des tests de sécurité et une validation de l'environnement cible.
 
 ### 4.4 Supabase hébergé — non vérifié
 
@@ -150,7 +151,7 @@ La paie de base reste une priorité P0 du MVP selon le cahier des charges, mais 
 
 Ordre de travail recommandé :
 
-1. conserver le scanner antivirus comme blocage strict ; choisir et intégrer un scanner serveur, puis ajouter le nettoyage des uploads abandonnés et la gestion de quarantaine/rétention ;
+1. maintenir les dépôts documentaires désactivés pour la Phase 1 et démontrer par des tests que l'API refuse tout dépôt et qu'aucun fichier en attente n'est téléchargeable ; reporter scanner, nettoyage, quarantaine et rétention jusqu'à la réactivation future du module ;
 2. obtenir l’accès à un projet Supabase non productif et vérifier Auth, migrations, Storage, bucket et secrets sans toucher à la production ;
 3. définir la politique de sauvegarde hébergée, le chiffrement, le stockage hors site, la rétention et les objectifs RPO/RTO ; réaliser un exercice de restauration non productif ;
 4. démontrer un environnement Preview/staging distinct et valider les parcours et contrôles qui y sont requis ;
