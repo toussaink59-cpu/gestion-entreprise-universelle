@@ -1,7 +1,7 @@
 # Feuille de route PolyGest
 
 **Référence fonctionnelle :** cahier des charges v0.1 du 19 octobre 2026, complété par l’avenant n°1 v0.2 du 5 novembre 2026.  
-**Mise à jour :** 5 novembre 2026.
+**Mise à jour :** 6 novembre 2026.
 
 Cette feuille de route traduit le cahier des charges applicable (v0.1 + avenant v0.2) en phases de réalisation. En cas de divergence, le cahier des charges consolidé prévaut. Toute évolution du périmètre doit être documentée et approuvée dans une nouvelle version ou un nouvel avenant.
 
@@ -12,8 +12,8 @@ Une priorité **P0** signifie qu’une capacité appartient au MVP ; elle ne sig
 D’après les éléments de suivi actuellement consignés dans le dépôt :
 
 - **Phase 0 — Cadrage :** cahier des charges v0.1 complété par l’avenant international v0.2 ; la région d'hébergement et les marchés réglementaires ultérieurs restent à arbitrer.
-- **Phase 1 — Fondation :** en cours d’audit et de consolidation ; elle ne doit pas être déclarée terminée sans preuves récentes des contrôles, tests et restaurations. Les fondations i18n FR/EN sont un chantier transversal à engager tôt.
-- **Phase 2 — Gestion quotidienne :** répertoires clients/fournisseurs et premier flux de devis présents ; les devis permettent désormais transmission, réponse client et annulation contrôlée. Les factures existent au stade brouillon uniquement (autonomes ou issues d’un devis accepté, sans numéro, taxe ni émission, en attente de validation fiscale). Factures, règlements, dépenses validées, trésorerie, budgets et exports restent à réaliser ou à valider selon l’état réel du code.
+- **Phase 1 — Fondation :** en consolidation, non clôturée. L’authentification, le multi-entreprises, les rôles, les invitations et les fondations i18n FR/EN sont en grande partie intégrés et couverts par les contrôles locaux. La CI et le déploiement Vercel Production sont verts sur `main` au 6 novembre. Restent notamment le scanner antivirus et le nettoyage des dépôts abandonnés, la validation Supabase hébergée non productive, la stratégie opérationnelle de sauvegarde/restauration et la preuve d’un environnement Preview/staging distinct.
+- **Phase 2 — Gestion quotidienne :** répertoires clients/fournisseurs et premier flux de devis présents ; les devis permettent transmission, réponse client et annulation contrôlée. Les factures existent au stade brouillon côté serveur uniquement (autonomes ou issues d’un devis accepté, sans interface dédiée, numéro, taxe ni émission, en attente de validation fiscale). Les règlements, dépenses validées, trésorerie, budgets et exports restent à réaliser ou à valider selon l’état réel du code.
 - **Phase 3 — Personnel et paie de base :** non déclarée terminée ; elle fait partie du MVP P0.
 - **Phases 4 et suivantes :** extensions et stabilisation selon les priorités du cahier des charges.
 
@@ -45,17 +45,18 @@ Cet état est un relevé documentaire, pas une nouvelle preuve d’exécution de
 
 ### 3.1 Chantier transversal — internationalisation FR/EN
 
-Ce chantier s'ajoute à la fondation, sans remplacer les contrôles de sécurité ou les priorités métier existantes. Il est livré par PRs limitées :
-- Formaliser ADR-002 et valider un prototype `next-intl` dans la version Next.js en place.
-- Préserver les routes françaises sans préfixe et introduire l'anglais sous `/en`.
-- Composer le routage avec `src/proxy.ts` et Supabase SSR dans un seul proxy.
-- Centraliser les catalogues FR/EN et localiser les parcours déjà livrés ainsi que leurs états chargement, vide, succès, erreur et absence de permission.
-- Auditer RLS et privilèges avant d'ajouter la préférence linguistique persistée de l'utilisateur.
-- Localiser les e-mails et notifications concernés.
-- Remplacer les formats codés en dur par des formatters recevant locale, devise et contexte temporel.
-- Tester routes, sessions, invitations, droits, accessibilité et isolation dans les deux langues.
+Ce chantier s'ajoute à la fondation, sans remplacer les contrôles de sécurité ou les priorités métier existantes.
 
-**Critères de sortie :** routes françaises compatibles, routes anglaises sous `/en`, préférence persistante, proxy Supabase fonctionnel, catalogues complets, formatage exact et CI/tests verts.
+**État au 6 novembre 2026 :** ADR-002, le socle `next-intl`, la préférence linguistique persistante, le proxy combiné à Supabase SSR et les catalogues FR/EN sont intégrés. Les parcours actuellement livrés et traduits couvrent l'authentification, la récupération du mot de passe, l'onboarding, le tableau de bord, les clients/fournisseurs, les devis, les dépenses, la gestion des membres et des entreprises ainsi que l'acceptation des invitations. Les PRs #87, #88, #91, #92 et #95 à #103 constituent les principaux lots de cette livraison.
+
+**Poursuite du chantier :**
+- Maintenir la parité des catalogues FR/EN pour chaque nouvelle page, état de chargement, état vide, succès, erreur et refus de permission.
+- Localiser les e-mails et notifications lorsqu'ils sont ajoutés ou étendus.
+- Étendre les formatters localisés à chaque nouveau module, en gardant séparés langue, devise, pays légal et fuseau horaire.
+- Compléter les tests automatisés de routes, sessions, invitations, permissions, accessibilité et isolation pour les deux langues.
+- Vérifier les parcours de bout en bout sur les environnements hébergés avant d'activer de nouvelles routes ou fonctionnalités.
+
+**Critères de sortie :** les routes françaises restent compatibles ; les parcours localisés disposent d'une préférence FR/EN persistante et d'un proxy Supabase SSR fonctionnel ; les catalogues sont complets pour chaque module effectivement livré ; le formatage et les tests sont vérifiés pour les deux langues. La parité des futurs modules reste obligatoire à mesure de leur développement.
 
 ### 3.2 Paramètres régionaux
 

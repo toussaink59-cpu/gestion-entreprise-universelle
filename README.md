@@ -13,6 +13,7 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 Éléments présents dans le dépôt :
 
 - une application Next.js / React / TypeScript avec inscription, connexion, déconnexion et création d’une première entreprise (authentification Supabase) ;
+- un socle d’internationalisation FR/EN avec préférence linguistique persistante et traductions des parcours actuellement livrés : authentification, récupération du mot de passe, onboarding, tableau de bord, clients/fournisseurs, devis, dépenses, membres, entreprises et acceptation des invitations ;
 - un tableau de bord qui liste les entreprises de l’utilisateur connecté, avec accès aux répertoires clients et fournisseurs ;
 - la gestion des membres par entreprise, avec invitations par e-mail sécurisées, jetons à usage unique et confirmation de l’adresse avant activation par le propriétaire ;
 - un premier module métier : répertoires clients et fournisseurs, avec archivage, sans suppression définitive ;
@@ -22,12 +23,13 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
 - un socle de stockage documentaire privé livré et intégré aux fiches clients/fournisseurs : bucket privé, métadonnées isolées, permissions héritées du module, dépôt direct signé et liens de téléchargement de 120 secondes ; le dépôt reste désactivé par défaut (`DOCUMENT_SCANNER_ENABLED=false`) tant que le scanner antivirus n'est pas branché ;
 - un premier flux de devis : brouillons, transmission avec numérotation interne provisoire `D-AAAA-NNNN`, réponse client (acceptation/refus) et annulation d’un devis transmis non répondu ; ce numéro reste distinct d’un numéro légal de facture et ne constitue aucune certification fiscale ;
+- une première fondation de factures brouillons côté serveur : création autonome ou à partir d’un devis accepté, avec abandon traçable ; aucune interface de facturation n’est encore livrée ;
 - les dépenses sont encore limitées aux brouillons ;
 - une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit de toutes les dépendances (runtime et développement), ShellCheck, lint SQL et tests sur une pile Supabase locale réelle.
 
-**Limites actuelles :** le flux de devis couvre les brouillons, la transmission interne, la réponse client et l’annulation dans les limites du module actuel ; l’émission de factures, les règlements, la trésorerie, les budgets, les stocks et la paie ne sont pas encore implémentés. Les dépenses restent limitées aux brouillons. L’internationalisation FR/EN est spécifiée dans l’avenant v0.2 mais n’est pas encore implémentée. Le scanner antivirus n’est pas intégré. Les migrations et paramètres n’ont pas été validés sur le projet Supabase hébergé ; la région, la politique de sauvegarde et les objectifs RPO/RTO restent à formaliser. Les scripts de sauvegarde ne remplacent pas un dispositif opérationnel de production.
+**Limites actuelles :** les devis peuvent être préparés, transmis, acceptés/refusés et annulés dans les limites du module actuel. Les factures existent uniquement au stade de brouillon côté serveur : aucune interface dédiée, numérotation légale, taxe, émission ou règlement n’est encore disponible. Les dépenses restent limitées aux brouillons. Les paiements, la trésorerie, les budgets, les stocks et la paie ne sont pas encore implémentés. Le socle d’internationalisation FR/EN et les traductions des parcours existants sont intégrés ; les nouvelles fonctionnalités devront conserver cette parité linguistique. Le scanner antivirus n’est pas intégré et les dépôts documentaires restent désactivés par défaut (`DOCUMENT_SCANNER_ENABLED=false`). Les migrations, paramètres Auth, Storage et secrets n’ont pas été validés sur un projet Supabase hébergé ; la région, la politique opérationnelle de sauvegarde et les objectifs RPO/RTO restent à formaliser. Les scripts et tests de sauvegarde/restauration ne remplacent pas un dispositif opérationnel de production.
 
-Le détail des constats vérifiés et des risques restants se trouve dans [l’audit Phase 1 du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md). La [checklist historique](docs/PHASE1_CHECKLIST.md) conserve le relevé du 23 octobre et n’est pas la source de statut actuelle.
+Le détail des constats vérifiés et des risques restants se trouve dans [l’audit Phase 1 du 6 novembre 2026](docs/PHASE1_AUDIT_2026-11-06.md). L’[audit du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md) et la [checklist historique](docs/PHASE1_CHECKLIST.md) sont conservés comme archives.
 
 ## Documents du projet
 
@@ -37,7 +39,8 @@ Le détail des constats vérifiés et des risques restants se trouve dans [l’a
 - [Feuille de route](docs/ROADMAP.md)
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
-- [Audit de la Phase 1 — état vérifié du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md)
+- [Audit de la Phase 1 — état vérifié du 6 novembre 2026](docs/PHASE1_AUDIT_2026-11-06.md)
+- [Audit historique de la Phase 1 — 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md)
 - [Audit de préparation commerciale — état initial du 4 novembre 2026](docs/PHASE2_COMMERCIAL_READINESS_AUDIT_2026-11-04.md)
 - [Spécification du stockage privé des documents](docs/STOCKAGE_DOCUMENTS_PRIVES.md)
 - [Checklist historique de la Phase 1](docs/PHASE1_CHECKLIST.md)
