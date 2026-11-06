@@ -13,7 +13,7 @@ D’après les éléments de suivi actuellement consignés dans le dépôt :
 
 - **Phase 0 — Cadrage :** cahier des charges v0.1 complété par l’avenant international v0.2 ; la région d'hébergement et les marchés réglementaires ultérieurs restent à arbitrer.
 - **Phase 1 — Fondation :** en cours d’audit et de consolidation ; elle ne doit pas être déclarée terminée sans preuves récentes des contrôles, tests et restaurations. Les fondations i18n FR/EN sont un chantier transversal à engager tôt.
-- **Phase 2 — Gestion quotidienne :** répertoires clients/fournisseurs et premier flux de devis présents ; les devis permettent désormais transmission, réponse client et annulation contrôlée. Factures, règlements, dépenses validées, trésorerie, budgets et exports restent à réaliser ou à valider selon l’état réel du code.
+- **Phase 2 — Gestion quotidienne :** répertoires clients/fournisseurs et premier flux de devis présents ; les devis permettent désormais transmission, réponse client et annulation contrôlée. Les factures existent au stade brouillon uniquement (autonomes ou issues d’un devis accepté, sans numéro, taxe ni émission, en attente de validation fiscale). Factures, règlements, dépenses validées, trésorerie, budgets et exports restent à réaliser ou à valider selon l’état réel du code.
 - **Phase 3 — Personnel et paie de base :** non déclarée terminée ; elle fait partie du MVP P0.
 - **Phases 4 et suivantes :** extensions et stabilisation selon les priorités du cahier des charges.
 
