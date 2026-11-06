@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isDocumentFeatureEnabled } from "@/lib/security/document-feature-gate";
 import {
   DOCUMENT_BUCKET,
   DOCUMENT_SIGNED_URL_TTL_SECONDS,
@@ -26,6 +27,10 @@ export async function GET(
   _request: NextRequest,
   context: { params: Promise<{ documentId: string }> },
 ) {
+  if (!isDocumentFeatureEnabled()) {
+    return jsonError(503, "documents_disabled", "Les téléchargements de documents sont désactivés pendant la Phase 1.");
+  }
+
   const { documentId } = await context.params;
   if (!UUID_PATTERN.test(documentId)) {
     return jsonError(404, "not_found", "Document introuvable.");
