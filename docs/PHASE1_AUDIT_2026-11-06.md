@@ -75,6 +75,8 @@ Le contrôle d’en-têtes confirme les réponses publiques vérifiées, pas une
 
 ### 4.3 Stockage privé — fondation présente, fonctionnalité documentaire différée
 
+**Verrou serveur vérifié dans le code :** le module est maintenu fermé par `isDocumentFeatureEnabled()`, qui retourne `false` indépendamment de `DOCUMENT_SCANNER_ENABLED`. Les routes de liste, réservation/dépôt, finalisation et téléchargement refusent l'accès pendant la Phase 1 ; l'annulation d'une session déjà créée reste possible pour permettre son nettoyage. Un test unitaire protège le verrou contre une réactivation accidentelle par variable d'environnement. Cette barrière doit être retirée uniquement dans une livraison ultérieure incluant un scanner serveur réel, les contrôles de nettoyage et de quarantaine, et les tests associés.
+
 La spécification `docs/STOCKAGE_DOCUMENTS_PRIVES.md` et la migration `20261104120000_stockage_prive_documents.sql` confirment le bucket privé, les métadonnées, les contrôles d’accès et les états `pending_upload`, `pending_scan`, `available` et `rejected`.
 
 **Décision économique pour la Phase 1 : le dépôt et la consultation de documents sont différés.** Aucun abonnement ni service antivirus payant ne sera ajouté au MVP à ce stade.
