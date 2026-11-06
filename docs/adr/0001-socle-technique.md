@@ -17,7 +17,7 @@ La plateforme est un SaaS multi-entreprises pour le Burkina Faso, avec une petit
 
 ## Décision
 
-1. **Base de données :** PostgreSQL. Le **schéma est la source de vérité** et vit dans des **migrations SQL pures** dans `supabase/migrations/`, sans dépendre d'un ORM.
+1. **Base de données :** PostgreSQL. Le **schéma est la source de vérité** et vit dans des **migrations SQL pures** dans `supabase/migrations/` (chemin déployé), sans dépendre d'un ORM. Les évolutions métier de Phase 2 postérieures aux factures brouillons sont isolées dans `supabase/phase2-migrations/` jusqu'à leur promotion (voir le README de ce dossier).
 2. **Hébergement géré :** Supabase (PostgreSQL géré, authentification, stockage privé), tant que l'hébergement n'est pas contredit par les vérifications ci-dessous.
 3. **Isolation :** chaque table métier porte un `company_id` ; la sécurité au niveau des lignes (RLS) est activée avec un accès **refusé par défaut**. Les vérifications côté serveur de l'application s'y ajoutent, elles ne les remplacent pas.
 4. **Autorisations :** rôles et permissions par entreprise, module et action (consulter, créer, modifier, valider, annuler, exporter), évalués dans la base par des fonctions dédiées, dans un schéma privé `app`.
