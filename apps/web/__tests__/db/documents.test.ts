@@ -119,122 +119,45 @@ describe("Stockage privé des documents — configuration", () => {
   });
 });
 
-describe("Stockage privé des documents — autorisation métier", () => {
-  it("autorise un propriétaire à joindre un document à un client de son entreprise", async () => {
-    const result = await asUser(t.db, "alice", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'customers', 'customer', $2) as allowed",
-        [t.companyA, customerId],
-      ),
+describe("Stockage privé des documents — verrouillage des dépôts", () => {
+  it("retire aux utilisateurs authentifiés et anonymes l'exécution des RPC de dépôt", async () => {
+    const privileges = await q<{
+      authenticatedCanCheck: boolean;
+      authenticatedCanReserve: boolean;
+      anonCanCheck: boolean;
+      anonCanReserve: boolean;
+    }>(
+      `select
+         has_function_privilege(
+           'authenticated',
+           'public.can_upload_document(uuid, text, text, uuid)',
+           'EXECUTE'
+         ) as "authenticatedCanCheck",
+         has_function_privilege(
+           'authenticated',
+           'public.create_document_upload(uuid, text, text, uuid, text, text, bigint)',
+           'EXECUTE'
+         ) as "authenticatedCanReserve",
+         has_function_privilege(
+           'anon',
+           'public.can_upload_document(uuid, text, text, uuid)',
+           'EXECUTE'
+         ) as "anonCanCheck",
+         has_function_privilege(
+           'anon',
+           'public.create_document_upload(uuid, text, text, uuid, text, text, bigint)',
+           'EXECUTE'
+         ) as "anonCanReserve"`,
     );
-    expect(result.rows[0].allowed).toBe(true);
-  });
 
-  it("crée une réservation uniquement après vérification de la permission et du parent", async () => {
-    const created = await asUser(t.db, "alice", () =>
-      q<{ document_id: string; storage_path: string }>(
-        `select * from public.create_document_upload(
-          $1, 'customers', 'customer', $2, 'contrat-client.pdf',
-          'application/pdf', 512
-        )`,
-        [t.companyA, customerId],
-      ),
-    );
-
-    expect(created.rows).toHaveLength(1);
-    expect(created.rows[0].storage_path).toBe(
-      `${t.companyA}/${created.rows[0].document_id}`,
-    );
-
-    const metadata = await asUser(t.db, "alice", () =>
-      q<{ scan_status: string; created_by: string; sha256: string | null }>(
-        `select scan_status, created_by, sha256
-         from public.documents where id = $1`,
-        [created.rows[0].document_id],
-      ),
-    );
-    expect(metadata.rows[0]).toEqual({
-      scan_status: "pending_upload",
-      created_by: ids.alice,
-      sha256: null,
-    });
-  });
-
-  it("refuse les réservations par un rôle en lecture seule et hors de son entreprise", async () => {
-    await expect(
-      asUser(t.db, "carol", () =>
-        q(
-          `select * from public.create_document_upload(
-            $1, 'customers', 'customer', $2, 'finance.pdf',
-            'application/pdf', 512
-          )`,
-          [t.companyA, customerId],
-        ),
-      ),
-    ).rejects.toThrow(/permission de dépôt requise/i);
-
-    await expect(
-      asUser(t.db, "bob", () =>
-        q(
-          `select * from public.create_document_upload(
-            $1, 'customers', 'customer', $2, 'foreign.pdf',
-            'application/pdf', 512
-          )`,
-          [t.companyA, customerId],
-        ),
-      ),
-    ).rejects.toThrow(/permission de dépôt requise/i);
-  });
-
-  it("refuse une entreprise étrangère et un identifiant parent inexistant", async () => {
-    const foreign = await asUser(t.db, "bob", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'customers', 'customer', $2) as allowed",
-        [t.companyA, customerId],
-      ),
-    );
-    const missing = await asUser(t.db, "alice", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'customers', 'customer', $2) as allowed",
-        [t.companyA, randomUUID()],
-      ),
-    );
-    expect(foreign.rows[0].allowed).toBe(false);
-    expect(missing.rows[0].allowed).toBe(false);
-  });
-
-  it("refuse la création aux rôles en lecture seule ou sans accès au module", async () => {
-    const finance = await asUser(t.db, "carol", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'customers', 'customer', $2) as allowed",
-        [t.companyA, customerId],
-      ),
-    );
-    const employee = await asUser(t.db, "dave", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'customers', 'customer', $2) as allowed",
-        [t.companyA, customerId],
-      ),
-    );
-    expect(finance.rows[0].allowed).toBe(false);
-    expect(employee.rows[0].allowed).toBe(false);
-  });
-
-  it("vérifie l'entité et le module ensemble", async () => {
-    const wrongModule = await asUser(t.db, "alice", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'suppliers', 'customer', $2) as allowed",
-        [t.companyA, customerId],
-      ),
-    );
-    const correctCompany = await asUser(t.db, "alice", () =>
-      q<{ allowed: boolean }>(
-        "select public.can_upload_document($1, 'company', 'company', $2) as allowed",
-        [t.companyA, t.companyA],
-      ),
-    );
-    expect(wrongModule.rows[0].allowed).toBe(false);
-    expect(correctCompany.rows[0].allowed).toBe(true);
+    expect(privileges.rows).toEqual([
+      {
+        authenticatedCanCheck: false,
+        authenticatedCanReserve: false,
+        anonCanCheck: false,
+        anonCanReserve: false,
+      },
+    ]);
   });
 });
 
