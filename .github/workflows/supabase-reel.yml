@@ -63,6 +63,19 @@ jobs:
           ${{ env.SUPABASE }} start
           -x realtime,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
+      # Les migrations Phase 2 sont appliquées uniquement à la base locale jetable
+      # des tests. Elles ne font pas partie de supabase/migrations et ne partent donc
+      # jamais avec le déploiement Phase 1.
+      - name: Appliquer les migrations Phase 2 pour les tests
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: |
+          shopt -s nullglob
+          for migration in supabase/phase2-migrations/*.sql; do
+            echo "Application de $migration sur la base locale jetable"
+            psql "$TEST_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
+
       - name: Lint SQL (plpgsql_check)
         run: ${{ env.SUPABASE }} db lint --local --schema public,app --fail-on error
 

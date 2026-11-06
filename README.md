@@ -18,6 +18,7 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 - la gestion des membres par entreprise, avec invitations par e-mail sécurisées, jetons à usage unique et confirmation de l’adresse avant activation par le propriétaire ;
 - un premier module métier : répertoires clients et fournisseurs, avec archivage, sans suppression définitive ;
 - des migrations PostgreSQL : entreprises, profils, appartenances, rôles, permissions, invitations sécurisées, journal d’audit en ajout seul, clients et fournisseurs, avec RLS ;
+- les migrations livrables de Phase 1 sont isolées dans `supabase/migrations/` ; les évolutions métier de Phase 2 sont conservées dans `supabase/phase2-migrations/` et testées séparément, sans être incluses dans le déploiement Phase 1 ;
 - aucune limite fixe de cinq entreprises par propriétaire dans le MVP ; les quotas éventuels seront définis dans les futures formules d’abonnement ;
 - des tests automatisés d’isolation entre entreprises, de permissions par rôle, de révocation et d’audit, exécutés sur les migrations ;
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
