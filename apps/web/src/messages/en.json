@@ -122,8 +122,8 @@
   },
   "WorkspaceNotice": {
     "title": "Your workspace is ready",
-    "description": "The English translation of the dashboard and management modules is in progress. For this first step, those screens remain available in French.",
-    "continue": "Continue to the workspace in French",
+    "description": "Your language preference is saved. Currently available workflows are shown in your selected language. You can change it at any time.",
+    "continue": "Continue to your workspace",
     "languageLabel": "Choose language"
   },
   "Dashboard": {
