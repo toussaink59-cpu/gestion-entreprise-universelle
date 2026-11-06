@@ -1,0 +1,55 @@
+import Link from "next/link";
+import { PageHeader } from "@/components/ui/page-header";
+import { getTranslations } from "next-intl/server";
+import type { InvoiceCompany } from "./workspace";
+
+export async function InvoiceCompanyChooser({
+  companies,
+  destinationPath = "/dashboard/factures",
+}: {
+  companies: InvoiceCompany[];
+  destinationPath?: string;
+}) {
+  const t = await getTranslations("Invoices.List");
+  return (
+    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <PageHeader
+        title={t("title")}
+        description={t("chooseCompanyDescription")}
+      />
+
+      <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
+        <h2 className="text-lg font-semibold text-[var(--pg-text)]">
+          {t("chooseCompanyTitle")}
+        </h2>
+        <div className="mt-4 divide-y divide-[var(--pg-border)]">
+          {companies.map((company) => (
+            <Link
+              key={company.id}
+              href={destinationPath + "?company=" + encodeURIComponent(company.id)}
+              className="block rounded-md px-3 py-4 hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
+            >
+              <span className="block font-semibold text-[var(--pg-text)]">
+                {company.trade_name || company.legal_name}
+              </span>
+              <span className="mt-1 block text-sm text-[var(--pg-text-muted)]">
+                {company.legal_name}
+              </span>
+              <span className="mt-2 block text-sm font-medium text-[var(--pg-accent)]">
+                {t("open")}
+              </span>
+            </Link>
+          ))}
+        </div>
+        <p className="mt-4 text-sm">
+          <Link
+            href="/dashboard"
+            className="font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline"
+          >
+            {t("accessBack")}
+          </Link>
+        </p>
+      </section>
+    </main>
+  );
+}

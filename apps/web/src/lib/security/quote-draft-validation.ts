@@ -72,7 +72,8 @@ function normalizeDecimal(
   return value;
 }
 
-function parseLines(raw: string | null): ParsedQuoteDraftLine[] | null {
+/** Analyse stricte des lignes JSON ; réutilisée par les brouillons de facture. */
+export function parseDraftLinesJson(raw: string | null): ParsedQuoteDraftLine[] | null {
   if (!raw || raw.length > 150_000) return null;
 
   let parsed: unknown;
@@ -185,7 +186,7 @@ export function parseQuoteDraftForm(
     return { ok: false, reason: "fields" };
   }
 
-  const lines = parseLines(readString(formData, "lines_json"));
+  const lines = parseDraftLinesJson(readString(formData, "lines_json"));
   if (!lines) return { ok: false, reason: "lines" };
 
   return {
