@@ -122,8 +122,8 @@
   },
   "WorkspaceNotice": {
     "title": "Votre espace de travail est prêt",
-    "description": "La traduction du tableau de bord et des modules de gestion est en cours. Pour cette première étape, ces écrans restent disponibles en français.",
-    "continue": "Continuer vers l’espace de travail en français",
+    "description": "Votre préférence linguistique est enregistrée. Les parcours actuellement disponibles s’affichent dans la langue choisie. Vous pouvez la modifier à tout moment.",
+    "continue": "Continuer vers l’espace de travail",
     "languageLabel": "Choisir la langue"
   },
   "Dashboard": {
