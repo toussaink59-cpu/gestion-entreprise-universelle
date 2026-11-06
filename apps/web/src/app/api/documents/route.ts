@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { isDocumentFeatureEnabled } from "@/lib/security/document-feature-gate";
 import {
   ALLOWED_DOCUMENT_MIME_TYPES,
   DOCUMENT_BUCKET,
@@ -40,6 +41,10 @@ function validCode(value: unknown): value is string {
 }
 
 export async function GET(request: NextRequest) {
+  if (!isDocumentFeatureEnabled()) {
+    return jsonError(503, "documents_disabled", "Le module documentaire est désactivé pendant la Phase 1.");
+  }
+
   const params = request.nextUrl.searchParams;
   const companyId = params.get("companyId");
   const moduleCode = params.get("moduleCode");
@@ -93,7 +98,7 @@ export async function GET(request: NextRequest) {
  * l'ordinateur de l'utilisateur à Storage à l'aide du jeton signé à usage unique.
  */
 export async function POST(request: NextRequest) {
-  if (process.env.DOCUMENT_SCANNER_ENABLED !== "true") {
+  if (!isDocumentFeatureEnabled()) {
     return jsonError(
       503,
       "scanner_not_configured",
@@ -268,6 +273,10 @@ export async function PUT(request: NextRequest) {
   }
   if (document.scan_status !== "pending_upload") {
     return jsonError(409, "invalid_state", "Cette session de dépôt n'est plus modifiable.");
+  }
+
+  if (action === "complete" && !isDocumentFeatureEnabled()) {
+    return jsonError(503, "scanner_not_configured", "La finalisation reste désactivée tant qu'un scanner serveur n'est pas intégré.");
   }
 
   if (action === "cancel") {
