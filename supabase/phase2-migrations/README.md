@@ -7,7 +7,7 @@ Les fichiers SQL de ce dossier sont des évolutions métier postérieures à la 
 - **Ne pas appliquer ce dossier à la production pendant la clôture de la Phase 1.**
 - Le CLI Supabase déploie les migrations placées dans `supabase/migrations/`. Ce dossier séparé n'est donc pas inclus dans un `supabase db push` standard.
 - Les tests automatisés chargent les migrations Phase 1 puis celles de ce dossier sur des bases jetables, afin de conserver la couverture des fonctionnalités déjà développées.
-- Pour livrer une évolution Phase 2, revoir sa conformité métier, ses permissions, ses tests et son plan de données, puis déplacer explicitement le fichier approuvé dans `supabase/migrations/` avec son horodatage d'origine et exécuter les contrôles DEV avant toute mise en production.
+- Pour livrer une évolution Phase 2, revoir sa conformité métier, ses permissions, ses tests et son plan de données. Créer alors une nouvelle migration avec `supabase migration new <nom_descriptif>` afin d'obtenir un horodatage postérieur aux migrations déjà livrées en Phase 1, y transférer le SQL approuvé, puis retirer le fichier de test de ce dossier. Exécuter les contrôles DEV avant toute mise en production.
 
 ## Contenu actuel
 
