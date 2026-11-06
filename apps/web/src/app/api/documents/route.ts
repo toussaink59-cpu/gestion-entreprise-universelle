@@ -41,6 +41,14 @@ function validCode(value: unknown): value is string {
 }
 
 export async function GET(request: NextRequest) {
+  if (!isDocumentFeatureEnabled()) {
+    return jsonError(
+      503,
+      "documents_disabled",
+      "Le module documentaire est désactivé pendant la Phase 1.",
+    );
+  }
+
   const params = request.nextUrl.searchParams;
   const companyId = params.get("companyId");
   const moduleCode = params.get("moduleCode");
