@@ -21,6 +21,14 @@ describe("French and English message catalogs", () => {
   it("expose exactly the same message keys", () => {
     expect(keyShape(fr)).toEqual(keyShape(en));
   });
+  it("never expose server configuration variable names to the browser", () => {
+    // Les catalogues sont envoyés intégralement à chaque visiteur.
+    const leaves = (value: unknown): string[] =>
+      value && typeof value === "object" ? Object.values(value).flatMap(leaves) : typeof value === "string" ? [value] : [];
+    const envLike = /\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/;
+    expect(leaves(fr).filter((text) => envLike.test(text))).toEqual([]);
+    expect(leaves(en).filter((text) => envLike.test(text))).toEqual([]);
+  });
   it("do not contain empty or non-string message leaves", () => {
     expect(emptyLeaves(fr)).toEqual([]);
     expect(emptyLeaves(en)).toEqual([]);

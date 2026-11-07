@@ -564,7 +564,7 @@
       "permission": "Your role does not allow you to assign this role or manage members.",
       "duplicate": "This account already has a membership in this company.",
       "noAccount": "No active account was found for this address. The person must first create a PolyGest account.",
-      "emailConfig": "Email delivery is not configured. Check the server-side RESEND_API_KEY, RESEND_FROM_EMAIL and NEXT_PUBLIC_APP_URL settings.",
+      "emailConfig": "Email delivery is not configured on this server. Contact the application administrator.",
       "emailFailed": "The invitation was saved, but the email was not sent. Check the Resend configuration and try again.",
       "emailRateLimit": "Wait at least one minute before resending this email.",
       "save": "The operation could not be saved. Check permissions and try again.",

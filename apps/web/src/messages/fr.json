@@ -564,7 +564,7 @@
       "permission": "Ton rôle ne permet pas d’attribuer ce rôle ou de gérer les membres.",
       "duplicate": "Ce compte possède déjà une appartenance à cette entreprise.",
       "noAccount": "Aucun compte actif n’a été trouvé pour cette adresse. La personne doit d’abord créer son compte PolyGest.",
-      "emailConfig": "L’envoi d’e-mails n’est pas configuré. Vérifie RESEND_API_KEY, RESEND_FROM_EMAIL et NEXT_PUBLIC_APP_URL côté serveur.",
+      "emailConfig": "L’envoi d’e-mails n’est pas configuré sur ce serveur. Contacte l’administrateur de l’application.",
       "emailFailed": "L’invitation est enregistrée, mais l’e-mail n’a pas été envoyé. Vérifie la configuration Resend puis réessaie.",
       "emailRateLimit": "Attends au moins une minute avant de renvoyer cet e-mail.",
       "save": "L’opération n’a pas pu être enregistrée. Vérifie les permissions puis réessaie.",
