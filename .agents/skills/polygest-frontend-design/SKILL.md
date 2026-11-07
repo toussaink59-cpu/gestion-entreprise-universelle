@@ -20,7 +20,7 @@ Les exigences métier, de sécurité et de confidentialité du dépôt priment s
 ## Direction visuelle
 
 - Utiliser la palette neutre et les tokens définis dans le design system.
-- Garder les écrans principalement blancs, gris très clair et anthracite ; l'accent bleu-gris est rare et fonctionnel.
+- Garder les écrans principalement blancs, gris très clair et anthracite ; l'accent bleu nuit (orange de marque limité aux repères non textuels) est rare et fonctionnel.
 - Ne jamais ajouter d'emoji dans les écrans.
 - Éviter les dégradés, néons, halos, lueurs, illustrations arbitraires, effets verre, arrière-plans colorés décoratifs, gros titres marketing inutiles et animations d'apparat.
 - Ne pas reproduire le modèle générique « toutes les informations dans des cartes arrondies identiques ».

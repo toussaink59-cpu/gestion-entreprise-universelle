@@ -8,10 +8,11 @@
   --pg-text: #20262d;
   --pg-text-muted: #58636f;
   --pg-border: #d5dce3;
-  --pg-control-border: #8b98a5;
-  --pg-accent: #415c76;
-  --pg-accent-hover: #344b62;
-  --pg-focus: #587b9b;
+  --pg-control-border: #7a8794;
+  --pg-accent: #0f2a6b;
+  --pg-accent-hover: #0a1f52;
+  --pg-focus: #2f55b0;
+  --pg-brand: #ff7200;
   --background: var(--pg-canvas);
   --foreground: var(--pg-text);
 }
