@@ -25,6 +25,17 @@ const SECONDARY =
 const LABEL = "text-sm font-medium text-[var(--pg-text)]";
 const DECIMAL = "[0-9]+([,.][0-9]{1,4})?";
 
+export type InvoiceDraftInitial = {
+  invoiceId: string;
+  customerId: string;
+  issueDate: string;
+  dueDate: string | null;
+  subject: string;
+  terms: string;
+  notes: string;
+  lines: Array<Omit<Line, "key">>;
+};
+
 export function InvoiceDraftForm({
   companyId,
   currencyCode,
@@ -32,6 +43,7 @@ export function InvoiceDraftForm({
   cancelHref,
   defaultUnit,
   today,
+  initial,
 }: {
   companyId: string;
   currencyCode: string;
@@ -39,11 +51,12 @@ export function InvoiceDraftForm({
   cancelHref: string;
   defaultUnit: string;
   today: string;
+  initial?: InvoiceDraftInitial;
 }) {
   const t = useTranslations("Invoices.Form");
   const [state, formAction, pending] = useActionState(saveInvoiceDraft, { error: null });
-  const [issueDate, setIssueDate] = useState(today);
-  const [dueDate, setDueDate] = useState("");
+  const [issueDate, setIssueDate] = useState(initial?.issueDate ?? today);
+  const [dueDate, setDueDate] = useState(initial?.dueDate ?? "");
   const newLine = (key: number): Line => ({
     key: String(key),
     description: "",
@@ -53,8 +66,12 @@ export function InvoiceDraftForm({
     discount_type: "none",
     discount_value: "0",
   });
-  const [lines, setLines] = useState<Line[]>([newLine(0)]);
-  const [nextKey, setNextKey] = useState(1);
+  const [lines, setLines] = useState<Line[]>(
+    initial && initial.lines.length > 0
+      ? initial.lines.map((line, index) => ({ ...line, key: String(index) }))
+      : [newLine(0)],
+  );
+  const [nextKey, setNextKey] = useState(initial ? Math.max(initial.lines.length, 1) : 1);
 
   const update = (key: string, changes: Partial<Line>) =>
     setLines((current) => current.map((line) => (line.key === key ? { ...line, ...changes } : line)));
@@ -76,6 +93,7 @@ export function InvoiceDraftForm({
     <form action={formAction} autoComplete="off" className="space-y-8">
       <input type="hidden" name="company_id" value={companyId} />
       <input type="hidden" name="lines_json" value={linesPayload} />
+      {initial ? <input type="hidden" name="invoice_id" value={initial.invoiceId} /> : null}
 
       {errorMessage ? (
         <p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">
@@ -91,7 +109,7 @@ export function InvoiceDraftForm({
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <label className={LABEL}>
             {t("customer")}
-            <select className={INPUT} name="customer_id" required defaultValue={customers[0]?.id} disabled={pending}>
+            <select className={INPUT} name="customer_id" required defaultValue={initial?.customerId ?? customers[0]?.id} disabled={pending}>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>{customer.name}</option>
               ))}
@@ -126,7 +144,7 @@ export function InvoiceDraftForm({
           </label>
           <label className={LABEL + " sm:col-span-2 xl:col-span-3"}>
             {t("subject")} <span className="font-normal text-[var(--pg-text-muted)]">{t("optional")}</span>
-            <input className={INPUT} type="text" name="subject" maxLength={200} disabled={pending} />
+            <input className={INPUT} type="text" name="subject" maxLength={200} defaultValue={initial?.subject ?? ""} disabled={pending} />
           </label>
         </div>
       </section>
@@ -217,11 +235,11 @@ export function InvoiceDraftForm({
       <section className="grid gap-4 border-t border-[var(--pg-border)] pt-6 sm:grid-cols-2">
         <label className={LABEL}>
           {t("terms")} <span className="font-normal text-[var(--pg-text-muted)]">{t("optional")}</span>
-          <textarea className={INPUT} name="terms" rows={4} maxLength={5000} disabled={pending} />
+          <textarea className={INPUT} name="terms" rows={4} maxLength={5000} defaultValue={initial?.terms ?? ""} disabled={pending} />
         </label>
         <label className={LABEL}>
           {t("notes")} <span className="font-normal text-[var(--pg-text-muted)]">{t("optional")}</span>
-          <textarea className={INPUT} name="notes" rows={4} maxLength={5000} disabled={pending} />
+          <textarea className={INPUT} name="notes" rows={4} maxLength={5000} defaultValue={initial?.notes ?? ""} disabled={pending} />
         </label>
       </section>
 

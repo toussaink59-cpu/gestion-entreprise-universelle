@@ -808,7 +808,7 @@
         "fields": "Vérifie les dates et la longueur des textes. L’échéance ne peut pas précéder la date de la facture.",
         "lines": "Vérifie les lignes : description, quantité positive, unité, prix et remise valides.",
         "session": "Ta session a expiré. Reconnecte-toi puis réessaie.",
-        "permission": "Ton rôle ne permet pas de créer ce brouillon.",
+        "permission": "Ton rôle ne permet pas d’enregistrer ce brouillon, ou il n’est plus modifiable.",
         "invalidData": "Les données sont refusées : vérifie le client et les montants.",
         "save": "Le brouillon n’a pas pu être enregistré. Réessaie plus tard.",
         "generic": "Une erreur est survenue. Réessaie plus tard."
@@ -874,7 +874,11 @@
       "abandonDescription": "Le brouillon passe au statut abandonné : il n’est plus modifiable ni utilisable, mais reste consultable avec son motif. Il n’est pas supprimé.",
       "abandonReason": "Motif de l’abandon",
       "abandonHelp": "Entre 3 et 500 caractères. Le motif est conservé dans l’historique.",
-      "abandonButton": "Abandonner le brouillon"
+      "abandonButton": "Abandonner le brouillon",
+      "editTitle": "Modifier le brouillon",
+      "editDescription": "Les montants sont recalculés par le serveur à chaque enregistrement. Les lignes enregistrées sont remplacées par celles du formulaire.",
+      "customersFailed": "Impossible de charger les clients pour modifier ce brouillon. Réessaie plus tard.",
+      "quoteDraftReadOnly": "Ce brouillon reprend le client, les lignes et les prix du devis accepté : il n’est pas modifiable. Abandonne-le pour en recréer un depuis le devis."
     },
     "FromQuote": {
       "title": "Facturation",

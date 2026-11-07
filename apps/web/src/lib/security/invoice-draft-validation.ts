@@ -5,6 +5,7 @@ const UUID_PATTERN =
 
 export type ParsedInvoiceDraftSubmission = {
   companyId: string;
+  invoiceId: string | null;
   customerId: string;
   issueDate: string;
   dueDate: string | null;
@@ -47,6 +48,12 @@ export function parseInvoiceDraftForm(formData: FormData): InvoiceDraftParseResu
   const customerId = text(formData, "customer_id");
   const issueDate = text(formData, "issue_date");
   const rawDue = text(formData, "due_date");
+  const rawInvoiceId = text(formData, "invoice_id");
+  // invoice_id absent ou vide : création ; sinon modification d'un brouillon existant.
+  if (rawInvoiceId !== null && rawInvoiceId !== "" && !UUID_PATTERN.test(rawInvoiceId)) {
+    return { ok: false, reason: "context" };
+  }
+  const invoiceId = rawInvoiceId ? rawInvoiceId : null;
 
   if (!companyId || !UUID_PATTERN.test(companyId) || !customerId || !UUID_PATTERN.test(customerId) || issueDate === null || rawDue === null) {
     return { ok: false, reason: "context" };
@@ -67,7 +74,7 @@ export function parseInvoiceDraftForm(formData: FormData): InvoiceDraftParseResu
   const lines = parseDraftLinesJson(text(formData, "lines_json"));
   if (!lines) return { ok: false, reason: "lines" };
 
-  return { ok: true, data: { companyId, customerId, issueDate, dueDate, subject, terms, notes, lines } };
+  return { ok: true, data: { companyId, invoiceId, customerId, issueDate, dueDate, subject, terms, notes, lines } };
 }
 
 export type InvoiceQuoteSourceParse =

@@ -808,7 +808,7 @@
         "fields": "Check the dates and the length of the texts. The due date cannot be earlier than the invoice date.",
         "lines": "Check the lines: description, positive quantity, unit, valid price and discount.",
         "session": "Your session has expired. Sign in again and retry.",
-        "permission": "Your role does not allow you to create this draft.",
+        "permission": "Your role does not allow you to save this draft, or it can no longer be edited.",
         "invalidData": "The data was rejected: check the customer and the amounts.",
         "save": "The draft could not be saved. Try again later.",
         "generic": "An error occurred. Try again later."
@@ -874,7 +874,11 @@
       "abandonDescription": "The draft becomes abandoned: it can no longer be edited or used, but it remains viewable with its reason. It is not deleted.",
       "abandonReason": "Reason for abandoning",
       "abandonHelp": "Between 3 and 500 characters. The reason is kept in the history.",
-      "abandonButton": "Abandon draft"
+      "abandonButton": "Abandon draft",
+      "editTitle": "Edit the draft",
+      "editDescription": "Amounts are recalculated by the server on every save. The saved lines are replaced by those in the form.",
+      "customersFailed": "Unable to load customers to edit this draft. Try again later.",
+      "quoteDraftReadOnly": "This draft carries over the customer, lines and prices of the accepted quote: it cannot be edited. Abandon it to create a new one from the quote."
     },
     "FromQuote": {
       "title": "Invoicing",

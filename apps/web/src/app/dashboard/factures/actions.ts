@@ -43,7 +43,7 @@ export async function saveInvoiceDraft(
     p_lines: parsed.data.lines,
     p_issue_date: parsed.data.issueDate,
     p_due_date: parsed.data.dueDate,
-    p_invoice_id: null,
+    p_invoice_id: parsed.data.invoiceId,
     p_subject: parsed.data.subject,
     p_terms: parsed.data.terms,
     p_notes: parsed.data.notes,
@@ -57,6 +57,7 @@ export async function saveInvoiceDraft(
   }
 
   revalidatePath("/dashboard/factures");
+  revalidatePath("/dashboard/factures/" + invoiceId);
   redirect(invoiceUrl(invoiceId, parsed.data.companyId, "success=saved"));
 }
 

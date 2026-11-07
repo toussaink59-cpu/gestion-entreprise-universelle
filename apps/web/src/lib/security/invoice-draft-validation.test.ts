@@ -34,6 +34,14 @@ describe("parseInvoiceDraftForm", () => {
     expect(parseInvoiceDraftForm(form({ ...base, lines_json: JSON.stringify([{ ...LINE, quantity: "NaN" }]) }))).toEqual({ ok: false, reason: "lines" });
   });
 
+  it("distingue création et modification d'un brouillon", () => {
+    const INVOICE = "33333333-3333-4333-8333-333333333333";
+    expect(parseInvoiceDraftForm(form(base))).toMatchObject({ ok: true, data: { invoiceId: null } });
+    expect(parseInvoiceDraftForm(form({ ...base, invoice_id: "" }))).toMatchObject({ ok: true, data: { invoiceId: null } });
+    expect(parseInvoiceDraftForm(form({ ...base, invoice_id: INVOICE }))).toMatchObject({ ok: true, data: { invoiceId: INVOICE } });
+    expect(parseInvoiceDraftForm(form({ ...base, invoice_id: "1; drop table" }))).toEqual({ ok: false, reason: "context" });
+  });
+
   it("ne transmet jamais de taxe", () => {
     const parsed = parseInvoiceDraftForm(form({ ...base, lines_json: JSON.stringify([{ ...LINE, tax_rate: "18" }]) }));
     expect(parsed.ok).toBe(true);
