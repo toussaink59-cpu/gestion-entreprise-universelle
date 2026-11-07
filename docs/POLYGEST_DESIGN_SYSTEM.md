@@ -30,10 +30,13 @@ La palette par défaut est claire, neutre et faiblement saturée. Les valeurs ci
 | `--pg-text` | `#20262D` | Texte principal |
 | `--pg-text-muted` | `#58636F` | Texte secondaire et aide |
 | `--pg-border` | `#D5DCE3` | Séparateurs et bordures discrètes |
-| `--pg-control-border` | `#8B98A5` | Bordures de champs et contrôles |
-| `--pg-accent` | `#415C76` | Action principale, lien important, sélection |
-| `--pg-accent-hover` | `#344B62` | Survol de l'accent |
-| `--pg-focus` | `#587B9B` | Anneau de focus visible |
+| `--pg-control-border` | `#7A8794` | Bordures de champs et contrôles (3,7:1 sur blanc ; l'ancienne valeur `#8B98A5` n'atteignait pas 3:1) |
+| `--pg-accent` | `#0F2A6B` | Action principale, lien important, sélection (bleu nuit du logo éclairci ; contraste 13,4:1 sur blanc) |
+| `--pg-accent-hover` | `#0A1F52` | Survol de l'accent |
+| `--pg-focus` | `#2F55B0` | Anneau de focus visible (6,9:1 sur blanc) |
+| `--pg-brand` | `#FF7200` | Orange du logo officiel : repère de marque non textuel uniquement |
+
+**Règle de l'orange de marque.** L'orange `#FF7200` n'offre que 2,7:1 sur blanc : il ne sert **jamais** de couleur de texte, de lien, de bouton ni de statut. Il est réservé au logo et à de petits repères non textuels déjà doublés d'un autre signal (par exemple le trait de l'élément de navigation actif, qui est aussi signalé par `aria-current`, le fond et le texte). Le texte posé sur orange est le bleu nuit `#01123B` (6,7:1). Le bleu nuit du logo (`#01123B`) reste celui du fichier du logo ; l'accent de l'interface est volontairement plus clair pour se distinguer du texte principal.
 
 ### Couleurs sémantiques
 
@@ -44,7 +47,7 @@ Les couleurs de statut doivent rester atténuées et toujours être accompagnée
 | Succès | `#285C45` | `#EEF5F0` | Action terminée, paiement confirmé |
 | Attention | `#76571F` | `#F8F4EA` | Échéance proche, action à vérifier |
 | Erreur | `#963F3F` | `#FAF0F0` | Échec, blocage ou donnée invalide |
-| Information | `#415C76` | `#EEF2F6` | Information neutre |
+| Information | `#0F2A6B` | `#EEF2F6` | Information neutre |
 
 Ne pas ajouter une couleur de marque supplémentaire à chaque module. Le module courant se distingue d'abord par la navigation, le titre et la structure, pas par un code couleur arbitraire.
 

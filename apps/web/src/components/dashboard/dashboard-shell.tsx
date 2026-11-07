@@ -36,7 +36,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}
-                className={`flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)] ${active ? "bg-[var(--pg-surface-subtle)] text-[var(--pg-text)]" : "text-[var(--pg-text-muted)] hover:bg-[var(--pg-surface-subtle)] hover:text-[var(--pg-text)]"}`}>
+                className={`flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)] ${active ? "bg-[var(--pg-surface-subtle)] text-[var(--pg-text)] shadow-[inset_3px_0_0_var(--pg-brand)]" : "text-[var(--pg-text-muted)] hover:bg-[var(--pg-surface-subtle)] hover:text-[var(--pg-text)]"}`}>
                 {t(item.key)}
               </Link>
             );
