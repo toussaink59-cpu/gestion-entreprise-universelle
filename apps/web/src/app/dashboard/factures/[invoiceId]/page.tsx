@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { InvoiceCompanyChooser } from "../company-chooser";
 import { abandonInvoiceDraft } from "../actions";
+import { InvoiceDraftForm, type InvoiceDraftInitial } from "../invoice-draft-form";
 import {
   formatInvoiceCurrency,
   formatInvoiceDate,
@@ -11,6 +12,7 @@ import {
   invoiceStatusLabel,
 } from "../formatting";
 import { getInvoiceWorkspace, isInvoiceUuid } from "../workspace";
+import type { InvoiceCustomerOption } from "../types";
 
 export const instant = false;
 
@@ -119,6 +121,43 @@ export default async function InvoiceDetailPage({ params, searchParams }: Props)
 
   const companyQuery = "?company=" + encodeURIComponent(workspace.company.id);
   const isDraft = invoice.status === "draft";
+  // Un brouillon issu d'un devis reprend les prix acceptés : il n'est pas modifiable ici.
+  const canEdit = isDraft && invoice.billing_kind === "standalone" && workspace.canWrite && !lineError;
+
+  let customerOptions: InvoiceCustomerOption[] = [];
+  let customersFailed = false;
+  if (canEdit) {
+    const { data: customerRows, error: customersError } = await workspace.supabase
+      .from("customers")
+      .select("id, name, status")
+      .eq("company_id", workspace.company.id)
+      .order("name")
+      .limit(500);
+    if (customersError) {
+      console.error("Invoice edit customers failed:", { code: customersError.code });
+      customersFailed = true;
+    }
+    customerOptions = ((customerRows ?? []) as Array<{ id: string; name: string; status: string }>)
+      .filter((row) => row.status === "active")
+      .map((row) => ({ id: row.id, name: row.name }));
+  }
+  const initial: InvoiceDraftInitial = {
+    invoiceId: invoice.id,
+    customerId: invoice.customer_id,
+    issueDate: invoice.issue_date,
+    dueDate: invoice.due_date,
+    subject: invoice.subject ?? "",
+    terms: invoice.terms ?? "",
+    notes: invoice.notes ?? "",
+    lines: lines.map((line) => ({
+      description: line.description,
+      quantity: line.quantity,
+      unit_label: line.unit_label,
+      unit_price: line.unit_price,
+      discount_type: line.discount_type,
+      discount_value: line.discount_value,
+    })),
+  };
   const successMessage =
     query.success === "saved" ? t("success.saved") : query.success === "fromQuote" ? t("success.fromQuote") : query.success === "abandoned" ? t("success.abandoned") : null;
   const errorMessage =
@@ -186,8 +225,32 @@ export default async function InvoiceDetailPage({ params, searchParams }: Props)
         </div>
       </dl>
 
+      {canEdit ? (
+        <section className="space-y-5">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("editTitle")}</h2>
+            <p className="mt-1 text-sm text-[var(--pg-text-muted)]">{t("editDescription")}</p>
+          </div>
+          {customersFailed ? (
+            <p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">{t("customersFailed")}</p>
+          ) : (
+            <InvoiceDraftForm
+              companyId={workspace.company.id}
+              currencyCode={invoice.currency_code}
+              customers={customerOptions}
+              cancelHref={"/dashboard/factures" + companyQuery}
+              defaultUnit={locale === "en" ? "unit" : "unité"}
+              today={invoice.issue_date}
+              initial={initial}
+            />
+          )}
+        </section>
+      ) : (
       <section className="space-y-5">
         <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("linesTitle")}</h2>
+        {isDraft && invoice.billing_kind === "full" ? (
+          <p className="text-sm text-[var(--pg-text-muted)]">{t("quoteDraftReadOnly")}</p>
+        ) : null}
         {lineError ? (
           <p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">{t("linesFailed")}</p>
         ) : lines.length === 0 ? (
@@ -246,6 +309,7 @@ export default async function InvoiceDetailPage({ params, searchParams }: Props)
           </section>
         ) : null}
       </section>
+      )}
 
       {isDraft && workspace.canWrite ? (
         <section className="mt-10 border-t border-[var(--pg-border)] pt-6">
