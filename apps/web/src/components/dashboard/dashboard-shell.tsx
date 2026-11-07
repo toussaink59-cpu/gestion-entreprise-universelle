@@ -13,6 +13,7 @@ const navigation = [
   { href: "/dashboard/clients", key: "clients", exact: false },
   { href: "/dashboard/fournisseurs", key: "suppliers", exact: false },
   { href: "/dashboard/devis", key: "quotes", exact: false },
+  { href: "/dashboard/factures", key: "invoices", exact: false },
   { href: "/dashboard/depenses", key: "expenses", exact: false },
   { href: "/dashboard/membres", key: "members", exact: false },
 ] as const;

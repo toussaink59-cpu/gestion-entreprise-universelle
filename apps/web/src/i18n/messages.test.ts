@@ -35,6 +35,10 @@ describe("French and English message catalogs", () => {
     expect(fr.Quotes.Form.saveDraft).toBe("Enregistrer le brouillon");
     expect(en.Quotes.Form.saveDraft).toBe("Save draft");
     expect(fr.Quotes.Detail.sendButton).toBe("Transmettre et numéroter");
+    expect(fr.Invoices.List.newInvoice).toBe("Nouveau brouillon");
+    expect(en.Invoices.List.newInvoice).toBe("New draft");
+    expect(fr.Dashboard.Navigation.invoices).toBe("Factures");
+    expect(en.Dashboard.Navigation.invoices).toBe("Invoices");
     expect(en.Quotes.Detail.sendButton).toBe("Send and number");
   });
   it("provide member and company-management copy in both locales", () => {

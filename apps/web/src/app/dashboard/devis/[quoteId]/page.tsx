@@ -10,6 +10,7 @@ import {
   quoteStatusLabel,
 } from "../formatting";
 import { cancelQuote, recordQuoteResponse, sendQuote } from "../actions";
+import { createInvoiceDraftFromQuote } from "../../factures/actions";
 import {
   QUOTE_RESPONSE_METHODS,
 } from "@/lib/security/quote-response-validation";
@@ -29,6 +30,7 @@ type Props = {
     success?: string;
     send_error?: string;
     action_error?: string;
+    invoice_error?: string;
   }>;
 };
 
@@ -243,6 +245,25 @@ export default async function QuoteDetailPage({
 
   const companyQuery =
     "?company=" + encodeURIComponent(workspace.company.id);
+  const invoiceT = await getTranslations("Invoices.FromQuote");
+  let activeInvoiceDraftId: string | null = null;
+  if (quote.status === "accepted" && workspace.canInvoice) {
+    const { data: draftRows, error: draftError } = await workspace.supabase
+      .from("invoices")
+      .select("id")
+      .eq("company_id", workspace.company.id)
+      .eq("source_quote_id", quote.id)
+      .eq("status", "draft")
+      .limit(1);
+    if (draftError) console.error("Quote invoice draft lookup failed:", { code: draftError.code });
+    activeInvoiceDraftId = draftRows?.[0]?.id ?? null;
+  }
+  const invoiceErrorMessage =
+    queryParams.invoice_error === undefined
+      ? null
+      : queryParams.invoice_error === "permission" ? invoiceT("errors.permission")
+      : queryParams.invoice_error === "invalid" ? invoiceT("errors.invalid")
+      : invoiceT("errors.generic");
   const successMessage =
     queryParams.success === "saved" ? t("success.saved") : queryParams.success === "sent" ? t("success.sent") : queryParams.success === "accepted" ? t("success.accepted") : queryParams.success === "rejected" ? t("success.rejected") : queryParams.success === "cancelled" ? t("success.cancelled") : null;
   const actionErrorMessage = (() => {
@@ -386,6 +407,43 @@ export default async function QuoteDetailPage({
             : ""}
           {quote.acceptance_reference ? " · " + t("proof") + ": " + quote.acceptance_reference : ""}
         </p>
+      ) : null}
+
+      {invoiceErrorMessage ? (
+        <p role="alert" className="mb-5 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">
+          {invoiceErrorMessage}
+        </p>
+      ) : null}
+
+      {quote.status === "accepted" && workspace.canInvoice ? (
+        <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">{invoiceT("title")}</h2>
+          {activeInvoiceDraftId ? (
+            <>
+              <p className="mt-1 text-sm text-[var(--pg-text-muted)]">{invoiceT("existingDescription")}</p>
+              <Link
+                href={"/dashboard/factures/" + activeInvoiceDraftId + companyQuery}
+                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
+              >
+                {invoiceT("openDraft")}
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="mt-1 text-sm text-[var(--pg-text-muted)]">{invoiceT("description")}</p>
+              <form action={createInvoiceDraftFromQuote} className="mt-4">
+                <input type="hidden" name="company_id" value={workspace.company.id} />
+                <input type="hidden" name="quote_id" value={quote.id} />
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
+                >
+                  {invoiceT("create")}
+                </button>
+              </form>
+            </>
+          )}
+        </section>
       ) : null}
 
       {quote.status === "rejected" ? (

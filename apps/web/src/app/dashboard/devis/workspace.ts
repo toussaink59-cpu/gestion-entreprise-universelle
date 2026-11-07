@@ -20,6 +20,10 @@ const READ_ROLES = new Set([
   "auditor",
 ]);
 
+// invoices:create : rôles autorisés à créer un brouillon de facture depuis un devis accepté
+// (create_invoice_draft_from_quote reste l'autorité).
+const INVOICE_CREATE_ROLES = new Set(["owner", "company_admin", "finance", "sales_purchasing"]);
+
 const WRITE_ROLES = new Set([
   "owner",
   "company_admin",
@@ -115,6 +119,7 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
   const canSend = canWrite;
   // quotes:cancel est réservé au propriétaire et à l'administrateur.
   const canCancel = roleCode === "owner" || roleCode === "company_admin";
+  const canInvoice = INVOICE_CREATE_ROLES.has(roleCode);
 
   return {
     status: "ready" as const,
@@ -127,5 +132,6 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
     canWrite,
     canSend,
     canCancel,
+    canInvoice,
   };
 }
