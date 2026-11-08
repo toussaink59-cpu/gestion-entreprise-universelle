@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isInvoiceModuleEnabled } from "@/lib/features";
 import {
   parseInvoiceAbandonForm,
   parseInvoiceDraftForm,
@@ -27,6 +28,8 @@ export async function saveInvoiceDraft(
   _previousState: InvoiceActionState,
   formData: FormData,
 ): Promise<InvoiceActionState> {
+  if (!isInvoiceModuleEnabled()) return { error: "disabled" };
+
   const parsed = parseInvoiceDraftForm(formData);
   if (!parsed.ok) return { error: parsed.reason };
 
@@ -62,6 +65,8 @@ export async function saveInvoiceDraft(
 }
 
 export async function createInvoiceDraftFromQuote(formData: FormData) {
+  if (!isInvoiceModuleEnabled()) redirect("/dashboard/devis");
+
   const parsed = parseInvoiceFromQuoteForm(formData);
   if (!parsed.ok) redirect("/dashboard/devis");
 
@@ -90,6 +95,8 @@ export async function createInvoiceDraftFromQuote(formData: FormData) {
 }
 
 export async function abandonInvoiceDraft(formData: FormData) {
+  if (!isInvoiceModuleEnabled()) redirect("/dashboard");
+
   const parsed = parseInvoiceAbandonForm(formData);
   if (!parsed.ok) {
     const invoice = formData.get("invoice_id");
