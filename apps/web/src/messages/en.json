@@ -154,7 +154,7 @@
       "myCompanies": "My companies",
       "directoryDescription": "Each company has its own customer and supplier directories.",
       "membershipError": "Unable to load company memberships.",
-      "membershipErrorHelp": "Check the Supabase schema and access policies.",
+      "membershipErrorHelp": "Try again later or contact the administrator if the problem persists.",
       "companiesError": "Unable to load company information.",
       "noCompaniesTitle": "No accessible company",
       "noCompaniesDescription": "Create a company or ask its owner to invite you to get started.",
@@ -168,7 +168,17 @@
       "previewError": "Unable to load records from this directory.",
       "customerEmpty": "No active customer records are visible for this company.",
       "supplierEmpty": "No active supplier records are visible for this company.",
-      "openDirectory": "Open directory"
+      "openDirectory": "Open directory",
+      "workTitle": "To handle",
+      "countUnavailable": "Unavailable",
+      "openCustomers": "View customers",
+      "openSuppliers": "View suppliers",
+      "work": {
+        "quotesSent": "Sent quotes awaiting a response",
+        "quotesDraft": "Quote drafts",
+        "invoicesDraft": "Invoice drafts",
+        "expensesDraft": "Expense drafts"
+      }
     }
   },
   "Contacts": {

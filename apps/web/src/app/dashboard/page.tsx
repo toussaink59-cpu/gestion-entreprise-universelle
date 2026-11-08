@@ -1,77 +1,55 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { getTranslations } from "next-intl/server";
 
 export const instant = false;
 
-type ContactPreview = {
-  id: string;
-  name: string;
-  contact_name: string | null;
-  email: string | null;
-  phone: string | null;
-};
+// Rôles pouvant consulter devis, factures et dépenses (miroir de la matrice ; la RLS reste l'autorité).
+const BUSINESS_READ_ROLES = new Set(["owner", "company_admin", "finance", "sales_purchasing", "auditor"]);
+const MEMBER_ADMIN_ROLES = new Set(["owner", "company_admin"]);
 
-type DashboardCopy = {
-  loadingEyebrow: string; loadingTitle: string; loadingDescription: string; loadingLabel: string;
-  eyebrow: string; title: string; welcome: string; welcomeNamed: string; account: string;
-  emailUnavailable: string; createCompany: string; signOut: string; myCompanies: string;
-  directoryDescription: string; membershipError: string; membershipErrorHelp: string;
-  companiesError: string; noCompaniesTitle: string; noCompaniesDescription: string;
-  legalName: string; currency: string; companyBadge: string; manageMembers: string;
-  customerDirectory: string; supplierDirectory: string; recentCount: string;
-  previewError: string; customerEmpty: string; supplierEmpty: string; openDirectory: string;
-};
+type ContactPreview = { id: string; name: string; contact_name: string | null; email: string | null; phone: string | null };
+type Tally = { count: number | null };
 
-function DashboardFallback({ copy }: { copy: DashboardCopy }) {
-  return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <PageHeader eyebrow={copy.loadingEyebrow} title={copy.loadingTitle} description={copy.loadingDescription} />
-      <div role="status" aria-label={copy.loadingLabel} className="space-y-4">
-        <div className="h-24 animate-pulse rounded-lg bg-[var(--pg-surface-subtle)]" />
-        <div className="h-40 animate-pulse rounded-lg bg-[var(--pg-surface-subtle)]" />
-      </div>
-    </main>
-  );
-}
+const PRIMARY_LINK =
+  "inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+const SECONDARY_BUTTON =
+  "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+const TEXT_LINK =
+  "inline-flex min-h-11 items-center font-medium text-[var(--pg-accent)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
 
 export default async function DashboardPage() {
   const t = await getTranslations("Dashboard.Home");
-  const copy: DashboardCopy = {
-    loadingEyebrow: t("loadingEyebrow"), loadingTitle: t("title"),
-    loadingDescription: t("loadingDescription"), loadingLabel: t("loadingLabel"),
-    eyebrow: t("eyebrow"), title: t("title"), welcome: t("welcome"),
-    welcomeNamed: t("welcomeNamed", { name: "{name}" }), account: t("account", { email: "{email}" }),
-    emailUnavailable: t("emailUnavailable"), createCompany: t("createCompany"), signOut: t("signOut"),
-    myCompanies: t("myCompanies"), directoryDescription: t("directoryDescription"),
-    membershipError: t("membershipError"), membershipErrorHelp: t("membershipErrorHelp"),
-    companiesError: t("companiesError"), noCompaniesTitle: t("noCompaniesTitle"),
-    noCompaniesDescription: t("noCompaniesDescription"), legalName: t("legalName", { name: "{name}" }),
-    currency: t("currency", { currency: "{currency}" }), companyBadge: t("companyBadge"),
-    manageMembers: t("manageMembers"), customerDirectory: t("customerDirectory"),
-    supplierDirectory: t("supplierDirectory"), recentCount: t("recentCount", { count: 5 }),
-    previewError: t("previewError"), customerEmpty: t("customerEmpty"),
-    supplierEmpty: t("supplierEmpty"), openDirectory: t("openDirectory"),
-  };
   return (
-    <Suspense fallback={<DashboardFallback copy={copy} />}>
-      <DashboardContent copy={copy} />
+    <Suspense
+      fallback={
+        <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <PageHeader title={t("title")} description={t("loadingDescription")} />
+          <div role="status" aria-label={t("loadingLabel")} className="space-y-4">
+            <div className="h-24 animate-pulse rounded-lg bg-[var(--pg-surface-subtle)] motion-reduce:animate-none" />
+            <div className="h-40 animate-pulse rounded-lg bg-[var(--pg-surface-subtle)] motion-reduce:animate-none" />
+          </div>
+        </main>
+      }
+    >
+      <DashboardContent />
     </Suspense>
   );
 }
 
-async function DashboardContent({ copy }: { copy: DashboardCopy }) {
+async function DashboardContent() {
   await connection();
+  const t = await getTranslations("Dashboard.Home");
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) redirect("/login");
 
   const { data: memberships, error: membershipError } = await supabase
@@ -81,28 +59,21 @@ async function DashboardContent({ copy }: { copy: DashboardCopy }) {
     .eq("status", "active");
 
   if (membershipError) {
+    console.error("Dashboard memberships failed:", { code: membershipError.code });
     return (
       <main className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
-        <PageHeader eyebrow={copy.eyebrow} title={copy.title} />
-        <p role="alert" className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">
-          {copy.membershipError} {copy.membershipErrorHelp}
+        <PageHeader title={t("title")} />
+        <p role="alert" className="rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">
+          {t("membershipError")} {t("membershipErrorHelp")}
         </p>
         <form action={signOut} className="mt-6">
-          <button
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
-            type="submit"
-          >
-            {copy.signOut}
-          </button>
+          <button className={SECONDARY_BUTTON} type="submit">{t("signOut")}</button>
         </form>
       </main>
     );
   }
 
-  const companyIds = [
-    ...new Set((memberships ?? []).map((membership) => membership.company_id)),
-  ];
-
+  const companyIds = [...new Set((memberships ?? []).map((membership) => membership.company_id))];
   if (companyIds.length === 0) redirect("/onboarding");
 
   const { data: companies, error: companiesError } = await supabase
@@ -111,223 +82,189 @@ async function DashboardContent({ copy }: { copy: DashboardCopy }) {
     .in("id", companyIds)
     .order("legal_name");
 
-  // Charger des aperçus séparés par entreprise. Les requêtes restent soumises
-  // à la RLS : un rôle sans permission de lecture ne reçoit aucune fiche.
-  const contactPreviews = !companiesError && companies?.length
-    ? await Promise.all(
-        companies.map(async (company) => {
-          const [customerResult, supplierResult] = await Promise.all([
-            supabase
-              .from("customers")
-              .select("id, name, contact_name, email, phone")
-              .eq("company_id", company.id)
-              .eq("status", "active")
-              .order("updated_at", { ascending: false })
-              .limit(5),
-            supabase
-              .from("suppliers")
-              .select("id, name, contact_name, email, phone")
-              .eq("company_id", company.id)
-              .eq("status", "active")
-              .order("updated_at", { ascending: false })
-              .limit(5),
-          ]);
+  const overviews =
+    !companiesError && companies?.length
+      ? await Promise.all(
+          companies.map(async (company) => {
+            const role = String((memberships ?? []).find((item) => item.company_id === company.id)?.role_code ?? "");
+            const canReadBusiness = BUSINESS_READ_ROLES.has(role);
+            const countOf = async (table: string, status: string): Promise<Tally> => {
+              const { count, error } = await supabase
+                .from(table)
+                .select("id", { count: "exact", head: true })
+                .eq("company_id", company.id)
+                .eq("status", status);
+              if (error) {
+                console.error("Dashboard count failed:", { table, code: error.code });
+                return { count: null };
+              }
+              return { count: count ?? 0 };
+            };
+            const previews = async (table: "customers" | "suppliers") => {
+              const { data, error } = await supabase
+                .from(table)
+                .select("id, name, contact_name, email, phone")
+                .eq("company_id", company.id)
+                .eq("status", "active")
+                .order("updated_at", { ascending: false })
+                .limit(5);
+              if (error) console.error("Dashboard preview failed:", { table, code: error.code });
+              return { rows: (data ?? []) as ContactPreview[], failed: Boolean(error) };
+            };
+            const [quotesSent, quotesDraft, invoicesDraft, expensesDraft, customers, suppliers] = await Promise.all([
+              canReadBusiness ? countOf("quotes", "sent") : Promise.resolve(null),
+              canReadBusiness ? countOf("quotes", "draft") : Promise.resolve(null),
+              canReadBusiness ? countOf("invoices", "draft") : Promise.resolve(null),
+              canReadBusiness ? countOf("expenses", "draft") : Promise.resolve(null),
+              previews("customers"),
+              previews("suppliers"),
+            ]);
+            return {
+              company,
+              canReadBusiness,
+              canManageMembers: MEMBER_ADMIN_ROLES.has(role),
+              work: [
+                { key: "quotesSent", tally: quotesSent, href: "/dashboard/devis" },
+                { key: "quotesDraft", tally: quotesDraft, href: "/dashboard/devis" },
+                { key: "invoicesDraft", tally: invoicesDraft, href: "/dashboard/factures" },
+                { key: "expensesDraft", tally: expensesDraft, href: "/dashboard/depenses" },
+              ] as const,
+              customers,
+              suppliers,
+            };
+          }),
+        )
+      : [];
 
-          if (customerResult.error) {
-            console.error("Dashboard customer preview failed:", {
-              code: customerResult.error.code,
-            });
-          }
-          if (supplierResult.error) {
-            console.error("Dashboard supplier preview failed:", {
-              code: supplierResult.error.code,
-            });
-          }
-
-          return {
-            companyId: company.id,
-            customers: (customerResult.data ?? []) as ContactPreview[],
-            suppliers: (supplierResult.data ?? []) as ContactPreview[],
-            customerError: Boolean(customerResult.error),
-            supplierError: Boolean(supplierResult.error),
-          };
-        }),
-      )
-    : [];
+  const fullName = user.user_metadata?.full_name ? String(user.user_metadata.full_name) : null;
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <PageHeader
-        eyebrow={copy.eyebrow}
-        title={copy.title}
-        description={`${user.user_metadata?.full_name ? copy.welcomeNamed.replace("{name}", String(user.user_metadata.full_name)) : copy.welcome} ${copy.account.replace("{email}", user.email ?? copy.emailUnavailable)}`}
+        title={t("title")}
+        description={(fullName ? t("welcomeNamed", { name: fullName }) : t("welcome")) + " " + t("account", { email: user.email ?? t("emailUnavailable") })}
         actions={
           <>
-            <a href="/dashboard/entreprises/nouvelle" className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]">
-              {copy.createCompany}
-            </a>
+            <Link href="/dashboard/entreprises/nouvelle" className={PRIMARY_LINK}>{t("createCompany")}</Link>
             <form action={signOut}>
-              <button className="inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-4 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]" type="submit">
-                {copy.signOut}
-              </button>
+              <button className={SECONDARY_BUTTON} type="submit">{t("signOut")}</button>
             </form>
           </>
         }
       />
 
-      <section className="mb-6">
-        <h2 className="text-lg font-semibold text-[var(--pg-text)]">{copy.myCompanies}</h2>
-        <p className="mt-1 text-sm text-[var(--pg-text-muted)]">{copy.directoryDescription}</p>
-      </section>
+      {companiesError ? (
+        <p role="alert" className="mb-5 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-4 text-sm text-[#963F3F]">{t("companiesError")}</p>
+      ) : null}
 
-      {companiesError && (
-        <p
-          role="alert"
-          className="mb-5 rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]"
-        >
-          {copy.companiesError}
-        </p>
-      )}
-
-      {!companiesError && companies && companies.length === 0 && (
+      {!companiesError && companies && companies.length === 0 ? (
         <EmptyState
-          title={copy.noCompaniesTitle}
-          description={copy.noCompaniesDescription}
-          action={<a href="/dashboard/entreprises/nouvelle" className="inline-flex min-h-11 items-center justify-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]">{copy.createCompany}</a>}
+          title={t("noCompaniesTitle")}
+          description={t("noCompaniesDescription")}
+          action={<Link href="/dashboard/entreprises/nouvelle" className={PRIMARY_LINK}>{t("createCompany")}</Link>}
         />
-      )}
+      ) : null}
 
-      {companies && companies.length > 0 && (
-        <div className="grid gap-6">
-          {companies.map((company) => {
-            const membership = (memberships ?? []).find(
-              (item) => item.company_id === company.id,
-            );
-            const canManageMembers = ["owner", "company_admin"].includes(
-              String(membership?.role_code ?? ""),
-            );
-            const preview = contactPreviews.find(
-              (item) => item.companyId === company.id,
-            );
-            const clientsUrl = `/dashboard/clients?company=${encodeURIComponent(company.id)}`;
-            const suppliersUrl = `/dashboard/fournisseurs?company=${encodeURIComponent(company.id)}`;
-
-            return (
-              <article
-                key={company.id}
-                className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-950">
-                      {company.trade_name || company.legal_name}
-                    </h3>
-                    <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-                      {copy.legalName.replace("{name}", company.legal_name)}
-                    </p>
-                    <p className="mt-1 text-xs text-[var(--pg-text-muted)]">
-                      {copy.currency.replace("{currency}", company.default_currency)}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-md bg-[var(--pg-surface-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--pg-text-muted)]">
-                      {copy.companyBadge}
-                    </span>
-                    {canManageMembers && (
-                      <a
-                        href={`/dashboard/membres?company=${encodeURIComponent(company.id)}`}
-                        className="inline-flex min-h-9 items-center rounded-md border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-1 text-xs font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
-                      >
-                        {copy.manageMembers}
-                      </a>
-                    )}
-                  </div>
+      <div className="space-y-12">
+        {overviews.map(({ company, canReadBusiness, canManageMembers, work, customers, suppliers }) => {
+          const query = "?company=" + encodeURIComponent(company.id);
+          const headingId = "company-" + company.id;
+          return (
+            <section key={company.id} aria-labelledby={headingId} className="border-t border-[var(--pg-border)] pt-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 id={headingId} className="text-xl font-semibold text-[var(--pg-text)]">
+                    {company.trade_name || company.legal_name}
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
+                    {t("legalName", { name: company.legal_name })} · {t("currency", { currency: company.default_currency })}
+                  </p>
                 </div>
+                {canManageMembers ? (
+                  <Link href={"/dashboard/membres" + query} className={SECONDARY_BUTTON}>{t("manageMembers")}</Link>
+                ) : null}
+              </div>
 
-                <div className="mt-6 grid gap-5 xl:grid-cols-2">
-                  <ContactDirectoryPreview
-                    title={copy.customerDirectory}
-                    contacts={preview?.customers ?? []}
-                    hasError={preview?.customerError ?? false}
-                    href={clientsUrl}
-                    labels={{ recentCount: copy.recentCount, previewError: copy.previewError, empty: copy.customerEmpty, open: copy.openDirectory }}
-                  />
-                  <ContactDirectoryPreview
-                    title={copy.supplierDirectory}
-                    contacts={preview?.suppliers ?? []}
-                    hasError={preview?.supplierError ?? false}
-                    href={suppliersUrl}
-                    labels={{ recentCount: copy.recentCount, previewError: copy.previewError, empty: copy.supplierEmpty, open: copy.openDirectory }}
-                  />
+              {canReadBusiness ? (
+                <div className="mt-6">
+                  <h3 className="text-base font-semibold text-[var(--pg-text)]">{t("workTitle")}</h3>
+                  <ul className="mt-2 divide-y divide-[var(--pg-border)] border-y border-[var(--pg-border)]">
+                    {work.map((item) => (
+                      <li key={item.key}>
+                        <Link
+                          href={item.href + query}
+                          className="flex min-h-11 items-center justify-between gap-4 px-1 py-2 text-sm text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--pg-focus)]"
+                        >
+                          <span>{t("work." + item.key)}</span>
+                          <span className="font-semibold tabular-nums">
+                            {item.tally && item.tally.count !== null ? item.tally.count : <span className="font-normal text-[var(--pg-text-muted)]">{t("countUnavailable")}</span>}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+              ) : null}
+
+              <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                <DirectoryPreview
+                  title={t("customerDirectory")}
+                  rows={customers.rows}
+                  failed={customers.failed}
+                  empty={t("customerEmpty")}
+                  failedLabel={t("previewError")}
+                  open={t("openCustomers")}
+                  href={"/dashboard/clients" + query}
+                  note={t("recentCount", { count: 5 })}
+                />
+                <DirectoryPreview
+                  title={t("supplierDirectory")}
+                  rows={suppliers.rows}
+                  failed={suppliers.failed}
+                  empty={t("supplierEmpty")}
+                  failedLabel={t("previewError")}
+                  open={t("openSuppliers")}
+                  href={"/dashboard/fournisseurs" + query}
+                  note={t("recentCount", { count: 5 })}
+                />
+              </div>
+            </section>
+          );
+        })}
+      </div>
     </main>
   );
 }
 
-function ContactDirectoryPreview({
-  title,
-  contacts,
-  hasError,
-  href,
-  labels,
+function DirectoryPreview({
+  title, rows, failed, empty, failedLabel, open, href, note,
 }: {
-  title: string;
-  contacts: ContactPreview[];
-  hasError: boolean;
-  href: string;
-  labels: { recentCount: string; previewError: string; empty: string; open: string };
+  title: string; rows: ContactPreview[]; failed: boolean; empty: string; failedLabel: string; open: string; href: string; note: string;
 }) {
-
   return (
-    <section className="min-w-0 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] p-4 sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h4 className="font-semibold text-[var(--pg-text)]">{title}</h4>
-        <span className="text-xs text-[var(--pg-text-muted)]">{labels.recentCount}</span>
+    <div className="min-w-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-base font-semibold text-[var(--pg-text)]">{title}</h3>
+        <span className="text-xs text-[var(--pg-text-muted)]">{note}</span>
       </div>
-
-      {hasError ? (
-        <p role="alert" className="mt-4 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-3 text-sm text-[var(--pg-text)]">
-          {labels.previewError}
-        </p>
-      ) : contacts.length === 0 ? (
-        <p className="mt-4 rounded-md border border-dashed border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text-muted)]">
-          {labels.empty}
-        </p>
+      {failed ? (
+        <p role="alert" className="mt-3 rounded-md border border-[#E7CACA] bg-[#FAF0F0] p-3 text-sm text-[#963F3F]">{failedLabel}</p>
+      ) : rows.length === 0 ? (
+        <p className="mt-3 text-sm text-[var(--pg-text-muted)]">{empty}</p>
       ) : (
-        <ul className="mt-3 divide-y divide-[var(--pg-border)] rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)]">
-          {contacts.map((contact) => (
-            <li key={contact.id} className="px-4 py-3">
-              <p className="truncate text-sm font-semibold text-[var(--pg-text)]">
-                {contact.name}
-              </p>
-              {contact.contact_name && (
-                <p className="mt-0.5 truncate text-xs text-[var(--pg-text-muted)]">
-                  {contact.contact_name}
-                </p>
-              )}
-              {(contact.email || contact.phone) && (
-                <p className="mt-1 truncate text-xs text-[var(--pg-text-muted)]">
-                  {[contact.email, contact.phone].filter(Boolean).join(" · ")}
-                </p>
-              )}
+        <ul className="mt-2 divide-y divide-[var(--pg-border)] border-y border-[var(--pg-border)]">
+          {rows.map((row) => (
+            <li key={row.id} className="py-3">
+              <p className="truncate text-sm font-medium text-[var(--pg-text)]">{row.name}</p>
+              {row.contact_name ? <p className="mt-0.5 truncate text-xs text-[var(--pg-text-muted)]">{row.contact_name}</p> : null}
+              {row.email || row.phone ? (
+                <p className="mt-0.5 truncate text-xs text-[var(--pg-text-muted)]">{[row.email, row.phone].filter(Boolean).join(" · ")}</p>
+              ) : null}
             </li>
           ))}
         </ul>
       )}
-
-      <div className="mt-4">
-        <a
-          href={href}
-          className="inline-flex min-h-11 items-center rounded-md bg-[var(--pg-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]"
-        >
-          {labels.open}
-        </a>
-      </div>
-    </section>
+      <Link href={href} className={TEXT_LINK}>{open}</Link>
+    </div>
   );
 }

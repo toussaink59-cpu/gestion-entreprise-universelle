@@ -41,9 +41,9 @@ type InvitationMetadata = {
   expires_at: string | null;
 };
 
-const INPUT_CLASS = "mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100";
-const BUTTON_CLASS = "inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2";
-const SECONDARY_BUTTON_CLASS = "inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50";
+const INPUT_CLASS = "mt-1 block w-full rounded-lg border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2.5 text-sm text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+const BUTTON_CLASS = "inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--pg-accent)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--pg-accent-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--pg-focus)]";
+const SECONDARY_BUTTON_CLASS = "inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--pg-control-border)] bg-[var(--pg-surface)] px-3 py-2 text-sm font-medium text-[var(--pg-text)] hover:bg-[var(--pg-surface-subtle)]";
 
 type RoleLabels = Record<MemberInvitationRole, string>;
 type StatusLabels = {
@@ -66,15 +66,15 @@ function statusLabel(value: string, acceptedAt: string | null, labels: StatusLab
 }
 
 function statusClass(value: string): string {
-  if (value === "active") return "bg-emerald-50 text-emerald-700";
-  if (value === "invited") return "bg-amber-50 text-amber-800";
-  return "bg-slate-100 text-slate-600";
+  if (value === "active") return "bg-[#EEF5F0] text-[#285C45]";
+  if (value === "invited") return "bg-[#F8F4EA] text-[#76571F]";
+  return "bg-[var(--pg-surface-subtle)] text-[var(--pg-text-muted)]";
 }
 
 function LoadingFallback({ loading }: { loading: string }) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div role="status" aria-live="polite" className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
+      <div role="status" aria-live="polite" className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-6 text-sm text-[var(--pg-text-muted)]">
         {loading}
       </div>
     </main>
@@ -139,7 +139,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     .eq("status", "active");
 
   if (membershipError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("errors.membershipAccess")}</p><p className="mt-4"><a className="text-blue-700 hover:underline" href="/dashboard">{t("backDashboard")}</a></p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-lg border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{t("errors.membershipAccess")}</p><p className="mt-4"><a className="text-[var(--pg-accent)] hover:underline" href="/dashboard">{t("backDashboard")}</a></p></main>;
   }
 
   const memberships = membershipData ?? [];
@@ -153,7 +153,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     .order("legal_name");
 
   if (companiesError) {
-    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("errors.companies")}</p></main>;
+    return <main className="mx-auto w-full max-w-5xl px-4 py-10"><p role="alert" className="rounded-lg border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{t("errors.companies")}</p></main>;
   }
 
   const companies = (companyData ?? []) as CompanyRow[];
@@ -175,21 +175,21 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     return (
       <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-          <div><p className="text-sm font-semibold uppercase tracking-widest text-blue-700">{t("eyebrow")}</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{t("title")}</h1><p className="mt-2 text-slate-600">{t("selectCompany")}</p></div>
+          <div><p className="text-sm font-semibold  text-[var(--pg-accent)]">{t("eyebrow")}</p><h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--pg-text)]">{t("title")}</h1><p className="mt-2 text-[var(--pg-text-muted)]">{t("selectCompany")}</p></div>
           <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>{t("dashboard")}</a>
         </header>
-        {params.company && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{t("companyNotAccessible")}</p>}
-        {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
-        {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+        {params.company && <p role="alert" className="mb-5 rounded-lg border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{t("companyNotAccessible")}</p>}
+        {currentError && <p role="alert" className="mb-5 rounded-lg border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{currentError}</p>}
+        {currentSuccess && <p role="status" className="mb-5 rounded-lg border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-[#285C45]">{currentSuccess}</p>}
         {params.success === "invited-link" && <InvitationLinkReveal />}
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">{t("myCompanies")}</h2>
+        <section className="rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-6">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("myCompanies")}</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             {companies.map((company) => (
-              <a key={company.id} href={`/dashboard/membres?company=${encodeURIComponent(company.id)}`} className="rounded-xl border border-slate-200 p-4 hover:border-blue-400 hover:bg-blue-50">
-                <span className="block font-semibold text-slate-900">{company.trade_name || company.legal_name}</span>
-                <span className="mt-1 block text-sm text-slate-600">{company.legal_name}</span>
-                <span className="mt-3 inline-block text-sm font-semibold text-blue-700">{t("manageMembers")} →</span>
+              <a key={company.id} href={`/dashboard/membres?company=${encodeURIComponent(company.id)}`} className="rounded-lg border border-[var(--pg-border)] p-4 hover:border-[var(--pg-accent)] hover:bg-[var(--pg-surface-subtle)]">
+                <span className="block font-semibold text-[var(--pg-text)]">{company.trade_name || company.legal_name}</span>
+                <span className="mt-1 block text-sm text-[var(--pg-text-muted)]">{company.legal_name}</span>
+                <span className="mt-3 inline-block text-sm font-semibold text-[var(--pg-accent)]">{t("manageMembers")} →</span>
               </a>
             ))}
           </div>
@@ -244,10 +244,10 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-700">{t("eyebrow")}</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">{t("title")}</h1>
-          <p className="mt-2 text-slate-600">{company.trade_name || company.legal_name}<span className="mx-2 text-slate-300">/</span>{t("subtitle")}</p>
-          <p className="mt-1 text-sm text-slate-500">{t("yourRole")}: {roleLabel(actorRole, roleLabels)}</p>
+          <p className="text-sm font-semibold  text-[var(--pg-accent)]">{t("eyebrow")}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-[var(--pg-text)]">{t("title")}</h1>
+          <p className="mt-2 text-[var(--pg-text-muted)]">{company.trade_name || company.legal_name}<span className="mx-2 text-[var(--pg-text-muted)]">/</span>{t("subtitle")}</p>
+          <p className="mt-1 text-sm text-[var(--pg-text-muted)]">{t("yourRole")}: {roleLabel(actorRole, roleLabels)}</p>
         </div>
         <nav aria-label={t("moduleNavigation")} className="flex flex-wrap gap-2">
           <a href="/dashboard" className={SECONDARY_BUTTON_CLASS}>{t("dashboard")}</a>
@@ -257,61 +257,61 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
         </nav>
       </header>
 
-      {currentError && <p role="alert" className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{currentError}</p>}
-      {currentSuccess && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">{currentSuccess}</p>}
+      {currentError && <p role="alert" className="mb-5 rounded-lg border border-[#E7CACA] bg-[#FAF0F0] p-4 text-[#963F3F]">{currentError}</p>}
+      {currentSuccess && <p role="status" className="mb-5 rounded-lg border border-[#D2E2D7] bg-[#EEF5F0] p-4 text-[#285C45]">{currentSuccess}</p>}
       {params.success === "invited-link" && <InvitationLinkReveal />}
 
       {canInvite && (
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-5"><h2 className="text-xl font-semibold text-slate-900">{t("inviteExistingAccount")}</h2><p className="mt-1 max-w-3xl text-sm text-slate-600">{t("inviteDescription")}</p></div>
+        <section className="mb-8 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5 sm:p-6">
+          <div className="mb-5"><h2 className="text-xl font-semibold text-[var(--pg-text)]">{t("inviteExistingAccount")}</h2><p className="mt-1 max-w-3xl text-sm text-[var(--pg-text-muted)]">{t("inviteDescription")}</p></div>
           <form action={inviteCompanyMember} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <input type="hidden" name="company_id" value={selectedCompanyId} />
-            <label className="text-sm font-medium text-slate-700">{t("emailRequired")}<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder={t("emailPlaceholder")} /></label>
-            <label className="text-sm font-medium text-slate-700">{t("roleRequired")}<select className={INPUT_CLASS} name="role_code" required defaultValue="employee">{invitationRoles.map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select></label>
+            <label className="text-sm font-medium text-[var(--pg-text)]">{t("emailRequired")}<input className={INPUT_CLASS} name="email" type="email" required maxLength={254} autoComplete="email" placeholder={t("emailPlaceholder")} /></label>
+            <label className="text-sm font-medium text-[var(--pg-text)]">{t("roleRequired")}<select className={INPUT_CLASS} name="role_code" required defaultValue="employee">{invitationRoles.map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select></label>
             <div className="flex items-end"><button type="submit" className={BUTTON_CLASS}>{t("createInvitation")}</button></div>
           </form>
-          {actorRole === "owner" && <p className="mt-4 text-xs text-slate-500">{t("privilegedRolesNotice")}</p>}
-          <p className="mt-2 text-xs text-slate-500">{t("invitationDeliveryNotice")}</p>
+          {actorRole === "owner" && <p className="mt-4 text-xs text-[var(--pg-text-muted)]">{t("privilegedRolesNotice")}</p>}
+          <p className="mt-2 text-xs text-[var(--pg-text-muted)]">{t("invitationDeliveryNotice")}</p>
         </section>
       )}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 p-5 sm:p-6"><h2 className="text-xl font-semibold text-slate-900">{t("membersTitle")}</h2><p className="mt-1 text-sm text-slate-600">{t("membersDescription")}</p></div>
+      <section className="overflow-hidden rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)]">
+        <div className="border-b border-[var(--pg-border)] p-5 sm:p-6"><h2 className="text-xl font-semibold text-[var(--pg-text)]">{t("membersTitle")}</h2><p className="mt-1 text-sm text-[var(--pg-text-muted)]">{t("membersDescription")}</p></div>
         {memberListError ? (
-          <p role="alert" className="m-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-950">{memberListError}</p>
+          <p role="alert" className="m-5 rounded-lg border border-[#EADFC0] bg-[#F8F4EA] p-4 text-[#76571F]">{memberListError}</p>
         ) : members.length === 0 ? (
-          <div className="p-10 text-center"><p className="font-semibold text-slate-800">{t("emptyTitle")}</p><p className="mt-1 text-sm text-slate-500">{t("emptyDescription")}</p></div>
+          <div className="p-10 text-center"><p className="font-semibold text-[var(--pg-text)]">{t("emptyTitle")}</p><p className="mt-1 text-sm text-[var(--pg-text-muted)]">{t("emptyDescription")}</p></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-5 py-3 font-semibold">{t("columns.member")}</th><th className="px-5 py-3 font-semibold">{t("columns.role")}</th><th className="px-5 py-3 font-semibold">{t("columns.status")}</th><th className="px-5 py-3 font-semibold">{t("columns.addedAt")}</th><th className="px-5 py-3 font-semibold">{t("columns.action")}</th></tr></thead>
+              <thead className="bg-[var(--pg-surface-subtle)] text-xs  text-[var(--pg-text-muted)]"><tr><th className="px-5 py-3 font-semibold">{t("columns.member")}</th><th className="px-5 py-3 font-semibold">{t("columns.role")}</th><th className="px-5 py-3 font-semibold">{t("columns.status")}</th><th className="px-5 py-3 font-semibold">{t("columns.addedAt")}</th><th className="px-5 py-3 font-semibold">{t("columns.action")}</th></tr></thead>
               <tbody>
                 {members.map((member) => (
-                  <tr key={member.membership_id} className="border-t border-slate-100 align-top hover:bg-slate-50/70">
-                    <td className="px-5 py-4"><p className="font-semibold text-slate-900">{member.full_name || member.email || t("polygestUser")}</p><p className="mt-1 text-xs text-slate-500">{member.email || t("userId", { id: member.user_id })}</p></td>
-                    <td className="px-5 py-4 text-slate-700">{roleLabel(member.role_code, roleLabels)}</td>
+                  <tr key={member.membership_id} className="border-t border-[var(--pg-border)] align-top hover:bg-[var(--pg-surface-subtle)]">
+                    <td className="px-5 py-4"><p className="font-semibold text-[var(--pg-text)]">{member.full_name || member.email || t("polygestUser")}</p><p className="mt-1 text-xs text-[var(--pg-text-muted)]">{member.email || t("userId", { id: member.user_id })}</p></td>
+                    <td className="px-5 py-4 text-[var(--pg-text)]">{roleLabel(member.role_code, roleLabels)}</td>
                     <td className="px-5 py-4"><span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(member.status)}`}>{statusLabel(member.status, member.accepted_at, statusLabels)}</span></td>
-                    <td className="px-5 py-4 text-slate-600">{new Intl.DateTimeFormat(locale === "en" ? "en-US" : "fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
+                    <td className="px-5 py-4 text-[var(--pg-text-muted)]">{new Intl.DateTimeFormat(locale === "en" ? "en-US" : "fr-FR", { dateStyle: "medium" }).format(new Date(member.created_at))}</td>
                     <td className="px-5 py-4">
                       <div className="flex flex-col items-start gap-2">
                         {canActivateMember(actorRole) && member.status === "invited" && member.accepted_at && (
                           <form action={activateCompanyMember}>
                             <input type="hidden" name="company_id" value={selectedCompanyId} />
                             <input type="hidden" name="membership_id" value={member.membership_id} />
-                            <button type="submit" className="text-sm font-semibold text-blue-700 underline decoration-blue-200 underline-offset-4 hover:text-blue-900">{t("activateAccess")}</button>
+                            <button type="submit" className="text-sm font-semibold text-[var(--pg-accent)] underline decoration-[var(--pg-border)] underline-offset-4 hover:text-[var(--pg-accent-hover)]">{t("activateAccess")}</button>
                           </form>
                         )}
                         {member.status === "invited" && !member.accepted_at && (actorRole === "owner" || member.invited_by === user.id) && (
                           <form action={resendCompanyMemberInvitation}>
                             <input type="hidden" name="company_id" value={selectedCompanyId} />
                             <input type="hidden" name="membership_id" value={member.membership_id} />
-                            <button type="submit" className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-950">{t("resendInvitation")}</button>
+                            <button type="submit" className="text-sm font-semibold text-[var(--pg-text)] underline decoration-[var(--pg-border)] underline-offset-4 hover:text-[var(--pg-text)]">{t("resendInvitation")}</button>
                           </form>
                         )}
                         {member.status === "invited" && member.accepted_at && (
-                          <span className="text-xs text-slate-500">{t("confirmedOwnerActivation")}</span>
+                          <span className="text-xs text-[var(--pg-text-muted)]">{t("confirmedOwnerActivation")}</span>
                         )}
-                        {member.status !== "invited" && <span className="text-xs text-slate-400">{t("noAction")}</span>}
+                        {member.status !== "invited" && <span className="text-xs text-[var(--pg-text-muted)]">{t("noAction")}</span>}
                       </div>
                     </td>
                   </tr>
@@ -321,7 +321,7 @@ async function MembersContent({ searchParams }: { searchParams: SearchParams }) 
           </div>
         )}
       </section>
-      <footer className="mt-8 text-sm text-slate-500">{t("securityFooter")}</footer>
+      <footer className="mt-8 text-sm text-[var(--pg-text-muted)]">{t("securityFooter")}</footer>
     </main>
   );
 }

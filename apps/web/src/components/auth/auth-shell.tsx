@@ -11,8 +11,8 @@ copy:{homeLabel:string;eyebrow:string;headline:string;description:string;footer:
 return <main className="min-h-screen bg-[var(--pg-canvas)]"><div className="mx-auto grid min-h-screen w-full max-w-7xl lg:grid-cols-[minmax(0,0.9fr)_minmax(30rem,1.1fr)]">
 <aside className="flex flex-col justify-between border-b border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] px-6 py-7 sm:px-10 sm:py-9 lg:min-h-screen lg:border-b-0 lg:border-r lg:px-14 lg:py-12">
 <Link href={localePath(locale, "/login")} aria-label={copy.homeLabel} className="inline-flex w-fit items-center rounded-sm text-xl font-semibold tracking-tight text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--pg-focus)]"><BrandLogo size={34}/></Link>
-<div className="max-w-md py-8 lg:py-16"><p className="text-sm font-medium text-[var(--pg-accent)]">{copy.eyebrow}</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[var(--pg-text)] sm:text-4xl">{copy.headline}</h2><p className="mt-5 max-w-sm text-base leading-7 text-[var(--pg-text-muted)]">{copy.description}</p></div>
-<p className="text-sm text-[var(--pg-text-muted)]">{copy.footer}</p></aside>
+<div className="hidden max-w-md py-8 lg:block lg:py-16"><p className="text-sm font-medium text-[var(--pg-accent)]">{copy.eyebrow}</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[var(--pg-text)] sm:text-4xl">{copy.headline}</h2><p className="mt-5 max-w-sm text-base leading-7 text-[var(--pg-text-muted)]">{copy.description}</p></div>
+<p className="hidden text-sm text-[var(--pg-text-muted)] lg:block">{copy.footer}</p></aside>
 <section aria-labelledby="auth-title" className="flex min-h-[32rem] flex-col px-5 py-6 sm:px-10 sm:py-9">
 <div className="flex justify-end"><LocaleSwitcher locale={locale} href={route} label={copy.languageLabel}/></div>
 <div className="flex flex-1 items-center justify-center py-8"><div className="w-full max-w-md">
