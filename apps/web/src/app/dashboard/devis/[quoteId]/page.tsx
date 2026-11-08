@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
+import { isInvoiceModuleEnabled } from "@/lib/features";
 import { QuoteDraftForm } from "../quote-draft-form";
 import {
   formatQuoteCurrency,
@@ -245,9 +246,10 @@ export default async function QuoteDetailPage({
 
   const companyQuery =
     "?company=" + encodeURIComponent(workspace.company.id);
+  const invoicesEnabled = isInvoiceModuleEnabled();
   const invoiceT = await getTranslations("Invoices.FromQuote");
   let activeInvoiceDraftId: string | null = null;
-  if (quote.status === "accepted" && workspace.canInvoice) {
+  if (invoicesEnabled && quote.status === "accepted" && workspace.canInvoice) {
     const { data: draftRows, error: draftError } = await workspace.supabase
       .from("invoices")
       .select("id")
@@ -415,7 +417,7 @@ export default async function QuoteDetailPage({
         </p>
       ) : null}
 
-      {quote.status === "accepted" && workspace.canInvoice ? (
+      {invoicesEnabled && quote.status === "accepted" && workspace.canInvoice ? (
         <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">{invoiceT("title")}</h2>
           {activeInvoiceDraftId ? (
