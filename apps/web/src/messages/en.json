@@ -821,6 +821,7 @@
         "permission": "Your role does not allow you to save this draft, or it can no longer be edited.",
         "invalidData": "The data was rejected: check the customer and the amounts.",
         "save": "The draft could not be saved. Try again later.",
+        "disabled": "The invoicing module is not enabled in this environment.",
         "generic": "An error occurred. Try again later."
       }
     },
