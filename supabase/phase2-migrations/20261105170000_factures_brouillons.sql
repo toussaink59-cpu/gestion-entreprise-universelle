@@ -96,11 +96,18 @@ create table public.invoice_lines (
   created_at timestamptz not null default now(),
   unique (company_id, invoice_id, id),
   unique (company_id, invoice_id, position),
+  -- This FK must not depend on nullable source_quote_id: standalone
+  -- invoice lines still have to reference an existing invoice.
+  foreign key (company_id, invoice_id)
+    references public.invoices(company_id, id) on delete restrict,
   foreign key (company_id, invoice_id, source_quote_id)
     references public.invoices(company_id, id, source_quote_id) on delete restrict,
   foreign key (company_id, source_quote_id, source_quote_line_id)
     references public.quote_lines(company_id, quote_id, id) on delete restrict,
-  check ((source_quote_line_id is null) or (source_quote_id is not null)),
+  check (
+    (source_quote_id is null and source_quote_line_id is null)
+    or (source_quote_id is not null and source_quote_line_id is not null)
+  ),
   check (discount_amount <= base_amount),
   check (taxable_amount = base_amount - discount_amount),
   check (total_amount = taxable_amount),

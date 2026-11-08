@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isInvoiceModuleEnabled } from "@/lib/features";
+import { canReadInvoices, canWriteInvoices } from "@/lib/security/invoice-role-permissions";
 
 export type InvoiceCompany = {
   id: string;
@@ -12,16 +14,13 @@ export type InvoiceCompany = {
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-// Miroir de la matrice de rôles : invoices:read pour ces rôles, invoices:create/update
-// pour les quatre premiers. Les fonctions SQL et la RLS restent l'autorité.
-const READ_ROLES = new Set(["owner", "company_admin", "finance", "sales_purchasing", "auditor"]);
-const WRITE_ROLES = new Set(["owner", "company_admin", "finance", "sales_purchasing"]);
-
 export function isInvoiceUuid(value: string): boolean {
   return UUID_PATTERN.test(value);
 }
 
 export async function getInvoiceWorkspace(requestedCompanyId?: string) {
+  if (!isInvoiceModuleEnabled()) notFound();
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -72,7 +71,7 @@ export async function getInvoiceWorkspace(requestedCompanyId?: string) {
     companies,
     company: selectedCompany,
     roleCode,
-    canRead: READ_ROLES.has(roleCode),
-    canWrite: WRITE_ROLES.has(roleCode),
+    canRead: canReadInvoices(roleCode),
+    canWrite: canWriteInvoices(roleCode),
   };
 }

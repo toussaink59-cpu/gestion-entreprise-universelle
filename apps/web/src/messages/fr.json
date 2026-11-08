@@ -821,6 +821,7 @@
         "permission": "Ton rôle ne permet pas d’enregistrer ce brouillon, ou il n’est plus modifiable.",
         "invalidData": "Les données sont refusées : vérifie le client et les montants.",
         "save": "Le brouillon n’a pas pu être enregistré. Réessaie plus tard.",
+        "disabled": "La fonctionnalité de facturation n’est pas activée dans cet environnement.",
         "generic": "Une erreur est survenue. Réessaie plus tard."
       }
     },
