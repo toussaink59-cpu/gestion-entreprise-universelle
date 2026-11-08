@@ -14,7 +14,7 @@ const lines = [
   { description: "Prestation B", quantity: "1", unit_label: "forfait", unit_price: "5000" },
 ];
 
-const saveDraft = (who: "alice" | "bob" | "carol" | "dave" | "erin", company: string, customer: string, payload: unknown = lines, invoiceId: string | null = null) =>
+const saveDraft = (who: "alice" | "bob" | "carol" | "dave" | "erin" | "frank" | "sales", company: string, customer: string, payload: unknown = lines, invoiceId: string | null = null) =>
   asUser(t.db, who, () =>
     q<{ id: string }>(
       `select public.save_invoice_draft($1, $2, $3::jsonb, current_date, current_date + 30, $4) as id`,
@@ -36,7 +36,7 @@ async function acceptedQuote(): Promise<string> {
   return id;
 }
 
-const fromQuote = (who: "alice" | "bob" | "dave" | "erin", quote: string) =>
+const fromQuote = (who: "alice" | "bob" | "dave" | "erin" | "sales", quote: string) =>
   asUser(t.db, who, () => q<{ id: string }>(`select public.create_invoice_draft_from_quote($1) as id`, [quote]));
 
 beforeAll(async () => {
@@ -87,12 +87,17 @@ describe("Factures — brouillon autonome", () => {
     await expect(saveDraft("alice", t.companyA, customerA, [])).rejects.toThrow(/lignes/i);
   });
 
-  it("applique les permissions : finance écrit, employé refusé, auditrice en lecture seule", async () => {
-    await saveDraft("carol", t.companyA, customerA);
+  it("applique la matrice complète : propriétaire, administrateur et finance écrivent ; commercial et auditeur lisent", async () => {
+    const financeInvoice = (await saveDraft("carol", t.companyA, customerA)).rows[0].id;
+    await saveDraft("frank", t.companyA, customerA);
     await expect(saveDraft("dave", t.companyA, customerA)).rejects.toThrow(/permission/i);
     await expect(saveDraft("erin", t.companyA, customerA)).rejects.toThrow(/permission/i);
-    const seen = await asUser(t.db, "erin", () => q(`select id from public.invoices where company_id = $1`, [t.companyA]));
-    expect(seen.rows.length).toBeGreaterThan(0);
+    await expect(saveDraft("sales", t.companyA, customerA)).rejects.toThrow(/permission/i);
+    await expect(saveDraft("sales", t.companyA, customerA, lines, financeInvoice)).rejects.toThrow(/permission/i);
+    const seenByAuditor = await asUser(t.db, "erin", () => q(`select id from public.invoices where company_id = $1`, [t.companyA]));
+    expect(seenByAuditor.rows.length).toBeGreaterThan(0);
+    const seenBySales = await asUser(t.db, "sales", () => q(`select id from public.invoices where company_id = $1`, [t.companyA]));
+    expect(seenBySales.rows.length).toBeGreaterThan(0);
     const hidden = await asUser(t.db, "dave", () => q(`select id from public.invoices where company_id = $1`, [t.companyA]));
     expect(hidden.rows).toHaveLength(0);
   });
@@ -159,6 +164,17 @@ describe("Factures — brouillon depuis un devis accepté", () => {
     const quote = await acceptedQuote();
     const id = (await fromQuote("alice", quote)).rows[0].id;
     await expect(saveDraft("alice", t.companyA, customerA, lines, id)).rejects.toThrow(/non modifiable/i);
+  });
+
+  it("refuse une ligne orpheline même lorsque source_quote_id est NULL", async () => {
+    await expect(
+      q(`insert into public.invoice_lines (
+        company_id, invoice_id, position, description, quantity, unit_label,
+        unit_price, base_amount, discount_amount, taxable_amount, total_amount
+      ) values ($1, $2, 1, 'Ligne orpheline', 1, 'unité', 0, 0, 0, 0, 0)`, [
+        t.companyA, "99999999-9999-4999-8999-999999999999",
+      ]),
+    ).rejects.toThrow(/foreign key/i);
   });
 
   it("impossible de rattacher une facture au devis d'un autre client", async () => {
