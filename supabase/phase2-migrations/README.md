@@ -11,7 +11,7 @@ Les fichiers SQL de ce dossier sont des évolutions métier postérieures à la 
 
 ## Contenu actuel
 
-- `20261105170000_factures_brouillons.sql` : fondation serveur des factures brouillons. Elle ne réalise aucune émission légale, numérotation fiscale, taxation ou règlement. Non appliquée sur Supabase hébergé. Il n'existe pas d'environnement de pré-production : sauvegarder la production avant toute migration.
+- `20261105170000_factures_brouillons.sql` : fondation serveur des factures brouillons. Elle ne réalise aucune émission légale, numérotation fiscale, taxation ou règlement. Non appliquée sur Supabase hébergé. Il n'existe pas d'environnement de pré-production : sauvegarder la production avant toute migration. L'interface reste masquée par défaut (`POLYGEST_INVOICES_ENABLED=false`) ; n'activer ce paramètre qu'après migration validée et tests de fumée réussis dans l'environnement cible.
 
 ## Règle d'historique
 
