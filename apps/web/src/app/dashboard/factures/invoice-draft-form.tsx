@@ -76,7 +76,7 @@ export function InvoiceDraftForm({
   const update = (key: string, changes: Partial<Line>) =>
     setLines((current) => current.map((line) => (line.key === key ? { ...line, ...changes } : line)));
 
-  const errorKeys = ["context", "fields", "lines", "session", "permission", "invalidData", "save"];
+  const errorKeys = ["context", "fields", "lines", "session", "permission", "invalidData", "save", "disabled"];
   const errorMessage = state.error
     ? errorKeys.includes(state.error)
       ? t("errors." + state.error)
