@@ -16,6 +16,7 @@ export const ids = {
   dave: randomUUID(), // employé dans A
   erin: randomUUID(), // auditrice dans A
   frank: randomUUID(), // administrateur d'entreprise dans A
+  sales: randomUUID(), // commercial en lecture seule sur les factures
   mallory: randomUUID(), // sans entreprise
 } as const
 
@@ -163,6 +164,7 @@ export async function seed(db: SqlClient): Promise<TestDb> {
     ['dave', 'employee'],
     ['erin', 'auditor'],
     ['frank', 'company_admin'],
+    ['sales', 'sales_purchasing'],
   ] as const) {
     const email = `${who}-${ids[who].slice(0, 8)}@example.test`
     const tokenHash = randomBytes(32).toString('hex')
