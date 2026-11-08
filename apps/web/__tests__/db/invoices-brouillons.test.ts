@@ -94,6 +94,8 @@ describe("Factures — brouillon autonome", () => {
     await expect(saveDraft("erin", t.companyA, customerA)).rejects.toThrow(/permission/i);
     await expect(saveDraft("sales", t.companyA, customerA)).rejects.toThrow(/permission/i);
     await expect(saveDraft("sales", t.companyA, customerA, lines, financeInvoice)).rejects.toThrow(/permission/i);
+    const accepted = await acceptedQuote();
+    await expect(fromQuote("sales", accepted)).rejects.toThrow(/permission/i);
     const seenByAuditor = await asUser(t.db, "erin", () => q(`select id from public.invoices where company_id = $1`, [t.companyA]));
     expect(seenByAuditor.rows.length).toBeGreaterThan(0);
     const seenBySales = await asUser(t.db, "sales", () => q(`select id from public.invoices where company_id = $1`, [t.companyA]));
