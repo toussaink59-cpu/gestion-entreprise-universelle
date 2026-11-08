@@ -11,13 +11,13 @@ Les fichiers SQL de ce dossier sont des évolutions métier postérieures à la 
 
 ## Contenu actuel
 
-- `20261105170000_factures_brouillons.sql` : fondation serveur des factures brouillons. Elle ne réalise aucune émission légale, numérotation fiscale, taxation ou règlement. Non appliquée sur Supabase hébergé.
+- `20261105170000_factures_brouillons.sql` : fondation serveur des factures brouillons. Elle ne réalise aucune émission légale, numérotation fiscale, taxation ou règlement. Non appliquée sur Supabase hébergé. Il n'existe pas d'environnement de pré-production : sauvegarder la production avant toute migration.
 
 ## Règle d'historique
 
 Une migration appliquée sur une base hébergée ne change plus de dossier : le CLI Supabase compare `supabase/migrations/` à l'historique distant, et un écart bloque `db push`.
 
-Relevé en lecture seule au 8 novembre 2026 des deux projets Supabase (`gestion-entreprise-universelle-dev` et `gestion-entreprise-universelle`) : les mêmes 18 migrations y sont enregistrées, dont les cinq migrations devis/dépenses (`20261104130000`, `20261104140000`, `20261105090000`, `20261105100000`, `20261105110000`). Ces cinq fichiers sont donc dans `supabase/migrations/`, identiques à l'historique distant. Les déplacer puis les rejouer échouerait, car leurs objets existent déjà.
+Relevé en lecture seule au 8 novembre 2026 des deux projets Supabase : `gestion-entreprise-universelle` (**production** de l'application) et `gestion-entreprise-universelle-dev` (projet de test). Les mêmes 18 migrations y sont enregistrées, dont les cinq migrations devis/dépenses (`20261104130000`, `20261104140000`, `20261105090000`, `20261105100000`, `20261105110000`). Ces cinq fichiers sont donc dans `supabase/migrations/`, identiques à l'historique distant. Les déplacer puis les rejouer échouerait, car leurs objets existent déjà.
 
 Ce dossier ne contient que ce qui n'est pas encore appliqué sur Supabase hébergé.
 
