@@ -18,8 +18,13 @@ Les fichiers SQL de ce dossier sont des évolutions métier postérieures à la 
 - `20261105110000_devis_reponse_client.sql` : réponse client aux devis.
 - `20261105170000_factures_brouillons.sql` : fondation serveur des factures brouillons. Elle ne réalise aucune émission légale, numérotation fiscale, taxation ou règlement.
 
-## Environnements déjà migrés
+## État constaté sur Supabase hébergé (8 novembre 2026)
 
-Ces fichiers ont d'abord été placés dans `supabase/migrations/`. Si une base (par exemple le projet Supabase de développement) les a déjà appliqués, son historique les contient et le déplacement du fichier ne change rien à cette base. Vérifier l'historique avec `supabase migration list` avant toute nouvelle livraison, et ne pas rejouer ces fichiers sur une base qui les a déjà reçus.
+Relevé en lecture seule de l'historique des migrations des deux projets Supabase (`gestion-entreprise-universelle-dev` et `gestion-entreprise-universelle`) : les 18 mêmes versions y sont enregistrées, y compris les cinq migrations devis/dépenses de ce dossier (`20261104130000`, `20261104140000`, `20261105090000`, `20261105100000`, `20261105110000`). La migration `20261105170000_factures_brouillons.sql` n'y est pas appliquée.
+
+Conséquences :
+
+- Ne jamais rejouer ces cinq fichiers sur ces projets : leurs objets existent déjà.
+- Ces fichiers ne sont plus dans `supabase/migrations/` alors que l'historique distant les contient. Le CLI Supabase peut donc refuser `supabase db push` (versions distantes absentes du dossier local). Décider de la marche à suivre (réparation de l'historique ou retour des fichiers) avant le prochain déploiement.
 
 Aucune migration de ce dossier ne doit être envoyée en production par automatisme.
