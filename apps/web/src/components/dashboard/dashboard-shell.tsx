@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 
-type DashboardShellProps = { children: ReactNode };
+type DashboardShellProps = { children: ReactNode; invoicesEnabled: boolean };
 
 const navigation = [
   { href: "/dashboard", key: "overview", exact: true },
@@ -18,9 +18,12 @@ const navigation = [
   { href: "/dashboard/membres", key: "members", exact: false },
 ] as const;
 
-export function DashboardShell({ children }: DashboardShellProps) {
+export function DashboardShell({ children, invoicesEnabled }: DashboardShellProps) {
   const pathname = usePathname();
   const t = useTranslations("Dashboard.Navigation");
+  const visibleNavigation = invoicesEnabled
+    ? navigation
+    : navigation.filter((item) => item.key !== "invoices");
 
   return (
     <div className="min-h-screen bg-[var(--pg-canvas)] text-[var(--pg-text)]">
@@ -30,7 +33,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
         </div>
         <nav aria-label={t("ariaLabel")} className="flex-1 space-y-1 px-3 py-6">
           <p className="mb-3 px-3 text-xs font-medium text-[var(--pg-text-muted)]">{t("workspace")}</p>
-          {navigation.map((item) => {
+          {visibleNavigation.map((item) => {
             const active = item.exact
               ? pathname === item.href
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -53,7 +56,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             <Link href="/dashboard" className="font-semibold tracking-tight text-[var(--pg-text)]"><BrandLogo size={26}/></Link>
           </div>
           <nav aria-label={t("ariaLabel")} className="flex gap-1 overflow-x-auto px-3 pb-3">
-            {navigation.map((item) => {
+            {visibleNavigation.map((item) => {
               const active = item.exact
                 ? pathname === item.href
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
