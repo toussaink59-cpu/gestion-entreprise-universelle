@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { isInvoiceModuleEnabled } from "@/lib/features";
 
 export const instant = false;
 
@@ -46,6 +47,7 @@ export default async function DashboardPage() {
 async function DashboardContent() {
   await connection();
   const t = await getTranslations("Dashboard.Home");
+  const invoicesEnabled = isInvoiceModuleEnabled();
   const supabase = await createClient();
   const {
     data: { user },
@@ -114,7 +116,7 @@ async function DashboardContent() {
             const [quotesSent, quotesDraft, invoicesDraft, expensesDraft, customers, suppliers] = await Promise.all([
               canReadBusiness ? countOf("quotes", "sent") : Promise.resolve(null),
               canReadBusiness ? countOf("quotes", "draft") : Promise.resolve(null),
-              canReadBusiness ? countOf("invoices", "draft") : Promise.resolve(null),
+              invoicesEnabled && canReadBusiness ? countOf("invoices", "draft") : Promise.resolve(null),
               canReadBusiness ? countOf("expenses", "draft") : Promise.resolve(null),
               previews("customers"),
               previews("suppliers"),
@@ -126,9 +128,11 @@ async function DashboardContent() {
               work: [
                 { key: "quotesSent", tally: quotesSent, href: "/dashboard/devis" },
                 { key: "quotesDraft", tally: quotesDraft, href: "/dashboard/devis" },
-                { key: "invoicesDraft", tally: invoicesDraft, href: "/dashboard/factures" },
+                ...(invoicesEnabled
+                  ? [{ key: "invoicesDraft" as const, tally: invoicesDraft, href: "/dashboard/factures" }]
+                  : []),
                 { key: "expensesDraft", tally: expensesDraft, href: "/dashboard/depenses" },
-              ] as const,
+              ],
               customers,
               suppliers,
             };
