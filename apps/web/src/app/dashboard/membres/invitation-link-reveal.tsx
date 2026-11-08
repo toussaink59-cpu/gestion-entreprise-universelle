@@ -18,9 +18,9 @@ export function InvitationLinkReveal() {
   if (!link) return null;
 
   return (
-    <section role="region" aria-label={t("linkRegion")} className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
+    <section role="region" aria-label={t("linkRegion")} className="mb-5 rounded-lg border border-[#EADFC0] bg-[#F8F4EA] p-4 text-[#76571F]">
       <p className="text-sm font-semibold">{t("linkTitle")}</p>
-      <input readOnly value={link} aria-label={t("copyLinkAria")} onFocus={(event) => event.currentTarget.select()} className="mt-2 block w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-slate-900" />
+      <input readOnly value={link} aria-label={t("copyLinkAria")} onFocus={(event) => event.currentTarget.select()} className="mt-2 block w-full rounded-lg border border-[#EADFC0] bg-[var(--pg-surface)] px-3 py-2 text-sm text-[var(--pg-text)]" />
       <p className="mt-2 text-xs">{t("linkInstructions")}</p>
     </section>
   );

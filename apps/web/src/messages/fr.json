@@ -3,8 +3,8 @@
     "Shell": {
       "homeLabel": "PolyGest, accueil de connexion",
       "eyebrow": "Gestion d’entreprise",
-      "headline": "Un espace de travail clair pour piloter votre activité.",
-      "description": "Retrouvez vos espaces d’entreprise et les outils de gestion associés à votre compte, avec des accès organisés par entreprise.",
+      "headline": "Un espace de travail clair pour piloter ton activité.",
+      "description": "Retrouve tes espaces d’entreprise et les outils de gestion associés à ton compte, avec des accès organisés par entreprise.",
       "footer": "PolyGest · Pour les entrepreneurs et les équipes.",
       "languageLabel": "Choisir la langue"
     },
@@ -121,8 +121,8 @@
     "languageLabel": "Choisir la langue"
   },
   "WorkspaceNotice": {
-    "title": "Votre espace de travail est prêt",
-    "description": "Votre préférence linguistique est enregistrée. Les parcours actuellement disponibles s’affichent dans la langue choisie. Vous pouvez la modifier à tout moment.",
+    "title": "Ton espace de travail est prêt",
+    "description": "Ta préférence linguistique est enregistrée. Les parcours actuellement disponibles s’affichent dans la langue choisie. Tu peux la modifier à tout moment.",
     "continue": "Continuer vers l’espace de travail",
     "languageLabel": "Choisir la langue"
   },
@@ -143,7 +143,7 @@
       "eyebrow": "PolyGest · Espace de travail",
       "title": "Tableau de bord",
       "loadingEyebrow": "PolyGest",
-      "loadingDescription": "Chargement de vos espaces de travail…",
+      "loadingDescription": "Chargement de tes espaces de travail…",
       "loadingLabel": "Chargement du tableau de bord",
       "welcome": "Bienvenue.",
       "welcomeNamed": "Bienvenue, {name}.",
@@ -154,7 +154,7 @@
       "myCompanies": "Mes entreprises",
       "directoryDescription": "Chaque entreprise dispose de ses propres répertoires clients et fournisseurs.",
       "membershipError": "Impossible de charger les appartenances à l’entreprise.",
-      "membershipErrorHelp": "Vérifie le schéma et les politiques d’accès Supabase.",
+      "membershipErrorHelp": "Réessaie plus tard ou contacte l’administrateur si le problème persiste.",
       "companiesError": "Impossible de charger les informations des entreprises.",
       "noCompaniesTitle": "Aucune entreprise accessible",
       "noCompaniesDescription": "Crée une entreprise ou demande à son propriétaire de t’inviter pour commencer.",
@@ -168,7 +168,17 @@
       "previewError": "Impossible de charger les fiches de ce répertoire.",
       "customerEmpty": "Aucune fiche client active visible pour cette entreprise.",
       "supplierEmpty": "Aucune fiche fournisseur active visible pour cette entreprise.",
-      "openDirectory": "Ouvrir le répertoire"
+      "openDirectory": "Ouvrir le répertoire",
+      "workTitle": "À traiter",
+      "countUnavailable": "Indisponible",
+      "openCustomers": "Voir les clients",
+      "openSuppliers": "Voir les fournisseurs",
+      "work": {
+        "quotesSent": "Devis transmis en attente de réponse",
+        "quotesDraft": "Brouillons de devis",
+        "invoicesDraft": "Brouillons de factures",
+        "expensesDraft": "Brouillons de dépenses"
+      }
     }
   },
   "Contacts": {

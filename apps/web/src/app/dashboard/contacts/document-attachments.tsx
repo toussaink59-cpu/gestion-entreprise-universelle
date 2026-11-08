@@ -215,7 +215,7 @@ export function DocumentAttachments({
     <div className="min-w-48">
       <button
         type="button"
-        className="text-sm font-semibold text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-slate-900"
+        className="text-sm font-semibold text-[var(--pg-text)] underline decoration-[var(--pg-border)] underline-offset-4 hover:text-[var(--pg-text)]"
         aria-expanded={open}
         aria-controls={`documents-${entityId}`}
         onClick={togglePanel}
@@ -227,44 +227,44 @@ export function DocumentAttachments({
         <section
           id={`documents-${entityId}`}
           aria-label={t("ariaLabel")}
-          className="mt-3 w-[min(24rem,calc(100vw-3rem))] rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+          className="mt-3 w-[min(24rem,calc(100vw-3rem))] rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4"
         >
-          <h3 className="text-sm font-semibold text-slate-900">{t("title")}</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-600">
+          <h3 className="text-sm font-semibold text-[var(--pg-text)]">{t("title")}</h3>
+          <p className="mt-1 text-xs leading-5 text-[var(--pg-text-muted)]">
             {t("privacy")}
           </p>
 
           {canUpload && scannerEnabled && (
             <form onSubmit={submitUpload} className="mt-4 space-y-3">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-xs font-medium text-[var(--pg-text)]">
                 {t("addFile")}
                 <input
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
                   onChange={(event) => setSelectedFile(event.currentTarget.files?.[0] ?? null)}
-                  className="mt-2 block w-full text-xs text-slate-700 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-200"
+                  className="mt-2 block w-full text-xs text-[var(--pg-text)] file:mr-3 file:rounded-md file:border-0 file:bg-[var(--pg-surface-subtle)] file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[var(--pg-text)] hover:file:bg-[var(--pg-border)]"
                 />
               </label>
               {selectedFile && (
-                <p className="break-all text-xs text-slate-500">
+                <p className="break-all text-xs text-[var(--pg-text-muted)]">
                   {selectedFile.name} · {formatFileSize(selectedFile.size)}
                 </p>
               )}
               <button
                 type="submit"
                 disabled={!selectedFile || uploading}
-                className="inline-flex min-h-10 items-center rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-10 items-center rounded-lg bg-[var(--pg-accent)] px-3 py-2 text-xs font-semibold text-white hover:bg-[var(--pg-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {uploading ? t("uploadingFile") : t("uploadFile")}
               </button>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[var(--pg-text-muted)]">
                 {t("allowedTypes")}
               </p>
             </form>
           )}
 
           {!scannerEnabled && (
-            <p role="status" className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+            <p role="status" className="mt-4 rounded-md border border-[#EADFC0] bg-[#F8F4EA] p-3 text-xs leading-5 text-[#76571F]">
               {t("scannerDisabled")}
             </p>
           )}
@@ -272,24 +272,24 @@ export function DocumentAttachments({
           {message && (
             <p
               role={messageIsError ? "alert" : "status"}
-              className={messageIsError ? "mt-3 text-xs text-red-700" : "mt-3 text-xs text-emerald-700"}
+              className={messageIsError ? "mt-3 text-xs text-[#963F3F]" : "mt-3 text-xs text-[#285C45]"}
             >
               {message}
             </p>
           )}
 
-          <div className="mt-4 border-t border-slate-100 pt-3">
-            <h4 className="text-xs font-semibold text-slate-700">{t("storedFiles")}</h4>
+          <div className="mt-4 border-t border-[var(--pg-border)] pt-3">
+            <h4 className="text-xs font-semibold text-[var(--pg-text)]">{t("storedFiles")}</h4>
             {loading ? (
-              <p role="status" className="mt-2 text-xs text-slate-500">{t("loading")}</p>
+              <p role="status" className="mt-2 text-xs text-[var(--pg-text-muted)]">{t("loading")}</p>
             ) : documents.length === 0 ? (
-              <p className="mt-2 text-xs text-slate-500">{t("empty")}</p>
+              <p className="mt-2 text-xs text-[var(--pg-text-muted)]">{t("empty")}</p>
             ) : (
-              <ul className="mt-2 divide-y divide-slate-100">
+              <ul className="mt-2 divide-y border-[var(--pg-border)]">
                 {documents.map((document) => (
                   <li key={document.id} className="py-2">
-                    <p className="break-all text-xs font-medium text-slate-800">{document.original_name}</p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="break-all text-xs font-medium text-[var(--pg-text)]">{document.original_name}</p>
+                    <p className="mt-1 text-xs text-[var(--pg-text-muted)]">
                       {formatFileSize(document.byte_size)} · {statusLabel(document.scan_status)}
                     </p>
                     {document.scan_status === "available" && (
@@ -297,7 +297,7 @@ export function DocumentAttachments({
                         href={`/api/documents/${encodeURIComponent(document.id)}/download`}
                         target="_blank"
                         rel="noreferrer"
-                        className="mt-1 inline-block text-xs font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+                        className="mt-1 inline-block text-xs font-semibold text-[var(--pg-accent)] underline underline-offset-2 hover:text-[var(--pg-accent-hover)]"
                       >
                         {t("download")}
                       </a>
