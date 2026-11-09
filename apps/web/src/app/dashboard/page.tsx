@@ -213,7 +213,7 @@ async function DashboardContent() {
                 </div>
               ) : null}
 
-{canReadBusiness ? (
+              {canReadBusiness ? (
                 <div className="mt-8 grid gap-8 lg:grid-cols-2">
                   <DirectoryPreview
                     title={t("customerDirectory")}
