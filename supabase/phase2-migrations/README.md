@@ -1,24 +1,35 @@
-# Migrations Phase 2 — hors déploiement Phase 1
+# Phase 2 — migrations en préparation
 
-Les fichiers SQL de ce dossier sont des évolutions métier postérieures à la fondation Phase 1.
+Ce dossier documente les règles de préparation des évolutions de la Phase 2. Les migrations destinées à être livrées sont générées directement dans `supabase/migrations/`.
 
-## Règles de déploiement
+## Règles de sécurité et de livraison
 
-- **Ne pas appliquer ce dossier à la production pendant la clôture de la Phase 1.**
-- Le CLI Supabase déploie les migrations placées dans `supabase/migrations/`. Ce dossier séparé n'est donc pas inclus dans un `supabase db push` standard.
-- Les tests automatisés chargent les migrations Phase 1 puis celles de ce dossier sur des bases jetables, afin de conserver la couverture des fonctionnalités déjà développées.
-- Pour livrer une évolution Phase 2, revoir sa conformité métier, ses permissions, ses tests et son plan de données. Créer alors une nouvelle migration avec `supabase migration new <nom_descriptif>` afin d'obtenir un horodatage postérieur aux migrations déjà livrées en Phase 1, y transférer le SQL approuvé, puis retirer le fichier de test de ce dossier. Exécuter les contrôles DEV avant toute mise en production.
+- La branche `main` reste la référence de production.
+- Toute évolution Phase 2 doit passer par une Pull Request et les contrôles CI requis.
+- Créer chaque migration avec `npx supabase@3.0.0 migration new <nom_descriptif>`.
+- Ne jamais modifier ou déplacer une migration déjà appliquée sur une base hébergée.
+- Conserver les tests sur des bases locales jetables.
+- Ne jamais exécuter `supabase db push` sur DEV ou Production sans autorisation explicite.
+- Ne pas activer une fonctionnalité avant sa validation sur l'environnement cible.
 
-## Contenu actuel
+## Factures brouillons — premier lot
 
-- `20261105170000_factures_brouillons.sql` : fondation serveur des factures brouillons. Elle ne réalise aucune émission légale, numérotation fiscale, taxation ou règlement. Non appliquée sur Supabase hébergé. Il n'existe pas d'environnement de pré-production : sauvegarder la production avant toute migration. L'interface reste masquée par défaut (`POLYGEST_INVOICES_ENABLED=false`) ; n'activer ce paramètre qu'après migration validée et tests de fumée réussis dans l'environnement cible.
+La migration `20261109161232_factures_brouillons.sql` se trouve désormais dans `supabase/migrations/`.
 
-## Règle d'historique
+Elle constitue la fondation serveur des factures brouillons. Elle ne met en œuvre aucune émission légale, numérotation fiscale, taxation ou règlement.
 
-Une migration appliquée sur une base hébergée ne change plus de dossier : le CLI Supabase compare `supabase/migrations/` à l'historique distant, et un écart bloque `db push`.
+La migration est en cours de revue et de validation locale. Elle n'a pas été appliquée aux projets Supabase hébergés.
 
-Relevé en lecture seule au 8 novembre 2026 des deux projets Supabase : `gestion-entreprise-universelle` (**production** de l'application) et `gestion-entreprise-universelle-dev` (projet de test). Les mêmes 18 migrations y sont enregistrées, dont les cinq migrations devis/dépenses (`20261104130000`, `20261104140000`, `20261105090000`, `20261105100000`, `20261105110000`). Ces cinq fichiers sont donc dans `supabase/migrations/`, identiques à l'historique distant. Les déplacer puis les rejouer échouerait, car leurs objets existent déjà.
+L'interface reste désactivée par défaut (`POLYGEST_INVOICES_ENABLED=false`). Ne pas activer cette fonctionnalité avant validation de la migration et tests de fumée sur l'environnement cible.
 
-Ce dossier ne contient que ce qui n'est pas encore appliqué sur Supabase hébergé.
+## Documents
 
-Aucune migration de ce dossier ne doit être envoyée en production par automatisme.
+Le verrouillage serveur des documents reste en vigueur. Ne pas activer `DOCUMENT_SCANNER_ENABLED` et ne pas rétablir les opérations d'envoi tant que le dispositif de scan n'est pas disponible et validé.
+
+## Historique des environnements hébergés
+
+Au relevé du 8 novembre 2026, les projets Supabase Production (`gestion-entreprise-universelle`) et DEV (`gestion-entreprise-universelle-dev`) avaient les mêmes 18 migrations Phase 1 enregistrées.
+
+Les migrations déjà appliquées sur ces projets ne doivent pas être déplacées ni rejouées. Toute nouvelle migration doit conserver un horodatage postérieur à l'historique existant.
+
+La présence d'une migration dans `supabase/migrations/` n'autorise pas son déploiement sur un projet hébergé.

@@ -136,7 +136,7 @@ create index invoice_lines_company_source_quote_line_idx
 alter table public.invoices enable row level security;
 alter table public.invoice_lines enable row level security;
 
-revoke all on table public.invoices, public.invoice_lines from public, anon, authenticated;
+revoke all on table public.invoices, public.invoice_lines from public, anon, authenticated, service_role;
 grant select on table public.invoices, public.invoice_lines to authenticated;
 
 create policy invoices_select
@@ -195,7 +195,7 @@ end;
 $$;
 
 revoke all on function app.invoice_line_amounts(numeric, numeric, text, numeric, integer)
-  from public, anon, authenticated;
+  from public, anon, authenticated, service_role;
 
 -- ---------------------------------------------------------------------------
 -- Brouillon autonome : création et modification.
@@ -407,7 +407,7 @@ end;
 $$;
 
 revoke all on function public.save_invoice_draft(uuid, uuid, jsonb, date, date, uuid, text, text, text)
-  from public, anon;
+  from public, anon, authenticated, service_role;
 grant execute on function public.save_invoice_draft(uuid, uuid, jsonb, date, date, uuid, text, text, text)
   to authenticated;
 
@@ -527,7 +527,7 @@ end;
 $$;
 
 revoke all on function public.create_invoice_draft_from_quote(uuid, date, date)
-  from public, anon;
+  from public, anon, authenticated, service_role;
 grant execute on function public.create_invoice_draft_from_quote(uuid, date, date)
   to authenticated;
 
@@ -587,5 +587,5 @@ begin
 end;
 $$;
 
-revoke all on function public.abandon_invoice_draft(uuid, text) from public, anon;
+revoke all on function public.abandon_invoice_draft(uuid, text) from public, anon, authenticated, service_role;
 grant execute on function public.abandon_invoice_draft(uuid, text) to authenticated;
