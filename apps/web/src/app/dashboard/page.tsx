@@ -8,11 +8,10 @@ import { signOut } from "@/app/auth/actions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { isInvoiceModuleEnabled } from "@/lib/features";
+import { canReadBusinessDashboard } from "@/lib/security/dashboard-role-permissions";
 
 export const instant = false;
 
-// Rôles pouvant consulter devis, factures et dépenses (miroir de la matrice ; la RLS reste l'autorité).
-const BUSINESS_READ_ROLES = new Set(["owner", "company_admin", "finance", "sales_purchasing", "auditor"]);
 const MEMBER_ADMIN_ROLES = new Set(["owner", "company_admin"]);
 
 type ContactPreview = { id: string; name: string; contact_name: string | null; email: string | null; phone: string | null };
@@ -89,7 +88,7 @@ async function DashboardContent() {
       ? await Promise.all(
           companies.map(async (company) => {
             const role = String((memberships ?? []).find((item) => item.company_id === company.id)?.role_code ?? "");
-            const canReadBusiness = BUSINESS_READ_ROLES.has(role);
+            const canReadBusiness = canReadBusinessDashboard(role);
             const countOf = async (table: string, status: string): Promise<Tally> => {
               const { count, error } = await supabase
                 .from(table)
@@ -118,8 +117,12 @@ async function DashboardContent() {
               canReadBusiness ? countOf("quotes", "draft") : Promise.resolve(null),
               invoicesEnabled && canReadBusiness ? countOf("invoices", "draft") : Promise.resolve(null),
               canReadBusiness ? countOf("expenses", "draft") : Promise.resolve(null),
-              previews("customers"),
-              previews("suppliers"),
+              canReadBusiness
+                ? previews("customers")
+                : Promise.resolve({ rows: [] as ContactPreview[], failed: false }),
+              canReadBusiness
+                ? previews("suppliers")
+                : Promise.resolve({ rows: [] as ContactPreview[], failed: false }),
             ]);
             return {
               company,
@@ -210,28 +213,30 @@ async function DashboardContent() {
                 </div>
               ) : null}
 
-              <div className="mt-8 grid gap-8 lg:grid-cols-2">
-                <DirectoryPreview
-                  title={t("customerDirectory")}
-                  rows={customers.rows}
-                  failed={customers.failed}
-                  empty={t("customerEmpty")}
-                  failedLabel={t("previewError")}
-                  open={t("openCustomers")}
-                  href={"/dashboard/clients" + query}
-                  note={t("recentCount", { count: 5 })}
-                />
-                <DirectoryPreview
-                  title={t("supplierDirectory")}
-                  rows={suppliers.rows}
-                  failed={suppliers.failed}
-                  empty={t("supplierEmpty")}
-                  failedLabel={t("previewError")}
-                  open={t("openSuppliers")}
-                  href={"/dashboard/fournisseurs" + query}
-                  note={t("recentCount", { count: 5 })}
-                />
-              </div>
+              {canReadBusiness ? (
+                <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                  <DirectoryPreview
+                    title={t("customerDirectory")}
+                    rows={customers.rows}
+                    failed={customers.failed}
+                    empty={t("customerEmpty")}
+                    failedLabel={t("previewError")}
+                    open={t("openCustomers")}
+                    href={"/dashboard/clients" + query}
+                    note={t("recentCount", { count: 5 })}
+                  />
+                  <DirectoryPreview
+                    title={t("supplierDirectory")}
+                    rows={suppliers.rows}
+                    failed={suppliers.failed}
+                    empty={t("supplierEmpty")}
+                    failedLabel={t("previewError")}
+                    open={t("openSuppliers")}
+                    href={"/dashboard/fournisseurs" + query}
+                    note={t("recentCount", { count: 5 })}
+                  />
+                </div>
+              ) : null}
             </section>
           );
         })}
