@@ -1,7 +1,7 @@
 # Feuille de route PolyGest
 
 **Référence fonctionnelle :** cahier des charges v0.1 du 19 octobre 2026, complété par l’avenant n°1 v0.2 du 5 novembre 2026.  
-**Mise à jour :** 6 novembre 2026.
+**Mise à jour :** 9 novembre 2026.
 
 Cette feuille de route traduit le cahier des charges applicable (v0.1 + avenant v0.2) en phases de réalisation. En cas de divergence, le cahier des charges consolidé prévaut. Toute évolution du périmètre doit être documentée et approuvée dans une nouvelle version ou un nouvel avenant.
 
@@ -12,12 +12,12 @@ Une priorité **P0** signifie qu’une capacité appartient au MVP ; elle ne sig
 D’après les éléments de suivi actuellement consignés dans le dépôt :
 
 - **Phase 0 — Cadrage :** cahier des charges v0.1 complété par l’avenant international v0.2 ; la région d'hébergement et les marchés réglementaires ultérieurs restent à arbitrer.
-- **Phase 1 — Fondation :** en consolidation, non clôturée. L’authentification, le multi-entreprises, les rôles, les invitations et les fondations i18n FR/EN sont en grande partie intégrés et couverts par les contrôles locaux. La CI et le déploiement Vercel Production sont verts sur `main` au 6 novembre. Restent notamment le scanner antivirus et le nettoyage des dépôts abandonnés, la validation Supabase hébergée non productive, la stratégie opérationnelle de sauvegarde/restauration et la preuve d’un environnement Preview/staging distinct.
-- **Phase 2 — Gestion quotidienne :** répertoires clients/fournisseurs et premier flux de devis présents ; les devis permettent transmission, réponse client et annulation contrôlée. Les factures existent au stade brouillon côté serveur uniquement (autonomes ou issues d’un devis accepté, avec une interface FR/EN de liste, création, modification (brouillons autonomes), consultation et abandon ; sans numéro, taxe ni émission, en attente de validation fiscale). Les règlements, dépenses validées, trésorerie, budgets et exports restent à réaliser ou à valider selon l’état réel du code.
+- **Phase 1 — Fondation :** clôturée le 9 novembre 2026 comme socle technique accepté. Les parcours principaux ont été vérifiés par le propriétaire en production ; la CI requise et le déploiement de référence sont documentés ; la branche `main` est protégée avec les deux contrôles obligatoires. La base Production est saine et ses migrations de Phase 1 sont synchronisées. La clôture conserve des réserves explicites : pas de scanner antivirus (documents toujours fermés), pas d’environnement de préproduction autonome, RPO/RTO à formaliser, avertissements Supabase à suivre et protection native des mots de passe compromis indisponible sur l’offre Free.
+- **Phase 2 — Gestion quotidienne :** ouverte le 9 novembre 2026. Les répertoires clients/fournisseurs, le flux de devis et le code du module Factures brouillons sont présents. Le SQL Factures reste isolé dans `supabase/phase2-migrations/`, non appliqué sur les projets Supabase hébergés ; l’interface, les routes et les actions serveur restent fermées par `POLYGEST_INVOICES_ENABLED`. Le premier lot consiste à auditer, tester sur base jetable puis DEV, et valider le parcours brouillon avant toute activation. Les règlements, dépenses validées, trésorerie, budgets et exports restent à réaliser ou valider selon le code et les critères d’acceptation.
 - **Phase 3 — Personnel et paie de base :** non déclarée terminée ; elle fait partie du MVP P0.
 - **Phases 4 et suivantes :** extensions et stabilisation selon les priorités du cahier des charges.
 
-Cet état est un relevé documentaire, pas une nouvelle preuve d’exécution des workflows ou des tests. Chaque statut devra être actualisé à partir de résultats vérifiables.
+Cet état est un relevé actualisé à partir des contrôles disponibles le 9 novembre 2026 et des vérifications manuelles rapportées par le propriétaire. Le procès-verbal de clôture distingue explicitement les contrôles automatisés, les contrôles en lecture seule et les tests manuels. Chaque nouveau statut Phase 2 devra rester relié à des résultats vérifiables.
 
 ## 2. Phase 0 — Cadrage et décisions
 
@@ -30,7 +30,7 @@ Cet état est un relevé documentaire, pas une nouvelle preuve d’exécution de
 
 **Livrable :** cadrage versionné, décisions consignées, backlog priorisé et critères d’acceptation.
 
-## 3. Phase 1 — Fondation technique et multi-entreprises
+## 3. Phase 1 — Fondation technique et multi-entreprises — clôturée le 9 novembre 2026
 
 - Stabiliser l’application Next.js / TypeScript et les environnements développement, préproduction et production.
 - Mettre en place l’authentification, les profils, la création d’entreprise et l’invitation des membres.
@@ -41,7 +41,7 @@ Cet état est un relevé documentaire, pas une nouvelle preuve d’exécution de
 - Sécuriser les fichiers privés, les secrets et les configurations.
 - Vérifier la CI, les dépendances et les procédures de sauvegarde/restauration.
 
-**Critères de sortie :** contrôles d’accès positifs et négatifs réussis, isolation interentreprises démontrée, CI verte, restauration testée et décisions de sécurité documentées. Aucune migration ne doit être appliquée en production sans sauvegarde, plan de retour arrière et validation de l’environnement cible.
+**Critères de sortie atteints pour la clôture de la fondation :** matrice d’accès et isolation interentreprises couvertes par les tests de base ; CI requise vérifiée ; branche `main` protégée ; sauvegarde/restauration de référence testée en environnement isolé ; application Production vérifiée manuellement par le propriétaire. Cette clôture n’emporte pas validation fiscale, certification de conformité exhaustive ou validation de tous les modules futurs. Les réserves et preuves sont listées dans [le procès-verbal de clôture du 9 novembre 2026](PHASE1_CLOTURE_2026-11-09.md). Aucune migration Phase 2 ne doit être appliquée en Production sans sauvegarde, plan de retour arrière et validation de l’environnement cible.
 
 ### 3.1 Chantier transversal — internationalisation FR/EN
 
@@ -63,6 +63,20 @@ Ce chantier s'ajoute à la fondation, sans remplacer les contrôles de sécurit�
 Réutiliser et auditer `companies.country_code`, `companies.default_currency` et `companies.timezone`. Utiliser ISO 3166-1 alpha-2, ISO 4217 et IANA. Les montants restent décimaux en base. Ne jamais additionner des devises différentes sans conversion documentée, datée et traçable.
 
 ## 4. Phase 2 — Gestion commerciale et financière quotidienne (MVP P0)
+
+### Premier lot ouvert — Factures brouillons
+
+Le code de la première tranche Factures est déjà présent (liste, création autonome, création depuis un devis accepté, consultation, modification des brouillons autonomes et abandon), avec fonctions serveur et tests de base. Il est toutefois **désactivé par défaut et non déployé sur Supabase hébergé** : le SQL reste dans `supabase/phase2-migrations/` et le drapeau `POLYGEST_INVOICES_ENABLED` doit rester absent ou faux en Production.
+
+Ordre obligatoire :
+1. relire les contraintes SQL, fonctions `SECURITY DEFINER`, permissions, RLS et tests ;
+2. exécuter les tests sur une base jetable et corriger toute anomalie ;
+3. générer une migration de livraison avec `supabase migration new` après validation, sans renommer ni déplacer une migration déjà appliquée ;
+4. appliquer et tester uniquement sur l’environnement DEV après revue et autorisation ;
+5. valider l’interface FR/EN, le mobile, les rôles, l’isolation multi-entreprises et les scénarios d’erreur ;
+6. conserver la production fermée jusqu’à une décision distincte de déploiement.
+
+**Périmètre strict de ce lot :** brouillons sans numéro, snapshot fiscal, taxe/TVA, émission légale, certification, paiement, acompte, facture de situation ou avoir. La migration ne doit pas être appliquée en Production dans le cadre de ce lot.
 
 - Répertoires clients et fournisseurs.
 - Devis, lignes de devis, acceptation/refus et conversion en facture.
