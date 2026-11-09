@@ -8,7 +8,7 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 
 ## Statut réel du projet
 
-**Phase actuelle : consolidation finale de la Phase 1 (fondation technique).** Le socle d’authentification, de gestion multi-entreprises, d’administration des membres et d’isolation des données a été renforcé et contrôlé sur les environnements de test. La Phase 1 reste toutefois ouverte : le dépôt ne doit pas être considéré comme un logiciel prêt pour la production.
+**État au 9 novembre 2026 : Phase 1 clôturée comme fondation technique ; Phase 2 ouverte.** L’authentification, le multi-entreprises, les rôles et permissions, les parcours métier livrés, l’internationalisation FR/EN, les contrôles CI, la protection de `main` et la vérification de la production constituent désormais le socle de référence. Cette clôture n’est ni une certification fiscale, ni une déclaration de conformité exhaustive, ni une autorisation d’activer les modules encore verrouillés. Le détail des preuves et des risques résiduels figure dans [le procès-verbal de clôture de la Phase 1](docs/PHASE1_CLOTURE_2026-11-09.md).
 
 Éléments présents dans le dépôt :
 
@@ -24,13 +24,13 @@ Plateforme web de gestion destinée aux entrepreneurs, indépendants, TPE et PME
 - des scripts de sauvegarde et de restauration, et un test de restauration de bout en bout avec données fictives ;
 - un socle de stockage documentaire privé livré et intégré aux fiches clients/fournisseurs : bucket privé, métadonnées isolées, permissions héritées du module, dépôt direct signé et liens de téléchargement de 120 secondes ; le dépôt reste désactivé par défaut (`DOCUMENT_SCANNER_ENABLED=false`) tant que le scanner antivirus n'est pas branché ;
 - un premier flux de devis : brouillons, transmission avec numérotation interne provisoire `D-AAAA-NNNN`, réponse client (acceptation/refus) et annulation d’un devis transmis non répondu ; ce numéro reste distinct d’un numéro légal de facture et ne constitue aucune certification fiscale ;
-- une première fondation de factures brouillons côté serveur : création autonome ou à partir d’un devis accepté, avec abandon traçable, et une interface FR/EN (liste, création, consultation, abandon, bouton « Créer un brouillon de facture » sur un devis accepté) limitée aux brouillons ;
+- une première fondation de factures brouillons : SQL, fonctions serveur, tests et interface FR/EN (liste, création, consultation, modification des brouillons autonomes, abandon et création depuis un devis accepté). **Ce module est livré dans le code mais reste caché et inaccessible** tant que la migration n’est pas validée puis appliquée en environnement DEV et que les tests de fumée ne sont pas réussis ; `POLYGEST_INVOICES_ENABLED` reste absent ou désactivé en production ;
 - les dépenses sont encore limitées aux brouillons ;
 - une CI GitHub Actions : lint, build, vérification TypeScript, tests, audit de toutes les dépendances (runtime et développement), ShellCheck, lint SQL et tests sur une pile Supabase locale réelle.
 
-**Limites actuelles :** les devis peuvent être préparés, transmis, acceptés/refusés et annulés dans les limites du module actuel. Les factures existent uniquement au stade de brouillon (serveur et interface) : numérotation légale, taxe, émission ou règlement n’est encore disponible. Les dépenses restent limitées aux brouillons. Les paiements, la trésorerie, les budgets, les stocks et la paie ne sont pas encore implémentés. Le socle d’internationalisation FR/EN et les traductions des parcours existants sont intégrés ; les nouvelles fonctionnalités devront conserver cette parité linguistique. Le scanner antivirus n’est pas intégré et les dépôts documentaires restent désactivés par défaut (`DOCUMENT_SCANNER_ENABLED=false`). Les migrations, paramètres Auth, Storage et secrets n’ont pas été validés sur un projet Supabase hébergé ; la région, la politique opérationnelle de sauvegarde et les objectifs RPO/RTO restent à formaliser. Les scripts et tests de sauvegarde/restauration ne remplacent pas un dispositif opérationnel de production.
+**Limites et garde-fous au 9 novembre 2026 :** les devis restent un flux commercial, pas une facture légale. Les factures ne sont disponibles qu’au stade brouillon dans le code : aucune numérotation légale, taxe/TVA, émission, certification ou règlement n’est livré. La migration de factures reste isolée dans `supabase/phase2-migrations/` et n’est pas appliquée à la base Supabase Production. Le drapeau `POLYGEST_INVOICES_ENABLED` n’est pas configuré en Production ; le module doit rester fermé. Les dépenses restent limitées aux brouillons. Les paiements, la trésorerie, les budgets, les stocks et la paie restent à construire. Le scanner antivirus n’est pas intégré et les dépôts documentaires restent désactivés (`DOCUMENT_SCANNER_ENABLED=false`). Le contrôle Supabase a relevé des avertissements de sécurité/performance documentés ; la protection native contre les mots de passe compromis n’est pas disponible sur l’offre Free actuelle. L’environnement de préproduction dédié et les objectifs opérationnels RPO/RTO restent à formaliser. Aucune évolution Phase 2 ne doit être déployée en Production sans migration validée, sauvegarde vérifiée, plan de retour arrière, contrôles d’accès et autorisation explicite.
 
-Le détail des constats vérifiés et des risques restants se trouve dans [l’audit Phase 1 du 6 novembre 2026](docs/PHASE1_AUDIT_2026-11-06.md). L’[audit du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md) et la [checklist historique](docs/PHASE1_CHECKLIST.md) sont conservés comme archives.
+Le détail de la clôture et des risques résiduels figure dans [le procès-verbal du 9 novembre 2026](docs/PHASE1_CLOTURE_2026-11-09.md) et dans [l’audit technique du 6 novembre 2026](docs/PHASE1_AUDIT_2026-11-06.md). L’[audit du 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md) et la [checklist historique](docs/PHASE1_CHECKLIST.md) sont conservés comme archives.
 
 ## Documents du projet
 
@@ -40,6 +40,7 @@ Le détail des constats vérifiés et des risques restants se trouve dans [l’a
 - [Feuille de route](docs/ROADMAP.md)
 - [Architecture proposée](docs/ARCHITECTURE.md)
 - [Modèle de données initial](docs/MODELE_DONNEES_INITIAL.md)
+- [Procès-verbal de clôture Phase 1 — 9 novembre 2026](docs/PHASE1_CLOTURE_2026-11-09.md)
 - [Audit de la Phase 1 — état vérifié du 6 novembre 2026](docs/PHASE1_AUDIT_2026-11-06.md)
 - [Audit historique de la Phase 1 — 4 novembre 2026](docs/PHASE1_AUDIT_2026-11-04.md)
 - [Audit de préparation commerciale — état initial du 4 novembre 2026](docs/PHASE2_COMMERCIAL_READINESS_AUDIT_2026-11-04.md)
