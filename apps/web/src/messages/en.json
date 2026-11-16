@@ -1,11 +1,7 @@
 {
   "Auth": {
     "Shell": {
-      "homeLabel": "PolyGest sign-in home",
-      "eyebrow": "Business management",
-      "headline": "A clear workspace to manage your business.",
-      "description": "Access your company workspaces and the management tools linked to your account, with permissions organized by company.",
-      "footer": "PolyGest · For business owners and teams.",
+      "homeLabel": "PolyGest home",
       "languageLabel": "Choose language"
     },
     "Login": {
@@ -63,7 +59,6 @@
       "submit": "Send recovery link",
       "pending": "Sending…",
       "checkEmail": "If an account is associated with this address, a recovery link will be sent. Check your inbox and spam folder.",
-      "loginPrompt": "Remember your password?",
       "loginLink": "Back to sign in",
       "errors": {
         "missing-email": "Enter your email address.",

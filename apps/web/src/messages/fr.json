@@ -1,11 +1,7 @@
 {
   "Auth": {
     "Shell": {
-      "homeLabel": "PolyGest, accueil de connexion",
-      "eyebrow": "Gestion d’entreprise",
-      "headline": "Un espace de travail clair pour piloter ton activité.",
-      "description": "Retrouve tes espaces d’entreprise et les outils de gestion associés à ton compte, avec des accès organisés par entreprise.",
-      "footer": "PolyGest · Pour les entrepreneurs et les équipes.",
+      "homeLabel": "Accueil PolyGest",
       "languageLabel": "Choisir la langue"
     },
     "Login": {
@@ -63,7 +59,6 @@
       "submit": "Envoyer le lien",
       "pending": "Envoi en cours…",
       "checkEmail": "Si un compte est associé à cette adresse, un lien de récupération sera envoyé. Vérifie ta boîte de réception et tes courriers indésirables.",
-      "loginPrompt": "Tu te souviens de ton mot de passe ?",
       "loginLink": "Retour à la connexion",
       "errors": {
         "missing-email": "Renseigne ton adresse e-mail.",
