@@ -83,6 +83,8 @@ describe("Factures — brouillon autonome", () => {
     await expect(saveDraft("alice", t.companyA, customerA, [{ ...lines[1], tax_rate: "18" }])).rejects.toThrow(/taxes/i);
     await expect(saveDraft("alice", t.companyA, customerA, [{ ...lines[1], unit_price: "-1" }])).rejects.toThrow(/invalide/i);
     await expect(saveDraft("alice", t.companyA, customerA, [{ ...lines[1], unit_price: "NaN" }])).rejects.toThrow();
+    await expect(saveDraft("alice", t.companyA, customerA, [{ ...lines[1], quantity: "NaN" }])).rejects.toThrow(/invalide/i);
+    await expect(saveDraft("alice", t.companyA, customerA, [{ ...lines[1], quantity: "Infinity" }])).rejects.toThrow();
     await expect(saveDraft("alice", t.companyA, customerA, [{ ...lines[1], discount_type: "percentage", discount_value: "101" }])).rejects.toThrow(/remise/i);
     await expect(saveDraft("alice", t.companyA, customerA, [])).rejects.toThrow(/lignes/i);
   });
@@ -109,6 +111,19 @@ describe("Factures — brouillon autonome", () => {
     await expect(saveDraft("bob", t.companyA, customerA)).rejects.toThrow(/permission/i);
     const seen = await asUser(t.db, "bob", () => q(`select id from public.invoices`));
     expect(seen.rows).toHaveLength(0);
+  });
+
+  it("rejette NaN directement par la contrainte de la table", async () => {
+    const invoiceId = (await saveDraft("alice", t.companyA, customerA)).rows[0].id;
+    await expect(
+      q(
+        `insert into public.invoice_lines (
+          company_id, invoice_id, position, description, quantity, unit_label,
+          unit_price, base_amount, discount_amount, taxable_amount, total_amount
+        ) values ($1, $2, 99, 'Direct NaN', 'NaN'::numeric, 'unit', 0, 0, 0, 0, 0)`,
+        [t.companyA, invoiceId],
+      ),
+    ).rejects.toThrow(/invoice_lines_quantity_finite_check/i);
   });
 
   it("interdit toute écriture directe et toute suppression", async () => {
