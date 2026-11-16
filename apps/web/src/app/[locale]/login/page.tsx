@@ -3,10 +3,13 @@ import { notFound } from "next/navigation";
 import { LoginPage } from "@/components/auth/login-page";
 import { isLocale } from "@/i18n/locale";
 
-export const metadata: Metadata = {
-  title: "Sign in · PolyGest",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: locale === "en" ? "Sign in · PolyGest" : "Connexion · PolyGest",
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function Page({
   params,

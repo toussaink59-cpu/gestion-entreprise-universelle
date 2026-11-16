@@ -1,24 +1,78 @@
-import type {ReactNode} from "react";
+
+import type { ReactNode } from "react";
 import Link from "next/link";
-import {localePath} from "@/i18n/locale";
-import type {Locale} from "@/i18n/locale";
-import {LocaleSwitcher} from "@/components/i18n/locale-switcher";
-import {BrandLogo} from "@/components/ui/brand-logo";
-export function AuthShell({title,description,children,footer,locale,route,copy}:{
-title:string;description:string;children:ReactNode;footer:ReactNode;locale:Locale;route:"/login"|"/register"|"/forgot-password"|"/reset-password";
-copy:{homeLabel:string;eyebrow:string;headline:string;description:string;footer:string;languageLabel:string};
-}){
-return <main className="min-h-screen bg-[var(--pg-canvas)]"><div className="mx-auto grid min-h-screen w-full max-w-7xl lg:grid-cols-[minmax(0,0.9fr)_minmax(30rem,1.1fr)]">
-<aside className="flex flex-col justify-between border-b border-[var(--pg-border)] bg-[var(--pg-surface-subtle)] px-6 py-7 sm:px-10 sm:py-9 lg:min-h-screen lg:border-b-0 lg:border-r lg:px-14 lg:py-12">
-<Link href={localePath(locale, "/login")} aria-label={copy.homeLabel} className="inline-flex w-fit items-center rounded-sm text-xl font-semibold tracking-tight text-[var(--pg-text)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--pg-focus)]"><BrandLogo size={34}/></Link>
-<div className="hidden max-w-md py-8 lg:block lg:py-16"><p className="text-sm font-medium text-[var(--pg-accent)]">{copy.eyebrow}</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-[var(--pg-text)] sm:text-4xl">{copy.headline}</h2><p className="mt-5 max-w-sm text-base leading-7 text-[var(--pg-text-muted)]">{copy.description}</p></div>
-<p className="hidden text-sm text-[var(--pg-text-muted)] lg:block">{copy.footer}</p></aside>
-<section aria-labelledby="auth-title" className="flex min-h-[32rem] flex-col px-5 py-6 sm:px-10 sm:py-9">
-<div className="flex justify-end"><LocaleSwitcher locale={locale} href={route} label={copy.languageLabel}/></div>
-<div className="flex flex-1 items-center justify-center py-8"><div className="w-full max-w-md">
-<h1 id="auth-title" className="text-2xl font-semibold tracking-tight text-[var(--pg-text)] sm:text-3xl">{title}</h1>
-<p className="mt-3 text-sm leading-6 text-[var(--pg-text-muted)]">{description}</p>
-<div className="mt-8">{children}</div>
-<div className="mt-8 border-t border-[var(--pg-border)] pt-6 text-sm text-[var(--pg-text-muted)]">{footer}</div>
-</div></div></section></div></main>;
+import { localePath } from "@/i18n/locale";
+import type { Locale } from "@/i18n/locale";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { BrandLogo } from "@/components/ui/brand-logo";
+
+type AuthRoute = "/login" | "/register" | "/forgot-password" | "/reset-password";
+
+type AuthShellCopy = {
+  homeLabel: string;
+  languageLabel: string;
+};
+
+export function AuthShell({
+  title,
+  description,
+  children,
+  footer,
+  locale,
+  route,
+  copy,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+  footer: ReactNode;
+  locale: Locale;
+  route: AuthRoute;
+  copy: AuthShellCopy;
+}) {
+  return (
+    <main className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#111a3b] px-4 py-8 sm:px-6 sm:py-10">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-40 -top-36 h-[28rem] w-[28rem] rounded-full bg-[#3f65b8]/30 blur-3xl" />
+        <div className="absolute -bottom-48 -right-32 h-[32rem] w-[32rem] rounded-full bg-[#713b9c]/30 blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#101936]/20 via-transparent to-[#0a2947]/40" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[440px]">
+        <section
+          aria-labelledby="auth-title"
+          className="rounded-[28px] border border-white/70 bg-white px-6 py-7 shadow-[0_28px_90px_rgba(5,12,35,0.42)] sm:px-10 sm:py-9"
+        >
+          <div className="flex justify-end">
+            <LocaleSwitcher locale={locale} href={route} label={copy.languageLabel} />
+          </div>
+
+          <div className="mt-2 flex justify-center">
+            <Link
+              href={localePath(locale, "/login")}
+              aria-label={copy.homeLabel}
+              className="inline-flex rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#087fa8]"
+            >
+              <BrandLogo size={40} className="text-2xl font-bold tracking-tight text-[#17233f]" />
+            </Link>
+          </div>
+
+          <div className="mt-8 text-center">
+            <h1 id="auth-title" className="text-[1.7rem] font-semibold tracking-tight text-[#18243e] sm:text-3xl">
+              {title}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-[#667386]">{description}</p>
+          </div>
+
+          <div className="mt-8">{children}</div>
+
+          {footer ? (
+            <div className="mt-7 border-t border-slate-100 pt-6 text-center text-sm text-slate-600">
+              {footer}
+            </div>
+          ) : null}
+        </section>
+      </div>
+    </main>
+  );
 }
