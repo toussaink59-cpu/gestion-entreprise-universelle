@@ -258,6 +258,35 @@
       "updated": "Changes were saved.",
       "archived": "The record was archived and remains available in the history.",
       "restored": "The record was restored."
+    },
+    "duplicates": {
+      "title": "Potential duplicates",
+      "description": "These active records look alike. Nothing is merged automatically: review them, then edit or archive the extra record.",
+      "reasonPrefix": "In common:",
+      "reasons": {
+        "name": "name",
+        "email": "email",
+        "taxIdentifier": "tax identifier",
+        "phone": "phone"
+      },
+      "unavailable": "Duplicate detection is unavailable right now."
+    },
+    "history": {
+      "summary": "History",
+      "emptyCustomer": "No quotes linked to this customer.",
+      "emptySupplier": "No expenses linked to this supplier.",
+      "unavailable": "History is unavailable right now.",
+      "draftReference": "Draft",
+      "expenseDraft": "Draft",
+      "columns": {
+        "quote": "Quote",
+        "category": "Category",
+        "date": "Date",
+        "status": "Status",
+        "amount": "Amount"
+      },
+      "noteCustomer": "Invoices, payments and balances: not yet available in this version.",
+      "noteSupplier": "Validated purchases, payments and balances: not yet available in this version."
     }
   },
   "Documents": {

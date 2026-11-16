@@ -6,7 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import type { BusinessContactKind } from "@/lib/security/business-contact-validation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { ContactHistory, DuplicateGroups, type HistoryRow } from "./contact-insights";
+import { findDuplicateGroups, type DuplicateCandidate } from "@/lib/contacts/duplicate-detection";
+import { formatQuoteCurrency, formatQuoteDate, quoteStatusLabel } from "@/app/dashboard/devis/formatting";
+import { formatExpenseCurrency, formatExpenseDate } from "@/app/dashboard/depenses/formatting";
 
 type PageSearchParams = Promise<{
   company?: string;
@@ -229,6 +233,97 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
     }
   }
 
+  const locale = (await getLocale()) === "en" ? "en" : "fr";
+
+  // FR-CRM-04 : doublons potentiels parmi les fiches actives (signalement seul, aucune fusion).
+  let duplicateGroups: ReturnType<typeof findDuplicateGroups<DuplicateCandidate>> = [];
+  let duplicatesFailed = false;
+  // FR-CRM-03 : historique lié à chaque fiche affichée (devis pour un client, dépenses pour un fournisseur).
+  const historyByContact = new Map<string, HistoryRow[]>();
+  let historyFailed = false;
+
+  if (canRead) {
+    const { data: activeRows, error: activeError } = await supabase
+      .from(kind === "customer" ? "customers" : "suppliers")
+      .select("id, name, email, phone, tax_identifier")
+      .eq("company_id", selectedCompanyId)
+      .eq("status", "active")
+      .limit(2000);
+    if (activeError) {
+      console.error("Duplicate detection load failed:", { code: activeError.code });
+      duplicatesFailed = true;
+    } else {
+      duplicateGroups = findDuplicateGroups((activeRows ?? []) as DuplicateCandidate[]);
+    }
+
+    const contactIds = contacts.map((contact) => contact.id);
+    if (contactIds.length > 0) {
+      if (kind === "customer") {
+        const { data: quoteRows, error: quoteError } = await supabase
+          .from("quotes")
+          .select("id, customer_id, quote_number, status, issue_date, total_amount, currency_code")
+          .eq("company_id", selectedCompanyId)
+          .in("customer_id", contactIds)
+          .order("issue_date", { ascending: false })
+          .limit(500);
+        if (quoteError) {
+          console.error("Customer history load failed:", { code: quoteError.code });
+          historyFailed = true;
+        } else {
+          for (const quote of quoteRows ?? []) {
+            const rows = historyByContact.get(quote.customer_id) ?? [];
+            rows.push({
+              key: quote.id,
+              primary: quote.quote_number ?? t("history.draftReference"),
+              secondary: formatQuoteDate(quote.issue_date, locale),
+              status: quoteStatusLabel(quote.status, locale),
+              amount: formatQuoteCurrency(quote.total_amount, quote.currency_code, locale),
+            });
+            historyByContact.set(quote.customer_id, rows);
+          }
+        }
+      } else {
+        const { data: expenseRows, error: expenseError } = await supabase
+          .from("expenses")
+          .select("id, supplier_id, category, expense_date, amount, currency_code")
+          .eq("company_id", selectedCompanyId)
+          .in("supplier_id", contactIds)
+          .order("expense_date", { ascending: false })
+          .limit(500);
+        if (expenseError) {
+          console.error("Supplier history load failed:", { code: expenseError.code });
+          historyFailed = true;
+        } else {
+          for (const expense of expenseRows ?? []) {
+            const rows = historyByContact.get(expense.supplier_id as string) ?? [];
+            rows.push({
+              key: expense.id,
+              primary: expense.category,
+              secondary: formatExpenseDate(expense.expense_date, locale),
+              status: t("history.expenseDraft"),
+              amount: formatExpenseCurrency(expense.amount, expense.currency_code, locale),
+            });
+            historyByContact.set(expense.supplier_id as string, rows);
+          }
+        }
+      }
+    }
+  }
+  const historyLabels = {
+    summary: t("history.summary"),
+    empty: customer ? t("history.emptyCustomer") : t("history.emptySupplier"),
+    unavailable: t("history.unavailable"),
+    columns: { reference: customer ? t("history.columns.quote") : t("history.columns.category"), date: t("history.columns.date"), status: t("history.columns.status"), amount: t("history.columns.amount") },
+    phase2Note: customer ? t("history.noteCustomer") : t("history.noteSupplier"),
+  };
+  const duplicateLabels = {
+    title: t("duplicates.title"),
+    description: t("duplicates.description"),
+    reasons: { name: t("duplicates.reasons.name"), email: t("duplicates.reasons.email"), taxIdentifier: t("duplicates.reasons.taxIdentifier"), phone: t("duplicates.reasons.phone") },
+    reasonPrefix: t("duplicates.reasonPrefix"),
+    unavailable: t("duplicates.unavailable"),
+  };
+
   const otherRoute = kind === "customer" ? "/dashboard/fournisseurs" : "/dashboard/clients";
   const otherLabel = customer ? t("titleSuppliers") : t("titleCustomers");
   const companyQuery = `?company=${encodeURIComponent(selectedCompanyId)}`;
@@ -258,6 +353,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
         </section>
       ) : (
         <>
+          <DuplicateGroups groups={duplicateGroups} failed={duplicatesFailed} labels={duplicateLabels} />
           {canWrite && (
             <section className="mb-8 border-b border-[var(--pg-border)] pb-6">
               <div className="mb-5"><h2 className="text-lg font-semibold text-[var(--pg-text)]">{customer ? t("addCustomer") : t("addSupplier")}</h2><p className="mt-1 text-sm text-[var(--pg-text-muted)]">{t("requiredFields")}</p></div>
@@ -307,6 +403,7 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
                         <td className="px-5 py-4"><DocumentAttachments companyId={selectedCompanyId} moduleCode={kind === "customer" ? "customers" : "suppliers"} entityType={kind} entityId={contact.id} canUpload={canWrite && process.env.DOCUMENT_SCANNER_ENABLED === "true"} scannerEnabled={process.env.DOCUMENT_SCANNER_ENABLED === "true"} /></td>
                         <td className="px-5 py-4">
                           <div className="flex min-w-40 flex-col items-start gap-3">
+                            <ContactHistory rows={historyByContact.get(contact.id) ?? []} failed={historyFailed} labels={historyLabels} />
                             {canWrite && <details className="w-full"><summary className="cursor-pointer font-medium text-[var(--pg-accent)] hover:underline">{t("edit")}</summary><form action={updateContact} className="mt-3 min-w-72 space-y-4 rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4">
                               <input type="hidden" name="contact_kind" value={kind} /><input type="hidden" name="company_id" value={selectedCompanyId} /><input type="hidden" name="contact_id" value={contact.id} />
                               <ContactFields contact={contact} labels={fieldLabels} /><button type="submit" className={BUTTON_CLASS}>{t("save")}</button>
