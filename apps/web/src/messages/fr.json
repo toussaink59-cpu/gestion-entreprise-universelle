@@ -479,6 +479,7 @@
       "saveResponse": "Enregistrer la réponse",
       "cancelTitle": "Annuler le devis",
       "cancelDescription": "Réservé au propriétaire et à l’administrateur. Le devis annulé reste consultable et son numéro n’est jamais réattribué.",
+      "cancelAcceptedDescription": "Réservé au propriétaire et à l’administrateur. L’annulation ferme le solde non facturé de ce devis accepté ; le motif est conservé et tracé. Le devis annulé reste consultable et son numéro n’est jamais réattribué.",
       "cancelReason": "Motif de l’annulation",
       "confirmCancel": "Annuler le devis",
       "sendTitle": "Transmettre le devis",

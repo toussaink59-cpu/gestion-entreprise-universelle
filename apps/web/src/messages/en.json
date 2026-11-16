@@ -479,6 +479,7 @@
       "saveResponse": "Save response",
       "cancelTitle": "Cancel quote",
       "cancelDescription": "Reserved for the owner and company administrator. A cancelled quote remains viewable and its number is never reassigned.",
+      "cancelAcceptedDescription": "Reserved for the owner and company administrator. Cancelling closes the unbilled balance of this accepted quote; the reason is kept and traced. A cancelled quote remains viewable and its number is never reassigned.",
       "cancelReason": "Cancellation reason",
       "confirmCancel": "Cancel quote",
       "sendTitle": "Send quote",
