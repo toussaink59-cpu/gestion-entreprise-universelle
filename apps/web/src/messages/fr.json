@@ -259,6 +259,35 @@
       "updated": "Les modifications ont été enregistrées.",
       "archived": "La fiche a été archivée. Elle reste conservée dans l’historique.",
       "restored": "La fiche a été réactivée."
+    },
+    "duplicates": {
+      "title": "Doublons potentiels",
+      "description": "Ces fiches actives se ressemblent. Rien n’est fusionné automatiquement : vérifie-les, puis modifie ou archive la fiche en trop.",
+      "reasonPrefix": "Points communs :",
+      "reasons": {
+        "name": "nom",
+        "email": "e-mail",
+        "taxIdentifier": "identifiant fiscal",
+        "phone": "téléphone"
+      },
+      "unavailable": "La recherche de doublons est indisponible pour le moment."
+    },
+    "history": {
+      "summary": "Historique",
+      "emptyCustomer": "Aucun devis lié à ce client.",
+      "emptySupplier": "Aucune dépense liée à ce fournisseur.",
+      "unavailable": "L’historique est indisponible pour le moment.",
+      "draftReference": "Brouillon",
+      "expenseDraft": "Brouillon",
+      "columns": {
+        "quote": "Devis",
+        "category": "Catégorie",
+        "date": "Date",
+        "status": "Statut",
+        "amount": "Montant"
+      },
+      "noteCustomer": "Factures, règlements et soldes : pas encore disponibles dans cette version.",
+      "noteSupplier": "Achats validés, règlements et soldes : pas encore disponibles dans cette version."
     }
   },
   "Documents": {
