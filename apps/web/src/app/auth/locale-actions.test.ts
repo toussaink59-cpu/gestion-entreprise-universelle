@@ -76,6 +76,16 @@ describe("locale preference server action", () => {
     await expectRedirect(setLocalePreference(form), "/fr/workspace-language-notice");
   });
 
+  it("switches the language from the workspace, saves it for the signed-in user and stays on the dashboard", async () => {
+    getUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
+    const form = makeForm({ locale: "en", route: "/dashboard" });
+
+    await expectRedirect(setLocalePreference(form), "/dashboard");
+
+    expect(cookieSet).toHaveBeenCalledWith("polygest-locale", "en", expect.any(Object));
+    expect(from).toHaveBeenCalledWith("users");
+  });
+
   it("rejects unsupported locales and forged return paths before contacting Supabase", async () => {
     const form = makeForm({ locale: "de", route: "https://attacker.example" });
 

@@ -14,6 +14,7 @@ const switchableRoutes = new Set([
   "/reset-password",
   "/onboarding",
   "/workspace-language-notice",
+  "/dashboard",
 ]);
 
 export async function setLocalePreference(formData: FormData): Promise<void> {

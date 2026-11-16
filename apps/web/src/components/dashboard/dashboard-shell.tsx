@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
+import { localeFrom } from "@/i18n/locale";
 
 type DashboardShellProps = { children: ReactNode; invoicesEnabled: boolean };
 
@@ -21,6 +23,7 @@ const navigation = [
 export function DashboardShell({ children, invoicesEnabled }: DashboardShellProps) {
   const pathname = usePathname();
   const t = useTranslations("Dashboard.Navigation");
+  const locale = localeFrom(useLocale());
   const visibleNavigation = invoicesEnabled
     ? navigation
     : navigation.filter((item) => item.key !== "invoices");
@@ -46,14 +49,16 @@ export function DashboardShell({ children, invoicesEnabled }: DashboardShellProp
           })}
         </nav>
         <div className="border-t border-[var(--pg-border)] px-6 py-4">
-          <p className="text-xs text-[var(--pg-text-muted)]">{t("footer")}</p>
+          <LocaleSwitcher locale={locale} href="/dashboard" label={t("languageLabel")} />
+          <p className="mt-2 text-xs text-[var(--pg-text-muted)]">{t("footer")}</p>
         </div>
       </aside>
 
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 border-b border-[var(--pg-border)] bg-[var(--pg-surface)] lg:hidden">
-          <div className="flex h-14 items-center px-4">
+          <div className="flex h-14 items-center justify-between px-4">
             <Link href="/dashboard" className="font-semibold tracking-tight text-[var(--pg-text)]"><BrandLogo size={26}/></Link>
+            <LocaleSwitcher locale={locale} href="/dashboard" label={t("languageLabel")} />
           </div>
           <nav aria-label={t("ariaLabel")} className="flex gap-1 overflow-x-auto px-3 pb-3">
             {visibleNavigation.map((item) => {
