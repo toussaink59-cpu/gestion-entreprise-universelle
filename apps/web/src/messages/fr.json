@@ -123,6 +123,7 @@
   },
   "Dashboard": {
     "Navigation": {
+      "languageLabel": "Choisir la langue",
       "ariaLabel": "Navigation principale",
       "workspace": "Espace de travail",
       "overview": "Vue d’ensemble",

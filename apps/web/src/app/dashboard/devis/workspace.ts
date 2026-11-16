@@ -49,8 +49,7 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
   if (membershipError) {
     return {
       status: "error" as const,
-      message:
-        "Impossible de vérifier les appartenances à l’entreprise. Réessaie plus tard.",
+      code: "memberships",
     };
   }
 
@@ -70,7 +69,7 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
   if (companyError) {
     return {
       status: "error" as const,
-      message: "Impossible de charger les entreprises accessibles.",
+      code: "companies",
     };
   }
 
@@ -81,7 +80,7 @@ export async function getQuoteWorkspace(requestedCompanyId?: string) {
   if (companies.length === 0) {
     return {
       status: "error" as const,
-      message: "Aucune entreprise active n’est accessible pour les devis.",
+      code: "no_active_company",
     };
   }
 
