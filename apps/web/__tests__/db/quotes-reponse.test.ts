@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { asUser, createMigratedDb, ids, seed, type TestDb } from "./helpers";
 
-// Réponse du client (accepté / refusé) et annulation d'un devis transmis.
+// Réponse du client (accepté / refusé) et annulation d'un devis transmis ou accepté.
 
 let t: TestDb;
 let customerA: string;
@@ -164,13 +164,41 @@ describe("Devis — annulation d'un devis transmis", () => {
     await expect(cancel("alice", t.companyA, id, "x".repeat(501))).rejects.toThrow(/motif/i);
   });
 
-  it("un devis accepté ne peut pas être annulé, ni un devis annulé recevoir une réponse", async () => {
+  it("un devis accepté peut être annulé avec motif ; la trace garde l'état précédent", async () => {
     const accepted = await sentQuote();
     await respond("erin", t.companyA, accepted, "accepted");
-    await expect(cancel("alice", t.companyA, accepted)).rejects.toThrow(/transmis/i);
+    await cancel("alice", t.companyA, accepted, "Projet abandonné par le client");
+    expect(await state(accepted)).toMatchObject({ status: "cancelled", reason: "Projet abandonné par le client" });
+    const who = await q<{ cancelled_by: string }>(`select cancelled_by::text from public.quotes where id = $1`, [accepted]);
+    expect(who.rows[0].cancelled_by).toBe(ids.alice);
+
+    const events = await asUser(t.db, "alice", () =>
+      q<{ previous: string }>(
+        `select metadata->>'previous_status' as previous from public.audit_events where entity_id = $1 and action = 'quotes.cancelled'`,
+        [accepted],
+      ),
+    );
+    expect(events.rows.map((row) => row.previous)).toEqual(["accepted"]);
+  });
+
+  it("l'annulation d'un devis accepté exige la permission et un motif", async () => {
+    const accepted = await sentQuote();
+    await respond("erin", t.companyA, accepted, "accepted");
+    for (const who of ["erin", "carol", "dave"] as const) {
+      await expect(cancel(who, t.companyA, accepted)).rejects.toThrow(/permission/i);
+    }
+    await expect(cancel("alice", t.companyA, accepted, null)).rejects.toThrow(/motif/i);
+    expect((await state(accepted)).status).toBe("accepted");
+  });
+
+  it("un devis refusé ou déjà annulé reste terminal ; un devis annulé ne reçoit plus de réponse", async () => {
+    const rejected = await sentQuote();
+    await respond("erin", t.companyA, rejected, "rejected");
+    await expect(cancel("alice", t.companyA, rejected)).rejects.toThrow(/transmis ou accepté/i);
 
     const cancelled = await sentQuote();
     await cancel("alice", t.companyA, cancelled);
+    await expect(cancel("alice", t.companyA, cancelled)).rejects.toThrow(/transmis ou accepté/i);
     await expect(respond("erin", t.companyA, cancelled, "accepted")).rejects.toThrow(/transmis/i);
   });
 

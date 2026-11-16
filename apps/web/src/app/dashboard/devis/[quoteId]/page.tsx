@@ -530,13 +530,13 @@ export default async function QuoteDetailPage({
         </section>
       ) : null}
 
-      {quote.status === "sent" && workspace.canCancel ? (
+      {(quote.status === "sent" || quote.status === "accepted") && workspace.canCancel ? (
         <section className="mb-7 rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] p-5">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">
             {t("cancelTitle")}
           </h2>
           <p className="mt-1 text-sm text-[var(--pg-text-muted)]">
-            {t("cancelDescription")}
+            {quote.status === "accepted" ? t("cancelAcceptedDescription") : t("cancelDescription")}
           </p>
           <form action={cancelQuote} className="mt-4 flex flex-wrap items-end gap-3">
             <input type="hidden" name="company_id" value={workspace.company.id} />
