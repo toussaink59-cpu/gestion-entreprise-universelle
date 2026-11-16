@@ -24,6 +24,11 @@ export function localeSwitcherPath(locale: Locale, path: string): string {
     return "/fr/workspace-language-notice";
   }
 
+  // The workspace has no /en alias: its language comes from the preference cookie.
+  if (normalized === "/dashboard" || normalized.startsWith("/dashboard/")) {
+    return normalized;
+  }
+
   return localePath(locale, normalized);
 }
 

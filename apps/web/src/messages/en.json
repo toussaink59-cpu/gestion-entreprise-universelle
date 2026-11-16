@@ -123,6 +123,7 @@
   },
   "Dashboard": {
     "Navigation": {
+      "languageLabel": "Choose language",
       "ariaLabel": "Main navigation",
       "workspace": "Workspace",
       "overview": "Overview",
