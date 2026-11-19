@@ -274,17 +274,22 @@
         "phone": "Téléphone",
         "taxIdentifier": "Identifiant fiscal"
       },
-      "historyCustomersTitle": "Historique des devis clients",
+      "historyCustomersTitle": "Historique commercial des clients",
       "historySuppliersTitle": "Historique des dépenses fournisseurs",
-      "historyCustomersDescription": "Devis associés aux clients actuellement affichés.",
+      "historyCustomersDescription": "Devis et brouillons de facture associés aux clients actuellement affichés.",
       "historySuppliersDescription": "Dépenses associées aux fournisseurs actuellement affichés.",
       "historyUnavailable": "Impossible de charger l’historique pour le moment.",
       "noHistory": "Aucun historique accessible pour les fiches affichées.",
       "historyItemsCount": "{count, plural, one {# élément} other {# éléments}}",
-      "historyLimited": "Historique limité aux 500 opérations les plus récentes.",
+      "historyLimited": "Historique limité aux 500 opérations les plus récentes par type de document.",
       "quoteNumber": "Devis n°{number}",
       "quoteWithoutNumber": "Devis sans numéro",
+      "invoiceWithoutSubject": "Facture brouillon sans objet",
       "expenseDraft": "Brouillon",
+      "invoiceStatuses": {
+        "draft": "Brouillon de facture",
+        "abandonedDraft": "Brouillon de facture abandonné"
+      },
       "quoteStatuses": {
         "draft": "Brouillon",
         "sent": "Transmis",
