@@ -93,7 +93,7 @@ jobs:
           exit 1
 
       - name: Installer Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 22
 
@@ -136,7 +136,7 @@ jobs:
           echo "Tous les contrôles GitHub Actions sont verts pour ${sha}."
 
       - name: Installer Node.js
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 22
 
