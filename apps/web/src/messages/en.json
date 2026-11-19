@@ -274,17 +274,22 @@
         "phone": "Phone",
         "taxIdentifier": "Tax identifier"
       },
-      "historyCustomersTitle": "Customer quote history",
+      "historyCustomersTitle": "Customer commercial history",
       "historySuppliersTitle": "Supplier expense history",
-      "historyCustomersDescription": "Quotes associated with the customers currently displayed.",
+      "historyCustomersDescription": "Quotes and invoice drafts associated with the customers currently displayed.",
       "historySuppliersDescription": "Expenses associated with the suppliers currently displayed.",
       "historyUnavailable": "Unable to load history at this time.",
       "noHistory": "No accessible history for the displayed records.",
       "historyItemsCount": "{count, plural, one {# item} other {# items}}",
-      "historyLimited": "History is limited to the 500 most recent operations.",
+      "historyLimited": "History is limited to the 500 most recent operations per document type.",
       "quoteNumber": "Quote no. {number}",
       "quoteWithoutNumber": "Unnumbered quote",
+      "invoiceWithoutSubject": "Invoice draft without a subject",
       "expenseDraft": "Draft",
+      "invoiceStatuses": {
+        "draft": "Invoice draft",
+        "abandonedDraft": "Abandoned invoice draft"
+      },
       "quoteStatuses": {
         "draft": "Draft",
         "sent": "Sent",

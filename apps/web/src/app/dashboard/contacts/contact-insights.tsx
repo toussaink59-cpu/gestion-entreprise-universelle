@@ -27,6 +27,16 @@ type ExpenseRow = {
   description: string;
   amount: number | string;
   currency_code: string;
+}
+
+type InvoiceHistoryRow = {
+  id: string;
+  customer_id: string;
+  subject: string | null;
+  status: 'draft' | 'abandoned_draft';
+  issue_date: string;
+  currency_code: string;
+  total_amount: number | string;
 };
 
 const MAX_SCAN = 2000;
@@ -97,26 +107,45 @@ export async function ContactInsights({
   const contactIds = contacts.map((contact) => contact.id);
 
   let quoteRows: QuoteRow[] = [];
+  let invoiceRows: InvoiceHistoryRow[] = [];
   let expenseRows: ExpenseRow[] = [];
   let historyError = false;
   let historyTruncated = false;
 
   // These authenticated reads remain subject to the existing Supabase RLS policies.
   if (contactIds.length > 0 && kind === 'customer') {
-    const { data, error } = await supabase
-      .from('quotes')
-      .select('id, customer_id, quote_number, status, issue_date, currency_code, total_amount')
-      .eq('company_id', companyId)
-      .in('customer_id', contactIds)
-      .order('issue_date', { ascending: false })
-      .limit(MAX_HISTORY);
+    const [quotesResult, invoicesResult] = await Promise.all([
+      supabase
+        .from('quotes')
+        .select('id, customer_id, quote_number, status, issue_date, currency_code, total_amount')
+        .eq('company_id', companyId)
+        .in('customer_id', contactIds)
+        .order('issue_date', { ascending: false })
+        .limit(MAX_HISTORY),
+      supabase
+        .from('invoices')
+        .select('id, customer_id, subject, status, issue_date, currency_code, total_amount')
+        .eq('company_id', companyId)
+        .in('customer_id', contactIds)
+        .in('status', ['draft', 'abandoned_draft'])
+        .order('issue_date', { ascending: false })
+        .limit(MAX_HISTORY),
+    ]);
 
-    if (error) {
+    if (quotesResult.error) {
       historyError = true;
-      console.error('Customer quote history failed:', { code: error.code });
+      console.error('Customer quote history failed:', { code: quotesResult.error.code });
     } else {
-      quoteRows = (data ?? []) as QuoteRow[];
+      quoteRows = (quotesResult.data ?? []) as QuoteRow[];
       historyTruncated = quoteRows.length === MAX_HISTORY;
+    }
+
+    if (invoicesResult.error) {
+      historyError = true;
+      console.error('Customer invoice history failed:', { code: invoicesResult.error.code });
+    } else {
+      invoiceRows = (invoicesResult.data ?? []) as InvoiceHistoryRow[];
+      historyTruncated ||= invoiceRows.length === MAX_HISTORY;
     }
   }
 
@@ -145,6 +174,13 @@ export async function ContactInsights({
     quotesByContact.set(quote.customer_id, group);
   }
 
+  const invoicesByContact = new Map<string, InvoiceHistoryRow[]>();
+  for (const invoice of invoiceRows) {
+    const group = invoicesByContact.get(invoice.customer_id) ?? [];
+    group.push(invoice);
+    invoicesByContact.set(invoice.customer_id, group);
+  }
+
   const expensesByContact = new Map<string, ExpenseRow[]>();
   for (const expense of expenseRows) {
     if (!expense.supplier_id) continue;
@@ -157,9 +193,10 @@ export async function ContactInsights({
     .map((contact) => ({
       contact,
       quotes: quotesByContact.get(contact.id) ?? [],
+      invoices: invoicesByContact.get(contact.id) ?? [],
       expenses: expensesByContact.get(contact.id) ?? [],
     }))
-    .filter((group) => group.quotes.length > 0 || group.expenses.length > 0);
+    .filter((group) => group.quotes.length > 0 || group.invoices.length > 0 || group.expenses.length > 0);
 
   const quoteStatusLabels: Record<string, string> = {
     draft: t('insights.quoteStatuses.draft'),
@@ -167,6 +204,10 @@ export async function ContactInsights({
     accepted: t('insights.quoteStatuses.accepted'),
     rejected: t('insights.quoteStatuses.rejected'),
     cancelled: t('insights.quoteStatuses.cancelled'),
+  };
+  const invoiceStatusLabels: Record<InvoiceHistoryRow['status'], string> = {
+    draft: t('insights.invoiceStatuses.draft'),
+    abandoned_draft: t('insights.invoiceStatuses.abandonedDraft'),
   };
 
   const visiblePairs = duplicateResult.matches.slice(0, MAX_VISIBLE_PAIRS);
@@ -266,13 +307,13 @@ export async function ContactInsights({
           </p>
         ) : (
           <div className='mt-4 divide-y divide-[var(--pg-border)]'>
-            {historyGroups.map(({ contact, quotes, expenses }) => (
+            {historyGroups.map(({ contact, quotes, invoices, expenses }) => (
               <details key={contact.id} className='py-3'>
                 <summary className='cursor-pointer font-medium text-[var(--pg-text)]'>
                   {contact.name}
                   <span className='ml-2 text-xs font-normal text-[var(--pg-text-muted)]'>
                     {t('insights.historyItemsCount', {
-                      count: kind === 'customer' ? quotes.length : expenses.length,
+                      count: kind === 'customer' ? quotes.length + invoices.length : expenses.length,
                     })}
                   </span>
                 </summary>
@@ -296,6 +337,27 @@ export async function ContactInsights({
                         </time>
                         <span className='font-medium text-[var(--pg-text)]'>
                           {formatAmount(quote.total_amount, quote.currency_code, locale)}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+
+                  {invoices.map((invoice) => (
+                    <article key={invoice.id} className='rounded-md border border-[var(--pg-border)] p-3'>
+                      <div className='flex flex-wrap justify-between gap-2'>
+                        <p className='text-sm font-medium text-[var(--pg-text)]'>
+                          {invoice.subject || t('insights.invoiceWithoutSubject')}
+                        </p>
+                        <span className='text-xs text-[var(--pg-text-muted)]'>
+                          {invoiceStatusLabels[invoice.status]}
+                        </span>
+                      </div>
+                      <div className='mt-1 flex flex-wrap justify-between gap-2 text-sm'>
+                        <time dateTime={invoice.issue_date} className='text-[var(--pg-text-muted)]'>
+                          {formatDate(invoice.issue_date, locale)}
+                        </time>
+                        <span className='font-medium text-[var(--pg-text)]'>
+                          {formatAmount(invoice.total_amount, invoice.currency_code, locale)}
                         </span>
                       </div>
                     </article>
