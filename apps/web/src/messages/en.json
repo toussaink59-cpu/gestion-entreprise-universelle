@@ -259,6 +259,39 @@
       "updated": "Changes were saved.",
       "archived": "The record was archived and remains available in the history.",
       "restored": "The record was restored."
+    },
+    "insights": {
+      "duplicatesTitle": "Potential duplicates",
+      "duplicatesDescription": "Records in this company are compared by name, email, phone and tax identifier. No automatic merging is performed.",
+      "duplicateScanUnavailable": "Duplicate detection is currently unavailable.",
+      "noDuplicates": "No potential duplicates were detected among the records examined.",
+      "duplicatePairCount": "{count, plural, one {# potential pair detected.} other {# potential pairs detected.}}",
+      "duplicateScanLimited": "The scan is limited to the 2,000 most recently updated records.",
+      "duplicateResultsLimited": "Only the first 20 pairs are displayed.",
+      "reasons": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "taxIdentifier": "Tax identifier"
+      },
+      "historyCustomersTitle": "Customer quote history",
+      "historySuppliersTitle": "Supplier expense history",
+      "historyCustomersDescription": "Quotes associated with the customers currently displayed.",
+      "historySuppliersDescription": "Expenses associated with the suppliers currently displayed.",
+      "historyUnavailable": "Unable to load history at this time.",
+      "noHistory": "No accessible history for the displayed records.",
+      "historyItemsCount": "{count, plural, one {# item} other {# items}}",
+      "historyLimited": "History is limited to the 500 most recent operations.",
+      "quoteNumber": "Quote no. {number}",
+      "quoteWithoutNumber": "Unnumbered quote",
+      "expenseDraft": "Draft",
+      "quoteStatuses": {
+        "draft": "Draft",
+        "sent": "Sent",
+        "accepted": "Accepted",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      }
     }
   },
   "Documents": {
