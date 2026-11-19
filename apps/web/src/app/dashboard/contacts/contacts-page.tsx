@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { createContact, setContactStatus, updateContact } from "@/app/dashboard/contacts/actions";
 import { DocumentAttachments } from "./document-attachments";
+import { ContactInsights } from "./contact-insights";
 import { createClient } from "@/lib/supabase/server";
 import type { BusinessContactKind } from "@/lib/security/business-contact-validation";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -258,6 +259,11 @@ export async function ContactsPage({ kind, searchParams }: { kind: BusinessConta
         </section>
       ) : (
         <>
+          <ContactInsights
+            companyId={selectedCompanyId}
+            kind={kind}
+            contacts={contacts.map(({ id, name }) => ({ id, name }))}
+          />
           {canWrite && (
             <section className="mb-8 border-b border-[var(--pg-border)] pb-6">
               <div className="mb-5"><h2 className="text-lg font-semibold text-[var(--pg-text)]">{customer ? t("addCustomer") : t("addSupplier")}</h2><p className="mt-1 text-sm text-[var(--pg-text-muted)]">{t("requiredFields")}</p></div>

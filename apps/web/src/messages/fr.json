@@ -259,6 +259,39 @@
       "updated": "Les modifications ont été enregistrées.",
       "archived": "La fiche a été archivée. Elle reste conservée dans l’historique.",
       "restored": "La fiche a été réactivée."
+    },
+    "insights": {
+      "duplicatesTitle": "Doublons potentiels",
+      "duplicatesDescription": "Comparaison des fiches de cette entreprise par nom, e-mail, téléphone et identifiant fiscal. Aucune fusion automatique n’est effectuée.",
+      "duplicateScanUnavailable": "La détection des doublons est indisponible pour le moment.",
+      "noDuplicates": "Aucun doublon potentiel détecté parmi les fiches examinées.",
+      "duplicatePairCount": "{count, plural, one {# paire potentielle détectée.} other {# paires potentielles détectées.}}",
+      "duplicateScanLimited": "Analyse limitée aux 2 000 fiches les plus récemment modifiées.",
+      "duplicateResultsLimited": "L’affichage est limité aux 20 premières paires.",
+      "reasons": {
+        "name": "Nom",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "taxIdentifier": "Identifiant fiscal"
+      },
+      "historyCustomersTitle": "Historique des devis clients",
+      "historySuppliersTitle": "Historique des dépenses fournisseurs",
+      "historyCustomersDescription": "Devis associés aux clients actuellement affichés.",
+      "historySuppliersDescription": "Dépenses associées aux fournisseurs actuellement affichés.",
+      "historyUnavailable": "Impossible de charger l’historique pour le moment.",
+      "noHistory": "Aucun historique accessible pour les fiches affichées.",
+      "historyItemsCount": "{count, plural, one {# élément} other {# éléments}}",
+      "historyLimited": "Historique limité aux 500 opérations les plus récentes.",
+      "quoteNumber": "Devis n°{number}",
+      "quoteWithoutNumber": "Devis sans numéro",
+      "expenseDraft": "Brouillon",
+      "quoteStatuses": {
+        "draft": "Brouillon",
+        "sent": "Transmis",
+        "accepted": "Accepté",
+        "rejected": "Refusé",
+        "cancelled": "Annulé"
+      }
     }
   },
   "Documents": {
