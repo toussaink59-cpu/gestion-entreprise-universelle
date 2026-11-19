@@ -168,9 +168,9 @@ export function InvoiceDraftForm({
           </button>
         </div>
 
-        <div className="divide-y divide-[var(--pg-border)]">
+        <div className="space-y-3">
           {lines.map((line, index) => (
-            <fieldset key={line.key} className="py-5">
+            <fieldset key={line.key} className="min-w-0 rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 sm:p-5">
               <legend className="mb-3 font-semibold text-[var(--pg-text)]">{t("lineNumber", { number: index + 1 })}</legend>
               <div className="mb-3 flex justify-end">
                 <button
@@ -183,7 +183,7 @@ export function InvoiceDraftForm({
                   {t("remove")}
                 </button>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+              <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
                 <label className={LABEL + " sm:col-span-2 xl:col-span-3"}>
                   {t("description")}
                   <input className={INPUT} type="text" maxLength={500} required value={line.description} disabled={pending}

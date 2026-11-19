@@ -879,7 +879,7 @@
         "reason": "Indique un motif de 3 à 500 caractères.",
         "generic": "L’action a échoué. Réessaie plus tard."
       },
-      "draftNotice": "Brouillon : ni numéro, ni valeur de facture, ni taxe. L’émission légale n’est pas encore disponible.",
+      "draftNotice": "Brouillon non \u00e9mis : aucun num\u00e9ro officiel n\u2019est attribu\u00e9. Le total calcul\u00e9 ci-dessous correspond \u00e0 ce brouillon et ne constitue pas une facture \u00e9mise. Les taxes ne sont pas configur\u00e9es.",
       "abandonedOn": "Brouillon abandonné le {date}.",
       "reason": "Motif",
       "issueDate": "Date de la facture",
