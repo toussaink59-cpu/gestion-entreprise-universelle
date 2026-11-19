@@ -201,7 +201,7 @@ Contraintes proposées :
 - `UNIQUE(company_id, id)` et `UNIQUE(company_id, id, source_quote_id)` pour les FKs des lignes.
 - FK composite `(company_id, customer_id) -> customers(company_id, id)).
 - FK composite `(company_id, source_quote_id, customer_id) -> quotes(company_id, id, customer_id)` pour garantir que la facture reprend le client du devis source.
-- `billing_kind = standalone` lorsque `source_quote_id IS NULL) ; une facture liée à un devis doit avoir un type `full`, `deposit`, `progress` ou `final`.
+- `billing_kind = standalone` lorsque `source_quote_id IS NULL` ; une facture liée à un devis doit avoir un type `full`, `deposit`, `progress` ou `final`.
 - `quote_allocated_amount` est null pour une facture autonome. Pour une facture émise issue d'un devis, il est positif et égal au montant TTC imputé au devis pour cette tranche.
 - `full` n'est autorisé que si aucune autre facture émise non annulée n'existe pour le devis.
 - `final` consomme exactement le reste à facturer et interdit toute émission ultérieure sur ce devis.
@@ -262,6 +262,8 @@ Réutiliser `app.log_event(company_id, action, entity_type, entity_id, metadata)
 - `quote.created`, `quote.updated`, `quote.sent`, `quote.accepted`, `quote.rejected`, `quote.cancelled`;
 - `invoice.created`, `invoice.issued`, `invoice.draft_abandoned`, `invoice.correction_opened`, `invoice.correction_resolved`;
 - `invoice.quote_allocation_created` si une trace dédiée de l'imputation est souhaitée.
+
+Événements effectivement journalisés à ce jour (espace de noms au pluriel) : `invoices.draft_created`, `invoices.draft_updated`, `invoices.draft_created_from_quote`, `invoices.draft_abandoned` et `quotes.cancelled` (avec `previous_status`). Les noms ci-dessus restent des suggestions pour les événements non encore livrés.
 
 Les métadonnées ne contiennent que les changements utiles, les montants de synthèse et les références nécessaires ; éviter les coordonnées client, notes privées, identifiants sensibles et données de paiement.
 

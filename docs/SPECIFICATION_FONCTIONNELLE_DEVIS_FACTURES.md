@@ -128,7 +128,7 @@ Précisions :
 4. Il peut ajouter une remise de ligne et appliquer uniquement les taxes autorisées par le profil fiscal effectif de l'entreprise ; la TVA ne peut pas être activée librement sur un document.
 5. Le serveur valide et calcule les montants ; le navigateur peut afficher une prévisualisation mais ne fait pas autorité.
 6. Le devis est sauvegardé en brouillon. Un brouillon peut être modifié ou annulé. La suppression définitive des documents commerciaux n'est pas proposée en V1 afin de préserver la traçabilité.
-7. Le numéro définitif est attribué de façon atomique au moment de la transmission ; les brouillons non transmis ne consomment donc pas de numéro officiel.
+7. Un numéro interne provisoire `D-AAAA-NNNN` est attribué de façon atomique au moment de la transmission ; les brouillons non transmis n'en consomment donc pas. Ce numéro est distinct d'un numéro légal de facture et ne constitue aucune numérotation fiscale validée.
 
 ### 4.3 Transmettre et traiter un devis
 

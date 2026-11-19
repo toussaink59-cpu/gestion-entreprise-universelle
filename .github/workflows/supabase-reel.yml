@@ -63,9 +63,10 @@ jobs:
           ${{ env.SUPABASE }} start
           -x realtime,imgproxy,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
 
-      # Les migrations Phase 2 sont appliquées uniquement à la base locale jetable
-      # des tests. Elles ne font pas partie de supabase/migrations et ne partent donc
-      # jamais avec le déploiement Phase 1.
+      # Reliquat : supabase/phase2-migrations/ ne contient plus de SQL (les migrations
+      # Phase 2 sont désormais dans supabase/migrations/, appliquées par le démarrage
+      # ci-dessus). Ce pas reste inoffensif tant que le dossier est vide ; tout fichier
+      # .sql qui y serait déposé serait testé ici mais jamais déployé.
       - name: Appliquer les migrations Phase 2 pour les tests
         env:
           TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
