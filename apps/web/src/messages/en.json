@@ -879,7 +879,7 @@
         "reason": "Enter a reason of 3 to 500 characters.",
         "generic": "The action failed. Try again later."
       },
-      "draftNotice": "Draft: no number, no value as an invoice, no tax. Legal issuing is not available yet.",
+      "draftNotice": "Unissued draft: no official number has been assigned. The calculated total below belongs to this draft and does not constitute an issued invoice. Taxes are not configured.",
       "abandonedOn": "Draft abandoned on {date}.",
       "reason": "Reason",
       "issueDate": "Invoice date",

@@ -198,16 +198,16 @@ export default async function InvoiceDetailPage({ params, searchParams }: Props)
         </p>
       ) : null}
 
-      <dl className="mb-8 grid gap-x-8 gap-y-3 border-b border-[var(--pg-border)] pb-6 text-sm sm:grid-cols-2">
-        <div>
+      <dl className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm sm:grid-cols-2 sm:gap-5 sm:p-5">
+        <div className="min-w-0">
           <dt className="text-[var(--pg-text-muted)]">{t("issueDate")}</dt>
           <dd className="mt-1 text-[var(--pg-text)]">{formatInvoiceDate(invoice.issue_date, locale)}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-[var(--pg-text-muted)]">{t("dueDate")}</dt>
           <dd className="mt-1 text-[var(--pg-text)]">{invoice.due_date ? formatInvoiceDate(invoice.due_date, locale) : t("noDueDate")}</dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-[var(--pg-text-muted)]">{t("origin")}</dt>
           <dd className="mt-1 text-[var(--pg-text)]">
             {invoice.source_quote_id ? (
@@ -219,7 +219,7 @@ export default async function InvoiceDetailPage({ params, searchParams }: Props)
             )}
           </dd>
         </div>
-        <div>
+        <div className="min-w-0">
           <dt className="text-[var(--pg-text-muted)]">{t("currency")}</dt>
           <dd className="mt-1 text-[var(--pg-text)]">{invoice.currency_code}</dd>
         </div>
@@ -246,71 +246,150 @@ export default async function InvoiceDetailPage({ params, searchParams }: Props)
           )}
         </section>
       ) : (
-      <section className="space-y-5">
-        <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("linesTitle")}</h2>
-        {isDraft && invoice.billing_kind === "full" ? (
-          <p className="text-sm text-[var(--pg-text-muted)]">{t("quoteDraftReadOnly")}</p>
-        ) : null}
-        {lineError ? (
-          <p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">{t("linesFailed")}</p>
-        ) : lines.length === 0 ? (
-          <p className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">{t("noLines")}</p>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)]">
-            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-              <caption className="sr-only">{t("linesCaption")}</caption>
-              <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-semibold">{t("columns.description")}</th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">{t("columns.quantity")}</th>
-                  <th scope="col" className="px-4 py-3 font-semibold">{t("columns.unit")}</th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">{t("columns.unitPrice")}</th>
-                  <th scope="col" className="px-4 py-3 font-semibold">{t("columns.discount")}</th>
-                  <th scope="col" className="px-4 py-3 text-right font-semibold">{t("columns.lineTotal")}</th>
-                </tr>
-              </thead>
-              <tbody>
+        <section className="space-y-5">
+          <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("linesTitle")}</h2>
+          {isDraft && invoice.billing_kind === "full" ? (
+            <p className="text-sm text-[var(--pg-text-muted)]">{t("quoteDraftReadOnly")}</p>
+          ) : null}
+          {lineError ? (
+            <p role="alert" className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">{t("linesFailed")}</p>
+          ) : lines.length === 0 ? (
+            <p className="rounded-md border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm text-[var(--pg-text)]">{t("noLines")}</p>
+          ) : (
+            <>
+              {/* Cartes mobiles */}
+              <div className="space-y-3 md:hidden">
                 {lines.map((line) => (
-                  <tr key={line.id} className="border-t border-[var(--pg-border)] align-top">
-                    <td className="px-4 py-4 text-[var(--pg-text)]">{line.description}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">{formatInvoiceQuantity(line.quantity, locale)}</td>
-                    <td className="px-4 py-4 text-[var(--pg-text)]">{line.unit_label}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(line.unit_price, invoice.currency_code, locale)}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-[var(--pg-text)]">{discountLabel(line)}</td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(line.total_amount, invoice.currency_code, locale)}</td>
-                  </tr>
+                  <article
+                    key={line.id}
+                    className="rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4"
+                  >
+                    <h3 className="break-words font-semibold text-[var(--pg-text)]">
+                      {line.description}
+                    </h3>
+
+                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                      <div className="min-w-0">
+                        <dt className="text-[var(--pg-text-muted)]">{t("columns.quantity")}</dt>
+                        <dd className="mt-1 tabular-nums text-[var(--pg-text)]">
+                          {formatInvoiceQuantity(line.quantity, locale)}
+                        </dd>
+                      </div>
+                      <div className="min-w-0">
+                        <dt className="text-[var(--pg-text-muted)]">{t("columns.unit")}</dt>
+                        <dd className="mt-1 break-words text-[var(--pg-text)]">
+                          {line.unit_label}
+                        </dd>
+                      </div>
+                      <div className="min-w-0">
+                        <dt className="text-[var(--pg-text-muted)]">{t("columns.unitPrice")}</dt>
+                        <dd className="mt-1 break-words tabular-nums text-[var(--pg-text)]">
+                          {formatInvoiceCurrency(line.unit_price, invoice.currency_code, locale)}
+                        </dd>
+                      </div>
+                      <div className="min-w-0">
+                        <dt className="text-[var(--pg-text-muted)]">{t("columns.discount")}</dt>
+                        <dd className="mt-1 break-words text-[var(--pg-text)]">
+                          {discountLabel(line)}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--pg-border)] pt-3">
+                      <span className="text-sm font-medium text-[var(--pg-text-muted)]">
+                        {t("columns.lineTotal")}
+                      </span>
+                      <span className="text-right font-semibold tabular-nums text-[var(--pg-text)]">
+                        {formatInvoiceCurrency(line.total_amount, invoice.currency_code, locale)}
+                      </span>
+                    </div>
+                  </article>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </div>
 
-        <dl className="ml-auto grid max-w-md grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--pg-border)] pt-4 text-sm">
-          <dt className="text-[var(--pg-text-muted)]">{t("subtotal")}</dt>
-          <dd className="text-right tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(invoice.subtotal_amount, invoice.currency_code, locale)}</dd>
-          <dt className="text-[var(--pg-text-muted)]">{t("discounts")}</dt>
-          <dd className="text-right tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(invoice.discount_amount, invoice.currency_code, locale)}</dd>
-          <dt className="text-[var(--pg-text-muted)]">{t("tax")}</dt>
-          <dd className="text-right text-[var(--pg-text-muted)]">{t("taxNotConfigured")}</dd>
-          <dt className="font-semibold text-[var(--pg-text)]">{t("draftTotal")}</dt>
-          <dd className="text-right font-semibold tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(invoice.total_amount, invoice.currency_code, locale)}</dd>
-        </dl>
+              {/* Tableau conservé sur tablette et ordinateur */}
+              <div className="hidden overflow-x-auto rounded-lg border border-[var(--pg-border)] bg-[var(--pg-surface)] md:block">
+                <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+                  <caption className="sr-only">{t("linesCaption")}</caption>
+                  <thead className="bg-[var(--pg-surface-subtle)] text-xs font-medium text-[var(--pg-text-muted)]">
+                    <tr>
+                      <th scope="col" className="px-4 py-3 font-semibold">{t("columns.description")}</th>
+                      <th scope="col" className="px-4 py-3 text-right font-semibold">{t("columns.quantity")}</th>
+                      <th scope="col" className="px-4 py-3 font-semibold">{t("columns.unit")}</th>
+                      <th scope="col" className="px-4 py-3 text-right font-semibold">{t("columns.unitPrice")}</th>
+                      <th scope="col" className="px-4 py-3 font-semibold">{t("columns.discount")}</th>
+                      <th scope="col" className="px-4 py-3 text-right font-semibold">{t("columns.lineTotal")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lines.map((line) => (
+                      <tr key={line.id} className="border-t border-[var(--pg-border)] align-top">
+                        <td className="px-4 py-4 text-[var(--pg-text)]">{line.description}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">{formatInvoiceQuantity(line.quantity, locale)}</td>
+                        <td className="px-4 py-4 text-[var(--pg-text)]">{line.unit_label}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-right tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(line.unit_price, invoice.currency_code, locale)}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-[var(--pg-text)]">{discountLabel(line)}</td>
+                        <td className="whitespace-nowrap px-4 py-4 text-right font-medium tabular-nums text-[var(--pg-text)]">{formatInvoiceCurrency(line.total_amount, invoice.currency_code, locale)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+          <dl className="ml-auto grid w-full max-w-md grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 text-sm sm:p-5">
+            <dt className="text-[var(--pg-text-muted)]">
+              {t("subtotal")}
+            </dt>
+            <dd className="text-right tabular-nums text-[var(--pg-text)]">
+              {formatInvoiceCurrency(invoice.subtotal_amount, invoice.currency_code, locale)}
+            </dd>
 
-        {invoice.terms ? (
-          <section className="border-t border-[var(--pg-border)] pt-4">
-            <h3 className="font-semibold text-[var(--pg-text)]">{t("terms")}</h3>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">{invoice.terms}</p>
-          </section>
-        ) : null}
-        {invoice.notes ? (
-          <section className="border-t border-[var(--pg-border)] pt-4">
-            <h3 className="font-semibold text-[var(--pg-text)]">{t("notes")}</h3>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">{invoice.notes}</p>
-          </section>
-        ) : null}
-      </section>
+            <dt className="text-[var(--pg-text-muted)]">
+              {t("discounts")}
+            </dt>
+            <dd className="text-right tabular-nums text-[var(--pg-text)]">
+              {formatInvoiceCurrency(invoice.discount_amount, invoice.currency_code, locale)}
+            </dd>
+
+            <dt className="text-[var(--pg-text-muted)]">
+              {t("tax")}
+            </dt>
+            <dd className="text-right text-[var(--pg-text-muted)]">
+              {t("taxNotConfigured")}
+            </dd>
+
+            <dt className="col-span-2 border-t border-[var(--pg-border)] pt-3 font-semibold text-[var(--pg-text)]">
+              {t("draftTotal")}
+            </dt>
+            <dd className="col-span-2 text-right text-xl font-bold tabular-nums text-[var(--pg-text)]">
+              {formatInvoiceCurrency(invoice.total_amount, invoice.currency_code, locale)}
+            </dd>
+          </dl>
+
+          {invoice.terms ? (
+            <section className="border-t border-[var(--pg-border)] pt-4">
+              <h3 className="font-semibold text-[var(--pg-text)]">
+                {t("terms")}
+              </h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">
+                {invoice.terms}
+              </p>
+            </section>
+          ) : null}
+
+          {invoice.notes ? (
+            <section className="border-t border-[var(--pg-border)] pt-4">
+              <h3 className="font-semibold text-[var(--pg-text)]">
+                {t("notes")}
+              </h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[var(--pg-text-muted)]">
+                {invoice.notes}
+              </p>
+            </section>
+          ) : null}
+        </section>
       )}
-
       {isDraft && workspace.canWrite ? (
         <section className="mt-10 border-t border-[var(--pg-border)] pt-6">
           <h2 className="text-lg font-semibold text-[var(--pg-text)]">{t("abandonTitle")}</h2>
