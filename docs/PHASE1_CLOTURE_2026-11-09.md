@@ -79,7 +79,7 @@ Ces réserves ne sont pas dissimulées par la clôture ; elles constituent le re
 Le premier lot retenu est **Factures brouillons — revue, validation et livraison contrôlée en DEV**.
 
 État de départ :
-- le SQL existe dans `supabase/phase2-migrations/20261105170000_factures_brouillons.sql` ;
+- le SQL existait dans `supabase/phase2-migrations/20261105170000_factures_brouillons.sql` ; il est depuis livré sous `supabase/migrations/20261109161232_factures_brouillons.sql` ;
 - la migration n’est pas présente dans l’historique hébergé Production ;
 - fonctions serveur, tests et interface FR/EN existent déjà dans le dépôt ;
 - les routes/actions sont protégées par `isInvoiceModuleEnabled()` et le drapeau `POLYGEST_INVOICES_ENABLED` ;
@@ -100,6 +100,6 @@ Numérotation légale, TVA/taxes, snapshots fiscaux, émission ou certification 
 - [Audit technique Phase 1 — 6 novembre 2026](PHASE1_AUDIT_2026-11-06.md)
 - [Feuille de route PolyGest](ROADMAP.md)
 - [Guide des migrations Phase 2 isolées](../supabase/phase2-migrations/README.md)
-- [Migration préparatoire des factures brouillons](../supabase/phase2-migrations/20261105170000_factures_brouillons.sql)
+- [Migration des factures brouillons (déplacée dans `supabase/migrations/`)](../supabase/migrations/20261109161232_factures_brouillons.sql)
 - [Spécification fonctionnelle Devis et Factures](SPECIFICATION_FONCTIONNELLE_DEVIS_FACTURES.md)
 - [Référentiel de conformité fiscale — Burkina Faso](CONFORMITE_FISCALE_BURKINA_FACTURATION.md)

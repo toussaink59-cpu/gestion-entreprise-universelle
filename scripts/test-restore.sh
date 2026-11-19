@@ -41,8 +41,8 @@ run_sql() { psql "$1" -v ON_ERROR_STOP=1 -q -tA "${@:2}"; }
 echo "1/6 Création de la base source (migrations + données fictives)"
 run_sql "$ADMIN_URL" -c "create database ${SRC_DB}" >/dev/null
 run_sql "$SRC_URL" -f "$ROOT/supabase/tests/auth_shim.sql" >/dev/null
-# Le test restaure l'ensemble du schéma livré, y compris les migrations Phase 2
-# isolées du chemin de déploiement Phase 1.
+# Le test restaure l'ensemble du schéma livré (supabase/migrations). Le dossier
+# phase2-migrations est conservé par précaution et ne contient plus de SQL.
 mapfile -d '' MIGRATION_FILES < <(
     find "$ROOT/supabase/migrations" "$ROOT/supabase/phase2-migrations" \
         -maxdepth 1 -type f -name '*.sql' -print0 | sort -z
