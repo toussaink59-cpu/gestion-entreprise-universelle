@@ -75,8 +75,8 @@ export async function createMigratedDb(): Promise<SqlClient> {
 
   const db = new PGlite()
   await db.exec(readFileSync(join(repoRoot, 'supabase/tests/auth_shim.sql'), 'utf8'))
-  // Les migrations Phase 1 sont dans supabase/migrations (déployables).
-  // Les migrations Phase 2 restent isolées jusqu'à leur mise en service.
+  // Toutes les migrations livrées (Phase 1 et Phase 2) sont dans supabase/migrations.
+  // supabase/phase2-migrations est conservé par précaution et ne contient plus de SQL.
   const migrationDirs = [
     join(repoRoot, 'supabase/migrations'),
     join(repoRoot, 'supabase/phase2-migrations'),

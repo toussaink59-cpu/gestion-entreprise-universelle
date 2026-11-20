@@ -4,7 +4,7 @@ Le schéma est la source de vérité du projet ([ADR-001](../docs/adr/0001-socle
 
 ## Contenu actuel
 
-Les migrations sont appliquées dans l'ordre chronologique de leur nom. Les migrations déjà fusionnées ne sont jamais réécrites : une correction est apportée par une nouvelle migration additive.
+Les migrations sont appliquées dans l'ordre chronologique de leur nom. La présence d'une migration dans ce dossier n'indique pas qu'elle est appliquée sur un projet hébergé : voir `supabase/phase2-migrations/README.md` et vérifier l'historique de chaque projet. Les migrations déjà fusionnées ne sont jamais réécrites : une correction est apportée par une nouvelle migration additive.
 
 | Migration | Contenu |
 |---|---|
@@ -25,6 +25,10 @@ Les migrations sont appliquées dans l'ordre chronologique de leur nom. Les migr
 | `20261105100000_devis_transmission.sql` | Transmission des devis par `send_quote` : numéro provisoire interne `D-AAAA-NNNN` (compteur par entreprise et par année), copie figée du client et de l'émetteur, garde de cohérence des devis non brouillons. Pas une numérotation de facture |
 | `20261105110000_devis_reponse_client.sql` | Réponse du client (`record_quote_response` : acceptation avec méthode et référence de preuve obligatoires, refus) et annulation d'un devis transmis (`cancel_quote`, propriétaire et administrateur, motif obligatoire) ; contraintes de cohérence des états |
 | `20261105160000_preference_langue_utilisateur.sql` | Préférence `fr`/`en` sur le profil existant, français par défaut, mise à jour limitée à la colonne dédiée et protégée par la RLS propre au profil |
+| `20261106102600_phase1_disable_document_upload_rpc.sql` | Retire l'exécution des RPC de dépôt de documents (`create_document_upload`, `can_upload_document`) tant que le dépôt est désactivé, pour fermer le contournement direct de la barrière applicative |
+| `20261109161232_factures_brouillons.sql` | Phase 2 : factures et lignes en brouillon, écriture uniquement par `save_invoice_draft`, `create_invoice_draft_from_quote` et `abandon_invoice_draft`, calculs côté serveur, aucune taxe, aucun numéro, aucune émission |
+| `20261116142111_invoice_quantity_finite_check.sql` | Phase 2 : contrainte de quantité finie sur les lignes de facture (rejette `NaN` et `Infinity`) |
+| `20261116203000_devis_annulation_accepte.sql` | Phase 1 (conformité à la spécification §5) : `cancel_quote` accepte les devis transmis **et acceptés**, avec la permission `quotes:cancel`, un motif de 3 à 500 caractères et le statut antérieur (`previous_status`) dans le journal ; remplace le comportement décrit pour `20261105110000` |
 
 **Règle actuelle de création d'entreprise :** aucun plafond fixe de nombre d'entreprises par propriétaire n'est appliqué au MVP. La migration du 24 octobre est conservée pour l'historique, mais la migration du 4 novembre remplace la fonction `public.create_company()` et retire ce plafond. Les quotas éventuels seront conçus ultérieurement dans le cadre des formules d'abonnement.
 
