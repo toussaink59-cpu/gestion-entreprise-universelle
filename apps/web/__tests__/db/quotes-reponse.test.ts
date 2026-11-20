@@ -202,6 +202,131 @@ describe("Devis — annulation d'un devis transmis", () => {
     await expect(respond("erin", t.companyA, cancelled, "accepted")).rejects.toThrow(/transmis/i);
   });
 
+  it("blocks cancellation when a linked invoice draft is active", async () => {
+    const accepted = await sentQuote();
+    await respond("erin", t.companyA, accepted, "accepted");
+
+    const invoice = await asUser(t.db, "alice", () =>
+      q<{ id: string }>(
+        `select public.create_invoice_draft_from_quote($1) as id`,
+        [accepted],
+      ),
+    );
+    const invoiceId = invoice.rows[0].id;
+
+    await expect(
+      cancel("alice", t.companyA, accepted, "Client changed project"),
+    ).rejects.toThrow(/brouillon de facture li/);
+
+    expect((await state(accepted)).status).toBe("accepted");
+
+    const invoiceState = await q<{ status: string }>(
+      `select status from public.invoices where id = $1`,
+      [invoiceId],
+    );
+    expect(invoiceState.rows[0].status).toBe("draft");
+
+    const cancellationEvents = await q<{ count: number }>(
+      `select count(*)::int as count
+       from public.audit_events
+       where entity_id = $1 and action = 'quotes.cancelled'`,
+      [accepted],
+    );
+    expect(cancellationEvents.rows[0].count).toBe(0);
+  });
+
+  it("allows cancellation after the linked invoice draft is abandoned", async () => {
+    const accepted = await sentQuote();
+    await respond("erin", t.companyA, accepted, "accepted");
+
+    const invoice = await asUser(t.db, "alice", () =>
+      q<{ id: string }>(
+        `select public.create_invoice_draft_from_quote($1) as id`,
+        [accepted],
+      ),
+    );
+    const invoiceId = invoice.rows[0].id;
+
+    await asUser(t.db, "alice", () =>
+      q(
+        `select public.abandon_invoice_draft($1, 'Draft withdrawn')`,
+        [invoiceId],
+      ),
+    );
+
+    const invoiceState = await q<{ status: string }>(
+      `select status from public.invoices where id = $1`,
+      [invoiceId],
+    );
+    expect(invoiceState.rows[0].status).toBe("abandoned_draft");
+
+    await cancel("alice", t.companyA, accepted, "Client changed project");
+
+    expect(await state(accepted)).toMatchObject({
+      status: "cancelled",
+      reason: "Client changed project",
+    });
+
+    const events = await asUser(t.db, "alice", () =>
+      q<{ previous: string }>(
+        `select metadata->>'previous_status' as previous
+         from public.audit_events
+         where entity_id = $1 and action = 'quotes.cancelled'`,
+        [accepted],
+      ),
+    );
+    expect(events.rows.map((row) => row.previous)).toEqual(["accepted"]);
+  });
+
+  it("still blocks cancellation when a new draft is created after an earlier draft was abandoned", async () => {
+    const accepted = await sentQuote();
+    await respond("erin", t.companyA, accepted, "accepted");
+
+    const firstInvoice = await asUser(t.db, "alice", () =>
+      q<{ id: string }>(
+        `select public.create_invoice_draft_from_quote($1) as id`,
+        [accepted],
+      ),
+    );
+    const firstInvoiceId = firstInvoice.rows[0].id;
+
+    await asUser(t.db, "alice", () =>
+      q(
+        `select public.abandon_invoice_draft($1, 'First draft withdrawn')`,
+        [firstInvoiceId],
+      ),
+    );
+
+    const secondInvoice = await asUser(t.db, "alice", () =>
+      q<{ id: string }>(
+        `select public.create_invoice_draft_from_quote($1) as id`,
+        [accepted],
+      ),
+    );
+    const secondInvoiceId = secondInvoice.rows[0].id;
+
+    expect(secondInvoiceId).not.toBe(firstInvoiceId);
+
+    await expect(
+      cancel("alice", t.companyA, accepted, "Client changed project"),
+    ).rejects.toThrow(/brouillon de facture li/);
+
+    expect((await state(accepted)).status).toBe("accepted");
+
+    const invoiceStates = await q<{ id: string; status: string }>(
+      `select id::text, status
+       from public.invoices
+       where id = any($1::uuid[])`,
+      [[firstInvoiceId, secondInvoiceId]],
+    );
+
+    expect(invoiceStates.rows).toEqual(
+      expect.arrayContaining([
+        { id: firstInvoiceId, status: "abandoned_draft" },
+        { id: secondInvoiceId, status: "draft" },
+      ]),
+    );
+  });
   it("une autre entreprise ne peut pas annuler", async () => {
     const id = await sentQuote();
     await expect(cancel("bob", t.companyA, id)).rejects.toThrow(/permission/i);
