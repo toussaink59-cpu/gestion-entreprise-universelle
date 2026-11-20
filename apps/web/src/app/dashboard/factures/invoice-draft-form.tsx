@@ -1,8 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { saveInvoiceDraft } from "./actions";
+import { calculateInvoiceDraftTotals } from "./invoice-draft-calculations";
+import { formatInvoiceCurrency } from "./formatting";
 import type { InvoiceCustomerOption } from "./types";
 
 type DiscountType = "none" | "percentage" | "fixed";
@@ -54,6 +56,9 @@ export function InvoiceDraftForm({
   initial?: InvoiceDraftInitial;
 }) {
   const t = useTranslations("Invoices.Form");
+  const tDetail = useTranslations("Invoices.Detail");
+  const locale = useLocale() === "en" ? "en" : "fr";
+
   const [state, formAction, pending] = useActionState(saveInvoiceDraft, { error: null });
   const [issueDate, setIssueDate] = useState(initial?.issueDate ?? today);
   const [dueDate, setDueDate] = useState(initial?.dueDate ?? "");
@@ -68,14 +73,22 @@ export function InvoiceDraftForm({
   });
   const [lines, setLines] = useState<Line[]>(
     initial && initial.lines.length > 0
-      ? initial.lines.map((line, index) => ({ ...line, key: String(index) }))
+      ? initial.lines.map((line, index) => ({
+          ...line,
+          key: String(index),
+          description: String(line.description ?? ""),
+          quantity: String(line.quantity ?? ""),
+          unit_label: String(line.unit_label ?? defaultUnit),
+          unit_price: String(line.unit_price ?? "0"),
+          discount_value: String(line.discount_value ?? "0"),
+        }))
       : [newLine(0)],
   );
   const [nextKey, setNextKey] = useState(initial ? Math.max(initial.lines.length, 1) : 1);
 
   const update = (key: string, changes: Partial<Line>) =>
     setLines((current) => current.map((line) => (line.key === key ? { ...line, ...changes } : line)));
-
+  const totals = calculateInvoiceDraftTotals(lines);
   const errorKeys = ["context", "fields", "lines", "session", "permission", "invalidData", "save", "disabled"];
   const errorMessage = state.error
     ? errorKeys.includes(state.error)
@@ -232,6 +245,46 @@ export function InvoiceDraftForm({
         {lines.length >= 100 ? <p className="text-sm text-[var(--pg-text-muted)]">{t("lineLimit")}</p> : null}
       </section>
 
+      <section
+        aria-label={tDetail("draftTotal")}
+        className="rounded-xl border border-[var(--pg-border)] bg-[var(--pg-surface)] p-4 sm:p-5"
+      >
+        {totals ? (
+          <dl className="ml-auto grid w-full max-w-md grid-cols-2 gap-x-6 gap-y-3 text-sm">
+            <dt className="text-[var(--pg-text-muted)]">
+              {tDetail("subtotal")}
+            </dt>
+            <dd className="text-right tabular-nums text-[var(--pg-text)]">
+              {formatInvoiceCurrency(totals.subtotalAmount, currencyCode, locale)}
+            </dd>
+
+            <dt className="text-[var(--pg-text-muted)]">
+              {tDetail("discounts")}
+            </dt>
+            <dd className="text-right tabular-nums text-[var(--pg-text)]">
+              {formatInvoiceCurrency(totals.discountAmount, currencyCode, locale)}
+            </dd>
+
+            <dt className="text-[var(--pg-text-muted)]">
+              {tDetail("tax")}
+            </dt>
+            <dd className="text-right text-[var(--pg-text-muted)]">
+              {tDetail("taxNotConfigured")}
+            </dd>
+
+            <dt className="col-span-2 border-t border-[var(--pg-border)] pt-3 font-semibold text-[var(--pg-text)]">
+              {tDetail("draftTotal")}
+            </dt>
+            <dd className="col-span-2 text-right text-xl font-bold tabular-nums text-[var(--pg-text)]">
+              {formatInvoiceCurrency(totals.totalAmount, currencyCode, locale)}
+            </dd>
+          </dl>
+        ) : (
+          <p role="status" className="text-sm text-[var(--pg-text-muted)]">
+            {t("errors.lines")}
+          </p>
+        )}
+      </section>
       <section className="grid gap-4 border-t border-[var(--pg-border)] pt-6 sm:grid-cols-2">
         <label className={LABEL}>
           {t("terms")} <span className="font-normal text-[var(--pg-text-muted)]">{t("optional")}</span>
